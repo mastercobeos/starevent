@@ -273,17 +273,10 @@ export default function Home() {
             backgroundPosition: 'center'
           }}
         />
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex justify-center items-center min-h-[300px] sm:min-h-[400px]">
-            <div 
-              className="px-4 sm:px-8 md:px-10 py-8 sm:py-10 md:py-12 rounded-lg backdrop-blur-md border border-navbar/20 max-w-4xl mx-4"
-              style={{
-                background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.25) 0%, hsl(var(--navbar) / 0.35) 50%, hsl(var(--navbar) / 0.25) 100%)',
-                backdropFilter: 'blur(12px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-              }}
-            >
-              <p className="text-white text-lg sm:text-2xl md:text-3xl font-medium text-center mb-6 sm:mb-8 leading-relaxed px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <p className="text-white text-lg sm:text-2xl md:text-3xl font-medium mb-6 sm:mb-8 leading-relaxed px-4">
                 {t.ctaTitle}
               </p>
               <div className="flex justify-center">
