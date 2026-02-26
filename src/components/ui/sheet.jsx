@@ -52,7 +52,7 @@ export function SheetContent({
     : '';
   
   const topClass = side === 'right' || side === 'left'
-    ? 'top-16 sm:top-20 md:top-24'
+    ? 'top-[3.2rem] sm:top-16 md:top-[4.8rem]'
     : '';
   
   return (
@@ -64,9 +64,9 @@ export function SheetContent({
       <div 
         className={`fixed ${sideClasses[side]} ${topClass} ${heightClass} z-[70] backdrop-blur-md ${className}`}
         style={{
-          background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.25) 0%, hsl(var(--navbar) / 0.35) 50%, hsl(var(--navbar) / 0.25) 100%)',
-          backdropFilter: 'blur(12px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(20, 30, 55, 0.78) 50%, rgba(15, 23, 42, 0.85) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         }}
       >
         <button
