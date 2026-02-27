@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, CheckCircle, AlertCircle, Loader2, Clock, CreditCard } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ArrowLeft, CheckCircle, AlertCircle, Loader2, Clock, CreditCard, MapPin } from 'lucide-react';
 import { Button } from './ui/button';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -8,6 +8,29 @@ import { createReservation, checkAvailability } from '../lib/supabase';
 
 const SQUARE_APP_ID = import.meta.env.VITE_SQUARE_APP_ID;
 const SQUARE_LOCATION_ID = import.meta.env.VITE_SQUARE_LOCATION_ID;
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+// Warehouse origin: 3730 Redwood Falls Dr, Houston, TX 77082
+const ORIGIN = { lat: 29.7233, lng: -95.5977 };
+const DELIVERY_BASE_FEE = 35;
+const DELIVERY_PER_MILE = 2;
+
+// Load Google Maps SDK dynamically
+function loadGoogleMaps() {
+  if (window.google?.maps) return Promise.resolve();
+  if (!GOOGLE_MAPS_API_KEY) return Promise.reject(new Error('No API key'));
+  if (window._gmapsLoading) return window._gmapsLoading;
+
+  window._gmapsLoading = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load Google Maps'));
+    document.head.appendChild(script);
+  });
+  return window._gmapsLoading;
+}
 
 export default function CheckoutForm({ onBack }) {
   const { items, getTotal, clearCart } = useCart();
@@ -32,11 +55,83 @@ export default function CheckoutForm({ onBack }) {
   const [savedTotal, setSavedTotal] = useState(0);
   const cardRef = useRef(null);
 
+  // Delivery fee state
+  const [deliveryFee, setDeliveryFee] = useState(null); // null = not calculated, number = fee
+  const [deliveryMiles, setDeliveryMiles] = useState(null);
+  const [calculatingDelivery, setCalculatingDelivery] = useState(false);
+  const [mapsLoaded, setMapsLoaded] = useState(false);
+  const addressInputRef = useRef(null);
+  const autocompleteRef = useRef(null);
+
+  // Load Google Maps on mount
+  useEffect(() => {
+    loadGoogleMaps()
+      .then(() => setMapsLoaded(true))
+      .catch(() => {}); // Silently fail if no API key
+  }, []);
+
+  // Initialize Places Autocomplete
+  useEffect(() => {
+    if (!mapsLoaded || !addressInputRef.current || autocompleteRef.current) return;
+
+    const autocomplete = new window.google.maps.places.Autocomplete(addressInputRef.current, {
+      componentRestrictions: { country: 'us' },
+      fields: ['formatted_address', 'geometry'],
+    });
+
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      if (place.formatted_address) {
+        setForm((prev) => ({ ...prev, eventAddress: place.formatted_address }));
+        if (errors.eventAddress) {
+          setErrors((prev) => ({ ...prev, eventAddress: '' }));
+        }
+        calculateDistance(place);
+      }
+    });
+
+    autocompleteRef.current = autocomplete;
+  }, [mapsLoaded]);
+
+  // Calculate driving distance using Distance Matrix
+  const calculateDistance = useCallback((place) => {
+    if (!window.google?.maps || !place.geometry) return;
+
+    setCalculatingDelivery(true);
+    const service = new window.google.maps.DistanceMatrixService();
+
+    service.getDistanceMatrix(
+      {
+        origins: [new window.google.maps.LatLng(ORIGIN.lat, ORIGIN.lng)],
+        destinations: [place.geometry.location],
+        travelMode: window.google.maps.TravelMode.DRIVING,
+        unitSystem: window.google.maps.UnitSystem.IMPERIAL,
+      },
+      (response, status) => {
+        setCalculatingDelivery(false);
+        if (status === 'OK' && response.rows[0]?.elements[0]?.status === 'OK') {
+          const distanceMeters = response.rows[0].elements[0].distance.value;
+          const miles = Math.round(distanceMeters / 1609.34);
+          const fee = DELIVERY_BASE_FEE + miles * DELIVERY_PER_MILE;
+          setDeliveryMiles(miles);
+          setDeliveryFee(fee);
+        }
+      }
+    );
+  }, []);
+
+  const getGrandTotal = () => getTotal() + (deliveryFee || 0);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+    // Reset delivery fee if address is manually changed
+    if (name === 'eventAddress') {
+      setDeliveryFee(null);
+      setDeliveryMiles(null);
     }
   };
 
@@ -51,22 +146,31 @@ export default function CheckoutForm({ onBack }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const buildReservationData = (status) => ({
-    client_name: form.fullName.trim(),
-    client_email: form.email.trim() || null,
-    client_phone: form.phone.trim(),
-    event_date: form.eventDate,
-    return_date: form.returnDate,
-    event_address: form.eventAddress.trim(),
-    notes: form.notes.trim() || null,
-    total: getTotal(),
-    status,
-    items: items.map((item) => ({
-      product_id: item.id,
-      quantity: item.quantity,
-      unit_price: item.price,
-    })),
-  });
+  const buildReservationData = (status) => {
+    const grandTotal = getGrandTotal();
+    const deliveryNote = deliveryFee != null && deliveryMiles != null
+      ? `[Delivery: ${deliveryMiles} mi - $${deliveryFee.toFixed(2)}]`
+      : '';
+    const existingNotes = form.notes.trim();
+    const combinedNotes = [deliveryNote, existingNotes].filter(Boolean).join(' | ');
+
+    return {
+      client_name: form.fullName.trim(),
+      client_email: form.email.trim() || null,
+      client_phone: form.phone.trim(),
+      event_date: form.eventDate,
+      return_date: form.returnDate,
+      event_address: form.eventAddress.trim(),
+      notes: combinedNotes || null,
+      total: grandTotal,
+      status,
+      items: items.map((item) => ({
+        product_id: item.id,
+        quantity: item.quantity,
+        unit_price: item.price,
+      })),
+    };
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -94,7 +198,7 @@ export default function CheckoutForm({ onBack }) {
       }
 
       // Stock available → auto-confirm
-      const total = getTotal();
+      const total = getGrandTotal();
       const reservation = await createReservation(buildReservationData('confirmed'));
       setReservationId(reservation.id);
       setSavedTotal(total);
@@ -287,9 +391,40 @@ export default function CheckoutForm({ onBack }) {
             <span className="text-white/80">${(item.price * item.quantity).toFixed(2)}</span>
           </div>
         ))}
-        <div className="flex justify-between text-sm font-bold pt-2 mt-2 border-t border-white/10">
+
+        {/* Subtotal */}
+        <div className="flex justify-between text-sm pt-2 mt-2 border-t border-white/10">
+          <span className="text-white/70">{tc.subtotal}</span>
+          <span className="text-white/80">${getTotal().toFixed(2)}</span>
+        </div>
+
+        {/* Delivery Fee */}
+        <div className="flex justify-between text-sm py-1">
+          <span className="text-white/70 flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5" />
+            {tc.deliveryFee}
+            {deliveryMiles != null && (
+              <span className="text-white/40">({deliveryMiles} {tc.miles})</span>
+            )}
+          </span>
+          <span className="text-white/80">
+            {calculatingDelivery ? (
+              <span className="flex items-center gap-1 text-white/50">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                {tc.calculatingDistance}
+              </span>
+            ) : deliveryFee != null ? (
+              `$${deliveryFee.toFixed(2)}`
+            ) : (
+              <span className="text-white/40">—</span>
+            )}
+          </span>
+        </div>
+
+        {/* Grand Total */}
+        <div className="flex justify-between text-sm font-bold pt-2 mt-1 border-t border-white/10">
           <span className="text-white">{tc.total}</span>
-          <span className="text-primary">${getTotal().toFixed(2)}</span>
+          <span className="text-primary">${getGrandTotal().toFixed(2)}</span>
         </div>
       </div>
 
@@ -333,8 +468,23 @@ export default function CheckoutForm({ onBack }) {
 
         <div>
           <label className={labelClass}>{tc.eventAddress} *</label>
-          <input type="text" name="eventAddress" value={form.eventAddress} onChange={handleChange} className={inputClass} placeholder="123 Main St, Houston, TX" />
+          <input
+            ref={addressInputRef}
+            type="text"
+            name="eventAddress"
+            value={form.eventAddress}
+            onChange={handleChange}
+            className={inputClass}
+            placeholder="123 Main St, Houston, TX"
+            autoComplete="off"
+          />
           {errors.eventAddress && <p className={errorClass}>{errors.eventAddress}</p>}
+          {deliveryFee != null && deliveryMiles != null && (
+            <p className="text-primary/80 text-xs mt-1 flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              {deliveryMiles} {tc.miles} — ${deliveryFee.toFixed(2)} {tc.deliveryFee.toLowerCase()}
+            </p>
+          )}
         </div>
 
         <div>

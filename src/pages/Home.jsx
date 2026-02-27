@@ -13,10 +13,10 @@ const productCards = [
     nameEs: 'Sillas',
     image: '/sillas.jpg',
     items: [
-      { id: 'chair-resin', name: 'Resin Chair', nameEs: 'Silla de Resina', price: 2.50, desc: 'Elegant white resin folding chairs, perfect for weddings and formal events.', descEs: 'Elegantes sillas plegables de resina blanca, perfectas para bodas y eventos formales.', image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
-      { id: 'chair-wood', name: 'Wooden Chair', nameEs: 'Silla de Madera', price: 3.00, desc: 'Classic wooden chairs that bring warmth and elegance to any event setting.', descEs: 'Sillas de madera clásicas que aportan calidez y elegancia a cualquier evento.', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
-      { id: 'chair-garden', name: 'Garden Chair', nameEs: 'Silla de Jardín', price: 2.00, desc: 'Comfortable garden chairs ideal for outdoor celebrations and gatherings.', descEs: 'Cómodas sillas de jardín ideales para celebraciones y reuniones al aire libre.', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'chair-resin', name: 'Resin Garden Chair', nameEs: 'Silla de Resina de Jardín', price: 3.00, desc: 'Elegant white resin garden chairs, perfect for weddings and formal events.', descEs: 'Elegantes sillas de resina de jardín blanca, perfectas para bodas y eventos formales.', image: '/gardenchair.png', checkoutLink: '#' },
+      { id: 'chair-wood', name: 'Wooden Chair', nameEs: 'Silla de Madera', price: 4.00, desc: 'Classic wooden chairs that bring warmth and elegance to any event setting.', descEs: 'Sillas de madera clásicas que aportan calidez y elegancia a cualquier evento.', image: '/woodchair.png', checkoutLink: '#' },
       { id: 'chair-chiavari', name: 'Chiavari Chair', nameEs: 'Silla Chiavari', price: 5.00, desc: 'Elegant gold Chiavari chairs with white cushion, perfect for weddings and upscale events.', descEs: 'Elegantes sillas Chiavari doradas con cojín blanco, perfectas para bodas y eventos de gala.', image: '/chiavari.png', checkoutLink: '#' },
+      { id: 'chair-kid-chiavari', name: 'Kid Chiavari Chair', nameEs: 'Silla Chiavari para Niños', price: 5.00, desc: 'Beautiful kid-sized Chiavari chairs, perfect for children at weddings and special events.', descEs: 'Hermosas sillas Chiavari para niños, perfectas para los pequeños en bodas y eventos especiales.', image: '/chiavari.png', checkoutLink: '#' },
     ],
   },
   {
@@ -24,9 +24,10 @@ const productCards = [
     nameEs: 'Mesas',
     image: '/mesas.jpg',
     items: [
-      { id: 'table-8ft', name: '8 FT Rectangular Table', nameEs: 'Mesa Rectangular de 8 pies', price: 12.00, desc: 'Sturdy 8-foot plastic folding tables built for versatility and strength.', descEs: 'Resistentes mesas plegables de plástico de 8 pies, construidas para versatilidad y fuerza.', image: 'https://images.unsplash.com/photo-1519225468359-2996bc017a1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
-      { id: 'table-6ft', name: '6 FT Rectangular Table', nameEs: 'Mesa Rectangular de 6 pies', price: 10.00, desc: 'Versatile 6-foot folding tables, great for smaller setups and buffets.', descEs: 'Versátiles mesas plegables de 6 pies, ideales para montajes pequeños y buffets.', image: 'https://images.unsplash.com/photo-1510076857177-7470076d4098?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'table-6ft', name: '6 FT Rectangular Table', nameEs: 'Mesa Rectangular de 6 pies', price: 8.00, desc: 'Versatile 6-foot folding tables, great for smaller setups and buffets.', descEs: 'Versátiles mesas plegables de 6 pies, ideales para montajes pequeños y buffets.', image: 'https://images.unsplash.com/photo-1510076857177-7470076d4098?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'table-8ft', name: '8 FT Rectangular Table', nameEs: 'Mesa Rectangular de 8 pies', price: 10.00, desc: 'Sturdy 8-foot plastic folding tables built for versatility and strength.', descEs: 'Resistentes mesas plegables de plástico de 8 pies, construidas para versatilidad y fuerza.', image: 'https://images.unsplash.com/photo-1519225468359-2996bc017a1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
       { id: 'table-round', name: '60" Round Table', nameEs: 'Mesa Redonda de 60"', price: 12.00, desc: '60-inch round folding tables, perfect for banquet-style seating.', descEs: 'Mesas redondas plegables de 60 pulgadas, perfectas para disposición tipo banquete.', image: 'https://images.unsplash.com/photo-1510076857177-7470076d4098?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'table-cocktail', name: 'Cocktail Table', nameEs: 'Mesa Cocktail', price: 15.00, desc: 'Elegant cocktail tables perfect for standing receptions and social events.', descEs: 'Elegantes mesas cocktail perfectas para recepciones de pie y eventos sociales.', image: 'https://images.unsplash.com/photo-1510076857177-7470076d4098?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
     ],
   },
   {
@@ -34,8 +35,8 @@ const productCards = [
     nameEs: 'Manteles',
     image: '/manteles.jpg',
     items: [
-      { id: 'cloth-white', name: 'White Tablecloth', nameEs: 'Mantel Blanco', price: 8.00, desc: 'Elegant white tablecloths that add a clean, sophisticated touch to any event.', descEs: 'Elegantes manteles blancos que agregan un toque limpio y sofisticado a cualquier evento.', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
-      { id: 'cloth-color', name: 'Colored Tablecloth', nameEs: 'Mantel de Color', price: 10.00, desc: 'Available in various colors to match your event theme and decoration.', descEs: 'Disponibles en varios colores para combinar con el tema y decoración de tu evento.', image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'cloth-white', name: 'White Tablecloth', nameEs: 'Mantel Blanco', price: 10.00, desc: 'Elegant white tablecloths that add a clean, sophisticated touch to any event.', descEs: 'Elegantes manteles blancos que agregan un toque limpio y sofisticado a cualquier evento.', image: '/whitecloths.png', checkoutLink: '#' },
+      { id: 'cloth-color', name: 'Colored Tablecloth', nameEs: 'Mantel de Color', price: 12.00, desc: 'Available in various colors to match your event theme and decoration.', descEs: 'Disponibles en varios colores para combinar con el tema y decoración de tu evento.', image: '/colorcloths.png', checkoutLink: '#' },
     ],
   },
   {
@@ -43,8 +44,12 @@ const productCards = [
     nameEs: 'Carpas',
     image: '/tent.jpg',
     items: [
-      { id: 'tent-20x20', name: 'Tent 20x20', nameEs: 'Carpa 20x20', price: 350.00, desc: 'Perfect for intimate gatherings of up to 30 guests with optional draping.', descEs: 'Perfecta para reuniones íntimas de hasta 30 invitados con drapeado opcional.', image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
-      { id: 'tent-20x40', name: 'Tent 20x40', nameEs: 'Carpa 20x40', price: 600.00, desc: 'Spacious tent for larger events up to 70 guests with elegant draping options.', descEs: 'Carpa espaciosa para eventos más grandes de hasta 70 invitados con opciones de drapeado elegante.', image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'tent-20x20', name: 'Tent 20x20', nameEs: 'Carpa 20x20', price: 250.00, desc: 'Perfect for intimate gatherings of up to 30 guests.', descEs: 'Perfecta para reuniones íntimas de hasta 30 invitados.', image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'tent-20x32', name: 'Tent 20x32', nameEs: 'Carpa 20x32', price: 350.00, desc: '70 people seated in chairs, 50 seated at tables. Fire proof.', descEs: '70 personas sentadas en sillas, 50 personas en mesas. Fire proof.', image: '/tent20x32.png', checkoutLink: '#' },
+      { id: 'tent-20x40', name: 'Tent 20x40', nameEs: 'Carpa 20x40', price: 450.00, desc: '100 people in chairs, 70 seated at tables. Fire proof.', descEs: '100 personas en sillas, 70 en mesas ubicadas. Fire proof.', image: '/tent20x40.png', checkoutLink: '#' },
+      { id: 'tent-20x60', name: 'Tent 20x60', nameEs: 'Carpa 20x60', price: 700.00, desc: 'Extra large tent for big events and celebrations.', descEs: 'Carpa extra grande para grandes eventos y celebraciones.', image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'tent-hp-20x20', name: 'High Peak 20x20', nameEs: 'High Peak 20x20', price: 550.00, desc: 'High peak premium heavy duty tent 20x20 for a stunning visual impact.', descEs: 'Carpa high peak premium heavy duty 20x20 para un impacto visual impresionante.', image: '/tent20x20.png', checkoutLink: '#' },
+      { id: 'tent-hp-20x40', name: 'High Peak 20x40', nameEs: 'High Peak 20x40', price: 1200.00, desc: 'High peak premium heavy duty tent 20x40 for grand events and weddings.', descEs: 'Carpa high peak premium heavy duty 20x40 para grandes eventos y bodas.', image: '/tent20x40highpeak.png', checkoutLink: '#' },
     ],
   },
   {
@@ -52,24 +57,26 @@ const productCards = [
     nameEs: 'Otros',
     image: '/others.jpg',
     items: [
-      { id: 'chandelier', name: 'Chandelier', nameEs: 'Candelabro', price: 50.00, desc: 'Beautiful chandeliers to add a touch of elegance and ambient lighting.', descEs: 'Hermosos candelabros para agregar un toque de elegancia e iluminación ambiental.', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
-      { id: 'garden-lights', name: 'Garden Lights', nameEs: 'Luces de Jardín', price: 25.00, desc: 'String lights and garden lighting to create a magical outdoor atmosphere.', descEs: 'Luces de cadena e iluminación de jardín para crear una atmósfera mágica al aire libre.', image: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
-      { id: 'walls-draping', name: 'Walls & Draping', nameEs: 'Paredes y Drapeado', price: 75.00, desc: 'Tent walls and draping to enhance privacy and create stunning backdrops.', descEs: 'Paredes de carpa y drapeado para mejorar la privacidad y crear fondos impresionantes.', image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
-      { id: 'cooler', name: 'Cooler', nameEs: 'Enfriador', price: 40.00, desc: 'Portable coolers to keep your guests comfortable during warm weather events.', descEs: 'Enfriadores portátiles para mantener a tus invitados cómodos durante eventos en clima cálido.', image: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
-      { id: 'heater', name: 'Heater', nameEs: 'Calentador', price: 45.00, desc: 'Outdoor heaters to keep your guests warm and cozy during cold weather events.', descEs: 'Calentadores exteriores para mantener a tus invitados cálidos y cómodos durante eventos en clima frío.', image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'heater', name: 'Heater', nameEs: 'Calentador', price: 65.00, desc: 'Outdoor heaters to keep your guests warm and cozy during cold weather events.', descEs: 'Calentadores exteriores para mantener a tus invitados cálidos y cómodos durante eventos en clima frío.', image: '/heater.png', checkoutLink: '#' },
+      { id: 'cooler', name: 'Cooler', nameEs: 'Enfriador', price: 120.00, desc: 'Hessaire 3,100 CFM 3-Speed Portable Evaporative Cooler (Swamp Cooler) for 950 sq. ft.', descEs: 'Hessaire 3,100 CFM Enfriador Evaporativo Portátil de 3 Velocidades (Swamp Cooler) para 950 pies cuadrados.', image: '/cooler.png', checkoutLink: '#' },
+      { id: 'plates', name: 'Plates', nameEs: 'Platos', price: 2.00, desc: 'Quality plates for your event table settings.', descEs: 'Platos de calidad para la mesa de tu evento.', image: '/plate.png', checkoutLink: '#' },
+      { id: 'gas-propane', name: 'Gas Propane', nameEs: 'Gas Propano', price: 20.00, desc: 'Propane gas tanks for heaters and outdoor cooking equipment.', descEs: 'Tanques de gas propano para calentadores y equipos de cocina al aire libre.', image: '/gaspropano.png', checkoutLink: '#' },
       { id: 'dancefloor-16x16', name: 'Dance Floor 16x16', nameEs: 'Pista de Baile 16x16', price: 750.00, desc: 'Elegant 16x16 dance floor to make your event unforgettable.', descEs: 'Elegante pista de baile 16x16 para hacer tu evento inolvidable.', image: '/dancefloor.png', checkoutLink: '#' },
       { id: 'dancefloor-12x12', name: 'Dance Floor 12x12', nameEs: 'Pista de Baile 12x12', price: 500.00, desc: 'Compact 12x12 dance floor, perfect for smaller venues and gatherings.', descEs: 'Pista de baile compacta 12x12, perfecta para espacios y reuniones más pequeñas.', image: '/dancefloor.png', checkoutLink: '#' },
     ],
   },
 ];
 
-const allPackages = [
-  { id: 'pkg-deluxe-20x20', badge: 'Deluxe', price: '$749', priceNum: 749, title: 'Tent 20x20 with draping', titleEs: 'Carpa 20x20 con drapeado', includes: ['30 Garden Chairs', '3 Rectangular Table 8ft', 'Garden Lights - Walls', '1 Chandelier', '3 Table cloths', 'Delivery and Tax included'], checkoutLink: '#' },
-  { id: 'pkg-basic-20x20', badge: 'Basic', price: '$399', priceNum: 399, title: 'Tent 20x20 without draping', titleEs: 'Carpa 20x20 sin drapeado', includes: ['30 Garden Chairs', '3 Rectangular Table 8ft', '3 Table cloths', 'Garden Light and walls', 'Delivery and Tax included'], checkoutLink: '#' },
-  { id: 'pkg-deluxe-20x40', badge: 'Deluxe', price: '$1,299', priceNum: 1299, title: 'Tent 20x40 with draping', titleEs: 'Carpa 20x40 con drapeado', includes: ['70 Garden Chairs', '7 Rectangular Table 8ft', 'Garden Lights', '7 Table cloths', '2 Chandeliers', 'Delivery and Tax included'], checkoutLink: '#' },
-  { id: 'pkg-basic-20x40', badge: 'Basic', price: '$849', priceNum: 849, title: 'Tent 20x40 without draping', titleEs: 'Carpa 20x40 sin drapeado', includes: ['70 Garden Chairs', '7 Rectangular Table 8ft', '7 Table Cloths', 'Garden lights', 'Walls', 'Delivery and Tax included'], checkoutLink: '#' },
+const deluxePackages = [
+  { id: 'pkg-deluxe-20x40', badge: 'Deluxe', price: '$1,299', priceNum: 1299, title: 'Tent 20x40', titleEs: 'Carpa 20x40', image: '/tentdeluxe1.jpeg', includes: ['Draping color in stock', '2 Chandeliers', '7 Rectangular Tables', '7 Tablecloths white or black', '70 Garden Chairs white', 'Garden Lights', '1 Table cake'], checkoutLink: '#' },
+  { id: 'pkg-deluxe-20x32', badge: 'Deluxe', price: '$1,100', priceNum: 1100, title: 'Tent 20x32', titleEs: 'Carpa 20x32', image: '/tentdeluxe.jpeg', includes: ['Draping color in stock', '1 Chandelier', '6 Round Tables', '6 Tablecloths white or black', '48 Garden Chairs white', 'Garden Lights', '1 Table cake'], checkoutLink: '#' },
+  { id: 'pkg-deluxe-20x20', badge: 'Deluxe', price: '$789', priceNum: 789, title: 'Tent 20x20', titleEs: 'Carpa 20x20', image: '/tentdeluxe1.jpeg', includes: ['Draping color in stock', '1 Chandelier', '3 Rectangular Tables', '3 Tablecloths white or black', '30 Garden Chairs white', 'Garden Lights', '1 Table cake'], checkoutLink: '#' },
 ];
-const totalPages = Math.ceil(allPackages.length / 2);
+const basicPackages = [
+  { id: 'pkg-basic-20x40', badge: 'Basic', price: '$849', priceNum: 849, title: 'Tent 20x40', titleEs: 'Carpa 20x40', image: '/basic1.png', includes: ['7 Rectangular Tables', '7 Tablecloths white or black', '70 Garden Chairs white', 'Garden Lights', '1 Table cake'], checkoutLink: '#' },
+  { id: 'pkg-basic-20x32', badge: 'Basic', price: '$599', priceNum: 599, title: 'Tent 20x32', titleEs: 'Carpa 20x32', image: '/basic.png', includes: ['6 Round Tables', '6 Tablecloths white or black', '48 Garden Chairs white', 'Garden Lights', '1 Table cake'], checkoutLink: '#' },
+  { id: 'pkg-basic-20x20', badge: 'Basic', price: '$399', priceNum: 399, title: 'Tent 20x20', titleEs: 'Carpa 20x20', image: '/basic1.png', includes: ['3 Rectangular Tables', '3 Tablecloths white or black', '30 Garden Chairs white', 'Garden Lights', '1 Table cake'], checkoutLink: '#' },
+];
 
 const heroImages = [
   'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80', // Event table setting
@@ -94,6 +101,7 @@ export default function Home() {
   const tc = translations[language].cart;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState('Deluxe'); // 'Deluxe' or 'Basic'
   const [sliderIndex, setSliderIndex] = useState(0);
   const [productIndex, setProductIndex] = useState(0);
   const [productModal, setProductModal] = useState(null); // index of selected category
@@ -120,13 +128,17 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  const activePackages = modalType === 'Deluxe' ? deluxePackages : basicPackages;
+  const perPage = 3;
+  const totalPages = Math.ceil(activePackages.length / perPage);
+
   useEffect(() => {
     if (!showModal) return;
     const timer = setInterval(() => {
       setSliderIndex((prev) => (prev + 1) % totalPages);
     }, 3000);
     return () => clearInterval(timer);
-  }, [showModal]);
+  }, [showModal, totalPages]);
 
   useEffect(() => {
     if (!showModal) return;
@@ -179,7 +191,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <a href="https://stareventrentaltx.com/rent-supplies/" target="_blank" rel="noreferrer">
+            <a href="#products">
               <Button variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-6 text-base sm:text-lg font-semibold transition-transform duration-300 hover:scale-110 w-full sm:w-auto">
                 {t.reserve}
               </Button>
@@ -279,14 +291,14 @@ export default function Home() {
             {[
               {
                 badge: 'Deluxe',
-                image: '/tarjeta.jpg',
+                image: '/tentdeluxe1.jpeg',
               },
               {
                 badge: 'Basic',
-                image: '/tarjeto.jpg',
+                image: '/basic1.png',
               },
             ].map((pkg, idx) => (
-              <div key={idx} onClick={() => { setShowModal(true); setSliderIndex(0); }}>
+              <div key={idx} onClick={() => { setModalType(pkg.badge); setShowModal(true); setSliderIndex(0); }}>
                 <div className="relative rounded-2xl shadow-xl hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl overflow-hidden h-[350px] sm:h-[400px] group cursor-pointer">
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
@@ -342,15 +354,24 @@ export default function Home() {
                 {productCards.map((product, idx) => (
                   <div key={idx} className="w-1/3 shrink-0 px-2 sm:px-3">
                     <div
-                      className="bg-card rounded-2xl overflow-hidden shadow-xl hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl group cursor-pointer"
+                      className="rounded-2xl overflow-hidden shadow-xl hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl group cursor-pointer border-2 border-[#C9A84C]"
                       onClick={() => { setProductModal(idx); setSelectedItemIdx(0); }}
                     >
+                      <div className="overflow-hidden">
+                        <div
+                          className="h-56 sm:h-72 md:h-80 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                          style={{ backgroundImage: `url(${product.image})` }}
+                        />
+                      </div>
                       <div
-                        className="h-56 sm:h-72 md:h-80 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                        style={{ backgroundImage: `url(${product.image})` }}
-                      />
-                      <div className="px-4 py-2 sm:px-5 sm:py-2.5">
-                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-card-foreground">
+                        className="px-4 py-2 sm:px-5 sm:py-2.5 backdrop-blur-md"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+                          backdropFilter: 'blur(12px) saturate(150%)',
+                          WebkitBackdropFilter: 'blur(12px) saturate(150%)',
+                        }}
+                      >
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white">
                           {language === 'en' ? product.name : product.nameEs}
                         </h3>
                       </div>
@@ -547,7 +568,7 @@ export default function Home() {
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative z-10 w-full max-w-[45rem]"
+            className="relative z-10 w-full max-w-[60rem]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
@@ -576,16 +597,21 @@ export default function Home() {
                 >
                   {Array.from({ length: totalPages }).map((_, pageIdx) => (
                     <div key={pageIdx} className="w-full shrink-0 px-2">
-                      <div className="grid grid-cols-2 gap-4">
-                        {allPackages.slice(pageIdx * 2, pageIdx * 2 + 2).map((sub, i) => (
-                          <div key={i} className="rounded-2xl p-4 sm:p-6 border-2 border-[#C9A84C] shadow-2xl flex flex-col h-full backdrop-blur-md" style={{ background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)', backdropFilter: 'blur(12px) saturate(180%)', WebkitBackdropFilter: 'blur(12px) saturate(180%)' }}>
+                      <div className="grid gap-4 grid-cols-3">
+                        {activePackages.slice(pageIdx * perPage, pageIdx * perPage + perPage).map((sub, i) => (
+                          <div key={i} className="rounded-2xl border-2 border-[#C9A84C] shadow-2xl flex flex-col h-full backdrop-blur-md overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)', backdropFilter: 'blur(12px) saturate(180%)', WebkitBackdropFilter: 'blur(12px) saturate(180%)' }}>
+                            {sub.image && (
+                              <div className="w-full h-28 sm:h-36 bg-cover bg-center" style={{ backgroundImage: `url(${sub.image})` }} />
+                            )}
+                            <div className="p-4 sm:p-6 flex flex-col flex-grow">
                             <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-3 w-fit ${
                               sub.badge === 'Deluxe' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
                             }`}>
                               {sub.badge}
                             </span>
-                            <div className="text-3xl sm:text-4xl font-bold text-white mb-1">{sub.price}</div>
-                            <h4 className="text-sm sm:text-base font-semibold text-white mb-3">{sub.title}</h4>
+                            <div className="text-3xl sm:text-4xl font-bold text-white mb-0">{sub.price}</div>
+                            <p className="text-white/50 text-xs mb-1">+ tax & delivery</p>
+                            <h4 className="text-sm sm:text-base font-semibold text-white mb-3">{language === 'en' ? sub.title : sub.titleEs}</h4>
                             <ul className="space-y-1.5 mb-4 flex-grow">
                               {sub.includes.map((item, j) => (
                                 <li key={j} className="text-xs sm:text-sm text-white/90 flex items-start gap-1.5">
@@ -625,6 +651,7 @@ export default function Home() {
                                 {addedFeedback === sub.id ? tc.addedToCart : tc.addToCart}
                               </Button>
                             </div>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -660,7 +687,7 @@ export default function Home() {
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative z-10 w-full max-w-[45rem] max-h-[85vh] rounded-2xl border-2 border-[#C9A84C] shadow-2xl overflow-y-auto"
+            className="relative z-10 w-full max-w-[45rem] max-h-[85vh] rounded-2xl border-2 border-[#C9A84C] shadow-2xl overflow-hidden flex flex-col"
             style={{
               background: 'rgba(0, 0, 0, 0.35)',
               backdropFilter: 'blur(16px) saturate(180%)',
@@ -674,9 +701,9 @@ export default function Home() {
             >
               ✕
             </button>
-            <div className="flex flex-col md:flex-row h-full">
+            <div className="flex flex-col md:flex-row min-h-0 flex-1">
               {/* Left side - Item list */}
-              <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-[#C9A84C]/30 p-4 sm:p-6 overflow-y-auto">
+              <div className="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-[#C9A84C]/30 p-4 sm:p-6 overflow-y-auto md:max-h-[85vh]">
                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">
                   {language === 'en' ? productCards[productModal].name : productCards[productModal].nameEs}
                 </h3>
@@ -698,7 +725,7 @@ export default function Home() {
                 </ul>
               </div>
               {/* Right side - Photo + Description */}
-              <div className="w-full md:w-1/2 p-4 sm:p-5 overflow-y-auto">
+              <div className="w-full md:w-1/2 p-4 sm:p-5 overflow-y-auto md:max-h-[85vh]">
                 <div
                   className="w-full h-40 sm:h-48 md:h-52 rounded-xl bg-contain bg-center bg-no-repeat mb-3 sm:mb-4"
                   style={{ backgroundImage: `url(${productCards[productModal].items[selectedItemIdx].image})` }}
@@ -717,9 +744,12 @@ export default function Home() {
                     : productCards[productModal].items[selectedItemIdx].descEs}
                 </p>
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-primary font-bold text-lg">
-                    ${productCards[productModal].items[selectedItemIdx].price.toFixed(2)}
-                  </p>
+                  <div>
+                    <p className="text-primary font-bold text-lg">
+                      ${productCards[productModal].items[selectedItemIdx].price.toFixed(2)}
+                    </p>
+                    <p className="text-white/50 text-xs">+ tax & delivery</p>
+                  </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center border border-[#C9A84C]/50 rounded-lg overflow-hidden">
                       <button

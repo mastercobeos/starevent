@@ -376,7 +376,7 @@ export default function Layout({ children }) {
       {/* Social Media Buttons */}
       <div
         className={`hidden md:flex fixed right-6 top-[5.5rem] z-[9999] flex-col gap-4 transition-all duration-500 ease-in-out ${
-          isNavbarVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 pointer-events-none'
+          isNavbarVisible && !isCartOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 pointer-events-none'
         }`}
       >
         <a
@@ -412,7 +412,7 @@ export default function Layout({ children }) {
           </svg>
         </a>
         <a
-          href="https://wa.me/12815090894"
+          href="https://wa.me/12816360615"
           target="_blank"
           rel="noopener noreferrer"
           className="w-[3.08rem] h-[3.08rem] rounded-full flex items-center justify-center backdrop-blur-md border-2 border-[#C9A84C] transition-all duration-300 hover:scale-110 hover:shadow-lg"

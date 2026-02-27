@@ -112,6 +112,11 @@ export const translations = {
       pendingTitle: 'Request Submitted!',
       confirmedTitle: 'Reservation Confirmed!',
       paidTitle: 'Payment Successful!',
+      subtotal: 'Subtotal',
+      deliveryFee: 'Delivery Fee',
+      calculatingDistance: 'Calculating distance...',
+      miles: 'mi',
+      deliveryIncluded: 'Delivery included',
     },
     footer: {
       companyDesc: 'Star Event Rental is a family-owned tent, table, chair, and linen rental business in Houston, Texas. We serve events in Houston, Katy, Cypress, Richmond, Rosenberg, Sugar Land, and the surrounding areas.',
@@ -237,6 +242,11 @@ export const translations = {
       pendingTitle: '¡Solicitud Enviada!',
       confirmedTitle: '¡Reservación Confirmada!',
       paidTitle: '¡Pago Exitoso!',
+      subtotal: 'Subtotal',
+      deliveryFee: 'Tarifa de Envío',
+      calculatingDistance: 'Calculando distancia...',
+      miles: 'mi',
+      deliveryIncluded: 'Envío incluido',
     },
     footer: {
       companyDesc: 'Star Event Rental es un negocio familiar de alquiler de carpas, mesas, sillas y mantelería en Houston, Texas. Servimos eventos en Houston, Katy, Cypress, Richmond, Rosenberg, Sugar Land y áreas circundantes.',
