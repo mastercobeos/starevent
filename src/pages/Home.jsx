@@ -109,6 +109,7 @@ export default function Home() {
   const [addedFeedback, setAddedFeedback] = useState(null); // id of item just added
   const [quantities, setQuantities] = useState({}); // { itemId: quantity }
   const [reviewIndex, setReviewIndex] = useState(0);
+  const [visibleReviews, setVisibleReviews] = useState(2);
   const [visibleProducts, setVisibleProducts] = useState(3);
 
   useEffect(() => {
@@ -137,11 +138,24 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const updateVisibleReviews = () => {
+      const v = window.innerWidth < 500 ? 1 : 2;
+      setVisibleReviews(v);
+      setReviewIndex(0);
+    };
+    updateVisibleReviews();
+    window.addEventListener('resize', updateVisibleReviews);
+    return () => window.removeEventListener('resize', updateVisibleReviews);
+  }, []);
+
+  const reviewPages = Math.ceil(googleReviews.length / visibleReviews);
+
+  useEffect(() => {
     const interval = setInterval(() => {
-      setReviewIndex((prev) => (prev + 1) % Math.ceil(googleReviews.length / 2));
+      setReviewIndex((prev) => (prev + 1) % reviewPages);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [reviewPages]);
 
   const [visiblePackages, setVisiblePackages] = useState(3);
 
@@ -526,7 +540,7 @@ export default function Home() {
             <div className="relative">
               {/* Previous Button */}
               <button
-                onClick={() => setReviewIndex((prev) => (prev - 1 + Math.ceil(googleReviews.length / 2)) % Math.ceil(googleReviews.length / 2))}
+                onClick={() => setReviewIndex((prev) => (prev - 1 + reviewPages) % reviewPages)}
                 className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white transition-all"
               >
                 <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -534,7 +548,7 @@ export default function Home() {
 
               {/* Next Button */}
               <button
-                onClick={() => setReviewIndex((prev) => (prev + 1) % Math.ceil(googleReviews.length / 2))}
+                onClick={() => setReviewIndex((prev) => (prev + 1) % reviewPages)}
                 className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white transition-all"
               >
                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -545,13 +559,13 @@ export default function Home() {
                   className="flex transition-transform duration-500 ease-in-out"
                   style={{ transform: `translateX(-${reviewIndex * 100}%)` }}
                 >
-                  {Array.from({ length: Math.ceil(googleReviews.length / 2) }).map((_, pageIdx) => (
+                  {Array.from({ length: reviewPages }).map((_, pageIdx) => (
                     <div key={pageIdx} className="w-full shrink-0 px-1">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {googleReviews.slice(pageIdx * 2, pageIdx * 2 + 2).map((review, i) => (
+                      <div className="flex gap-3">
+                        {googleReviews.slice(pageIdx * visibleReviews, pageIdx * visibleReviews + visibleReviews).map((review, i) => (
                           <div
                             key={i}
-                            className="rounded-xl p-4 border border-white/15 backdrop-blur-md"
+                            className="flex-1 min-w-0 rounded-xl p-3 sm:p-4 border border-white/15 backdrop-blur-md"
                             style={{
                               background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
                               backdropFilter: 'blur(12px) saturate(150%)',
@@ -560,13 +574,13 @@ export default function Home() {
                           >
                             <div className="flex items-center gap-0.5 mb-2">
                               {[...Array(review.rating)].map((_, j) => (
-                                <svg key={j} className="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <svg key={j} className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                               ))}
                             </div>
-                            <p className="text-white/85 text-xs sm:text-sm italic leading-relaxed mb-2">
+                            <p className="text-white/85 text-[11px] sm:text-xs italic leading-relaxed mb-2 line-clamp-4">
                               "{review.text}"
                             </p>
-                            <p className="text-primary font-semibold text-xs sm:text-sm">{review.author}</p>
+                            <p className="text-primary font-semibold text-xs">{review.author}</p>
                           </div>
                         ))}
                       </div>
@@ -576,7 +590,7 @@ export default function Home() {
               </div>
 
               <div className="flex justify-center gap-1.5 mt-4">
-                {Array.from({ length: Math.ceil(googleReviews.length / 2) }).map((_, idx) => (
+                {Array.from({ length: reviewPages }).map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setReviewIndex(idx)}
