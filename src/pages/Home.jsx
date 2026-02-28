@@ -109,6 +109,21 @@ export default function Home() {
   const [addedFeedback, setAddedFeedback] = useState(null); // id of item just added
   const [quantities, setQuantities] = useState({}); // { itemId: quantity }
   const [reviewIndex, setReviewIndex] = useState(0);
+  const [visibleProducts, setVisibleProducts] = useState(3);
+
+  useEffect(() => {
+    const updateVisible = () => {
+      let v;
+      if (window.innerWidth < 640) v = 1;
+      else if (window.innerWidth < 768) v = 2;
+      else v = 3;
+      setVisibleProducts(v);
+      setProductIndex((prev) => Math.min(prev, productCards.length - v));
+    };
+    updateVisible();
+    window.addEventListener('resize', updateVisible);
+    return () => window.removeEventListener('resize', updateVisible);
+  }, []);
 
   const getQty = (id) => quantities[id] || 1;
   const setQty = (id, val) => setQuantities((prev) => ({ ...prev, [id]: Math.max(1, val) }));
@@ -128,8 +143,24 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  const [visiblePackages, setVisiblePackages] = useState(3);
+
+  useEffect(() => {
+    const updateVisiblePkgs = () => {
+      let v;
+      if (window.innerWidth < 640) v = 1;
+      else if (window.innerWidth < 1024) v = 2;
+      else v = 3;
+      setVisiblePackages(v);
+      setSliderIndex(0);
+    };
+    updateVisiblePkgs();
+    window.addEventListener('resize', updateVisiblePkgs);
+    return () => window.removeEventListener('resize', updateVisiblePkgs);
+  }, []);
+
   const activePackages = modalType === 'Deluxe' ? deluxePackages : basicPackages;
-  const perPage = 3;
+  const perPage = visiblePackages;
   const totalPages = Math.ceil(activePackages.length / perPage);
 
   useEffect(() => {
@@ -218,7 +249,7 @@ export default function Home() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-12">
           <div 
-            className="px-4 sm:px-5 py-12 sm:py-14 md:py-16 rounded-2xl shadow-xl text-center border-2 border-[#C9A84C] hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl backdrop-blur-md h-auto sm:h-[480px] flex flex-col justify-center w-full max-w-[280px]"
+            className="px-4 sm:px-5 py-12 sm:py-14 md:py-16 rounded-2xl shadow-xl text-center border-2 border-[#C9A84C] hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl backdrop-blur-md h-auto sm:h-[480px] flex flex-col justify-center w-full max-w-sm sm:max-w-[280px]"
             style={{
               background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)',
               backdropFilter: 'blur(12px) saturate(180%)',
@@ -234,7 +265,7 @@ export default function Home() {
             </p>
           </div>
           <div 
-            className="px-4 sm:px-5 py-12 sm:py-14 md:py-16 rounded-2xl shadow-xl text-center border-2 border-[#C9A84C] hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl backdrop-blur-md h-auto sm:h-[480px] flex flex-col justify-center w-full max-w-[280px]"
+            className="px-4 sm:px-5 py-12 sm:py-14 md:py-16 rounded-2xl shadow-xl text-center border-2 border-[#C9A84C] hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl backdrop-blur-md h-auto sm:h-[480px] flex flex-col justify-center w-full max-w-sm sm:max-w-[280px]"
             style={{
               background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)',
               backdropFilter: 'blur(12px) saturate(180%)',
@@ -250,7 +281,7 @@ export default function Home() {
             </p>
           </div>
           <div 
-            className="px-4 sm:px-5 py-12 sm:py-14 md:py-16 rounded-2xl shadow-xl text-center border-2 border-[#C9A84C] hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl backdrop-blur-md h-auto sm:h-[480px] flex flex-col justify-center w-full max-w-[280px]"
+            className="px-4 sm:px-5 py-12 sm:py-14 md:py-16 rounded-2xl shadow-xl text-center border-2 border-[#C9A84C] hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl backdrop-blur-md h-auto sm:h-[480px] flex flex-col justify-center w-full max-w-sm sm:max-w-[280px]"
             style={{
               background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)',
               backdropFilter: 'blur(12px) saturate(180%)',
@@ -270,7 +301,7 @@ export default function Home() {
       </section>
 
       {/* Packages Preview Section */}
-      <section id="packages" className="relative py-24 overflow-hidden">
+      <section id="packages" className="relative py-16 sm:py-24 overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center z-0"
           style={{
@@ -279,8 +310,8 @@ export default function Home() {
             backgroundPosition: 'center'
           }}
         />
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-4 sm:mb-6">{t.ourPackages}</h2>
             <p className="text-base sm:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed px-4">
@@ -299,7 +330,7 @@ export default function Home() {
               },
             ].map((pkg, idx) => (
               <div key={idx} onClick={() => { setModalType(pkg.badge); setShowModal(true); setSliderIndex(0); }}>
-                <div className="relative rounded-2xl shadow-xl hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl overflow-hidden h-[350px] sm:h-[400px] group cursor-pointer">
+                <div className="relative rounded-2xl shadow-xl hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl overflow-hidden h-[280px] sm:h-[350px] md:h-[400px] group cursor-pointer">
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                     style={{ backgroundImage: `url(${pkg.image})` }}
@@ -341,7 +372,7 @@ export default function Home() {
           </div>
           <div className="relative flex items-center gap-2 sm:gap-4 max-w-5xl mx-auto">
             <button
-              onClick={() => setProductIndex((prev) => prev <= 0 ? productCards.length - 3 : prev - 1)}
+              onClick={() => setProductIndex((prev) => prev <= 0 ? productCards.length - visibleProducts : prev - 1)}
               className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-[1.5px] border-[#C9A84C] bg-transparent text-white transition-all hover:scale-110 hover:bg-[#C9A84C]/15 flex items-center justify-center"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -349,10 +380,10 @@ export default function Home() {
             <div className="overflow-hidden w-full">
               <div
                 className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${productIndex * (100 / 3)}%)` }}
+                style={{ transform: `translateX(-${productIndex * (100 / visibleProducts)}%)` }}
               >
                 {productCards.map((product, idx) => (
-                  <div key={idx} className="w-1/3 shrink-0 px-2 sm:px-3">
+                  <div key={idx} className="shrink-0 px-2 sm:px-3" style={{ width: `${100 / visibleProducts}%` }}>
                     <div
                       className="rounded-2xl overflow-hidden shadow-xl hover:-translate-y-3 transition-all duration-300 hover:shadow-2xl group cursor-pointer border-2 border-[#C9A84C]"
                       onClick={() => { setProductModal(idx); setSelectedItemIdx(0); }}
@@ -381,14 +412,14 @@ export default function Home() {
               </div>
             </div>
             <button
-              onClick={() => setProductIndex((prev) => prev >= productCards.length - 3 ? 0 : prev + 1)}
+              onClick={() => setProductIndex((prev) => prev >= productCards.length - visibleProducts ? 0 : prev + 1)}
               className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-[1.5px] border-[#C9A84C] bg-transparent text-white transition-all hover:scale-110 hover:bg-[#C9A84C]/15 flex items-center justify-center"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>
           <div className="flex justify-center gap-2 mt-6">
-            {Array.from({ length: productCards.length - 2 }).map((_, i) => (
+            {Array.from({ length: Math.max(1, productCards.length - visibleProducts + 1) }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => setProductIndex(i)}
@@ -568,17 +599,16 @@ export default function Home() {
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative z-10 w-full max-w-[60rem]"
+            className="relative z-10 w-full max-w-[60rem] px-2 sm:px-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-6">
-              <div />
-              <h3 className="text-2xl sm:text-3xl font-bold text-white text-center">
+            <div className="flex items-center justify-center mb-4 sm:mb-6 relative">
+              <h3 className="text-2xl sm:text-3xl font-bold text-white text-center drop-shadow-lg">
                 {t.ourPackages}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-white/80 hover:text-white text-2xl font-light transition-colors"
+                className="absolute right-0 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white text-lg font-light transition-all backdrop-blur-sm"
               >
                 ✕
               </button>
@@ -597,49 +627,49 @@ export default function Home() {
                 >
                   {Array.from({ length: totalPages }).map((_, pageIdx) => (
                     <div key={pageIdx} className="w-full shrink-0 px-2">
-                      <div className="grid gap-4 grid-cols-3">
+                      <div className={`grid gap-2 sm:gap-4 ${visiblePackages === 1 ? 'grid-cols-1 max-w-sm mx-auto' : visiblePackages === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
                         {activePackages.slice(pageIdx * perPage, pageIdx * perPage + perPage).map((sub, i) => (
-                          <div key={i} className="rounded-2xl border-2 border-[#C9A84C] shadow-2xl flex flex-col h-full backdrop-blur-md overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)', backdropFilter: 'blur(12px) saturate(180%)', WebkitBackdropFilter: 'blur(12px) saturate(180%)' }}>
+                          <div key={i} className="rounded-xl sm:rounded-2xl border-2 border-[#C9A84C] shadow-2xl flex flex-col h-full backdrop-blur-md overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)', backdropFilter: 'blur(12px) saturate(180%)', WebkitBackdropFilter: 'blur(12px) saturate(180%)' }}>
                             {sub.image && (
-                              <div className="w-full h-28 sm:h-36 bg-cover bg-center" style={{ backgroundImage: `url(${sub.image})` }} />
+                              <div className="w-full h-24 sm:h-32 md:h-36 bg-cover bg-center" style={{ backgroundImage: `url(${sub.image})` }} />
                             )}
-                            <div className="p-4 sm:p-6 flex flex-col flex-grow">
-                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-3 w-fit ${
+                            <div className="p-2 sm:p-4 md:p-6 flex flex-col flex-grow">
+                            <span className={`inline-block px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold mb-1.5 sm:mb-3 w-fit ${
                               sub.badge === 'Deluxe' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
                             }`}>
                               {sub.badge}
                             </span>
-                            <div className="text-3xl sm:text-4xl font-bold text-white mb-0">{sub.price}</div>
-                            <p className="text-white/50 text-xs mb-1">+ tax & delivery</p>
-                            <h4 className="text-sm sm:text-base font-semibold text-white mb-3">{language === 'en' ? sub.title : sub.titleEs}</h4>
-                            <ul className="space-y-1.5 mb-4 flex-grow">
+                            <div className="text-lg sm:text-2xl md:text-4xl font-bold text-white mb-0">{sub.price}</div>
+                            <p className="text-white/50 text-[9px] sm:text-xs mb-0.5 sm:mb-1">+ tax & delivery</p>
+                            <h4 className="text-xs sm:text-sm md:text-base font-semibold text-white mb-1.5 sm:mb-3">{language === 'en' ? sub.title : sub.titleEs}</h4>
+                            <ul className="space-y-0.5 sm:space-y-1.5 mb-2 sm:mb-4 flex-grow">
                               {sub.includes.map((item, j) => (
-                                <li key={j} className="text-xs sm:text-sm text-white/90 flex items-start gap-1.5">
-                                  <span className="text-primary mt-0.5 font-bold">✓</span>
-                                  <span>{item}</span>
+                                <li key={j} className="text-[10px] sm:text-xs md:text-sm text-white/90 flex items-start gap-1">
+                                  <span className="text-primary mt-0.5 font-bold text-[10px] sm:text-xs">✓</span>
+                                  <span className="leading-tight">{item}</span>
                                 </li>
                               ))}
                             </ul>
-                            <div className="flex items-center gap-2">
-                              <div className="flex items-center border border-[#C9A84C]/50 rounded-lg overflow-hidden shrink-0">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2">
+                              <div className="flex items-center justify-center border border-[#C9A84C]/50 rounded-lg overflow-hidden shrink-0">
                                 <button
                                   onClick={() => setQty(sub.id, getQty(sub.id) - 1)}
-                                  className="w-7 h-7 flex items-center justify-center text-white/80 hover:bg-white/10 transition-all"
+                                  className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-white/80 hover:bg-white/10 transition-all"
                                 >
-                                  <ChevronLeft className="w-3.5 h-3.5" />
+                                  <ChevronLeft className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                 </button>
-                                <span className="w-6 text-center text-white text-xs font-bold">
+                                <span className="w-5 sm:w-6 text-center text-white text-[10px] sm:text-xs font-bold">
                                   {getQty(sub.id)}
                                 </span>
                                 <button
                                   onClick={() => setQty(sub.id, getQty(sub.id) + 1)}
-                                  className="w-7 h-7 flex items-center justify-center text-white/80 hover:bg-white/10 transition-all"
+                                  className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-white/80 hover:bg-white/10 transition-all"
                                 >
-                                  <ChevronRight className="w-3.5 h-3.5" />
+                                  <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                 </button>
                               </div>
                               <Button
-                                className="flex-1 font-semibold py-2 px-3 text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl"
+                                className="flex-1 font-semibold py-1.5 sm:py-2 px-2 sm:px-3 text-[10px] sm:text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl"
                                 onClick={() => {
                                   const qty = getQty(sub.id);
                                   addItem({ id: sub.id, name: sub.title, nameEs: sub.titleEs, price: sub.priceNum, image: '', type: 'package', checkoutLink: sub.checkoutLink }, qty);
@@ -687,7 +717,7 @@ export default function Home() {
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative z-10 w-full max-w-[45rem] max-h-[85vh] rounded-2xl border-2 border-[#C9A84C] shadow-2xl overflow-hidden flex flex-col"
+            className="relative z-10 w-full max-w-[45rem] max-h-[90vh] sm:max-h-[85vh] rounded-2xl border-2 border-[#C9A84C] shadow-2xl overflow-hidden flex flex-col"
             style={{
               background: 'rgba(0, 0, 0, 0.35)',
               backdropFilter: 'blur(16px) saturate(180%)',
@@ -730,28 +760,28 @@ export default function Home() {
                   className="w-full h-40 sm:h-48 md:h-52 rounded-xl bg-contain bg-center bg-no-repeat mb-3 sm:mb-4"
                   style={{ backgroundImage: `url(${productCards[productModal].items[selectedItemIdx].image})` }}
                 />
-                <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1.5 sm:mb-2">
                   <h4 className="text-base sm:text-lg md:text-xl font-bold text-white">
                     {language === 'en'
                       ? productCards[productModal].items[selectedItemIdx].name
                       : productCards[productModal].items[selectedItemIdx].nameEs}
                   </h4>
-                  <span className="text-xs sm:text-sm text-white/60">| {language === 'en' ? 'Duration: 24 hours' : 'Duración: 24 horas'}</span>
+                  <span className="text-xs sm:text-sm text-white/60">{language === 'en' ? 'Duration: 24 hours' : 'Duración: 24 horas'}</span>
                 </div>
                 <p className="text-white/85 text-sm leading-relaxed mb-3">
                   {language === 'en'
                     ? productCards[productModal].items[selectedItemIdx].desc
                     : productCards[productModal].items[selectedItemIdx].descEs}
                 </p>
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div>
-                    <p className="text-primary font-bold text-lg">
+                    <p className="text-primary font-bold text-lg sm:text-xl">
                       ${productCards[productModal].items[selectedItemIdx].price.toFixed(2)}
                     </p>
                     <p className="text-white/50 text-xs">+ tax & delivery</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center border border-[#C9A84C]/50 rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="flex items-center border border-[#C9A84C]/50 rounded-lg overflow-hidden shrink-0">
                       <button
                         onClick={() => setQty(productCards[productModal].items[selectedItemIdx].id, getQty(productCards[productModal].items[selectedItemIdx].id) - 1)}
                         className="w-8 h-8 flex items-center justify-center text-white/80 hover:bg-white/10 transition-all"
@@ -769,7 +799,7 @@ export default function Home() {
                       </button>
                     </div>
                     <Button
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 py-2 shadow-lg hover:shadow-xl text-sm"
+                      className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-4 py-2 shadow-lg hover:shadow-xl text-sm"
                       onClick={() => {
                         const item = productCards[productModal].items[selectedItemIdx];
                         const qty = getQty(item.id);
