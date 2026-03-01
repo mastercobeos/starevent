@@ -33,7 +33,7 @@ export const productCards = [
   {
     name: 'Tents',
     nameEs: 'Carpas',
-    image: '/tentsportada.png',
+    image: '/tentsportada.jpg',
     items: [
       { id: 'tent-20x20', name: 'Tent 20x20', nameEs: 'Carpa 20x20', price: 250.00, desc: 'Perfect for intimate gatherings of up to 30 guests.', descEs: 'Perfecta para reuniones íntimas de hasta 30 invitados.', image: '/tent20x2040.png', checkoutLink: '#' },
       { id: 'tent-20x32', name: 'Tent 20x32', nameEs: 'Carpa 20x32', price: 350.00, desc: '70 people seated in chairs, 50 seated at tables. Fire proof.', descEs: '70 personas sentadas en sillas, 50 personas en mesas. A prueba de fuego.', image: '/tent20x32.png', checkoutLink: '#' },
@@ -46,7 +46,7 @@ export const productCards = [
   {
     name: 'Others',
     nameEs: 'Otros',
-    image: '/others.jpg',
+    image: '/othersportada.jpg',
     items: [
       { id: 'heater', name: 'Heater', nameEs: 'Calentador', price: 65.00, desc: 'Outdoor heaters to keep your guests warm and cozy during cold weather events. 200 sq ft heating space.', descEs: 'Calentadores exteriores para mantener a tus invitados cálidos y cómodos durante eventos en clima frío. 200 pies cuadrados de espacio de calefacción.', image: '/heater.png', checkoutLink: '#' },
       { id: 'cooler', name: 'Cooler', nameEs: 'Enfriador', price: 120.00, desc: 'Hessaire 3,100 CFM 3-Speed Portable Evaporative Cooler (Swamp Cooler) for 950 sq. ft.', descEs: 'Hessaire 3,100 CFM Enfriador Evaporativo Portátil de 3 Velocidades (Swamp Cooler) para 950 pies cuadrados.', image: '/cooler.png', checkoutLink: '#' },
