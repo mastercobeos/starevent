@@ -15,7 +15,7 @@ export const HeroSection = memo(function HeroSection({ t }) {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 2000);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -25,33 +25,26 @@ export const HeroSection = memo(function HeroSection({ t }) {
       {...swipe}
     >
       <div className="absolute inset-0 z-0">
-        {heroImages.map((image, index) => {
-          const isVisible = index === currentImageIndex;
-          const isNext = index === (currentImageIndex + 1) % heroImages.length;
-          if (!isVisible && !isNext) return (
-            <div key={index} className="absolute inset-0 opacity-0" aria-hidden="true" />
-          );
-          return (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                isVisible ? 'opacity-100' : 'opacity-0'
-              }`}
-              aria-hidden={!isVisible}
-            >
-              <Image
-                src={image}
-                alt={`Star Event Rental - Event setup ${index + 1}`}
-                fill
-                sizes="100vw"
-                className="object-cover object-center"
-                priority={index === 0}
-                quality={75}
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-900/75 to-slate-900/65" />
-            </div>
-          );
-        })}
+        {heroImages.map((image, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+            aria-hidden={index !== currentImageIndex}
+          >
+            <Image
+              src={image}
+              alt={`Star Event Rental - Event setup ${index + 1}`}
+              fill
+              sizes="100vw"
+              className="object-cover object-center"
+              priority={index <= 1}
+              quality={75}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/75 to-slate-900/65" />
+          </div>
+        ))}
       </div>
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 mt-[50px]">
         <div className="mb-6">

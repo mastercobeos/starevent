@@ -23,10 +23,10 @@ export const ProductsSection = memo(function ProductsSection({ language, onSelec
           {productCards.map((product, idx) => (
             <div
               key={idx}
-              className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] rounded-2xl overflow-hidden shadow-xl hover:-translate-y-3 transition-[transform,box-shadow] duration-300 hover:shadow-2xl group cursor-pointer border-2 border-[#C9A84C]"
+              className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] rounded-2xl overflow-hidden shadow-xl hover:-translate-y-3 transition-[transform,box-shadow] duration-300 hover:shadow-2xl group cursor-pointer border-2 border-[#C9A84C] will-change-transform"
               onClick={() => onSelectProduct(idx)}
             >
-              <div className="relative h-56 sm:h-72 md:h-80 overflow-hidden">
+              <div className="relative h-56 sm:h-72 md:h-80 overflow-hidden rounded-t-2xl">
                 <Image
                   src={product.image}
                   alt={language === 'en' ? product.name : product.nameEs}

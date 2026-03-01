@@ -10,9 +10,9 @@ export const AboutSection = memo(function AboutSection({ language }) {
 
   const benefits = [
     { icon: '/diamante.png', isImage: true, filter: 'invert(70%) sepia(60%) saturate(500%) hue-rotate(10deg) brightness(90%) contrast(90%)', imgStyle: { transform: 'scale(0.85)' }, title: about.personalizedService, desc: about.personalizedServiceDesc },
-    { icon: '/reloj.png', isImage: true, imgStyle: { transform: 'scale(1.3)' }, title: about.punctuality, desc: about.punctualityDesc },
+    { icon: '/reloj.png', isImage: true, filter: 'invert(75%) sepia(80%) saturate(600%) hue-rotate(10deg) brightness(110%) contrast(100%)', imgStyle: { transform: 'scale(1.3)' }, title: about.punctuality, desc: about.punctualityDesc },
     { icon: '/quality.png', isImage: true, filter: 'invert(70%) sepia(60%) saturate(500%) hue-rotate(10deg) brightness(90%) contrast(90%)', title: about.quality, desc: about.qualityDesc },
-    { icon: '/casa.png', isImage: true, imgStyle: { opacity: 0.75 }, title: about.familyBusiness, desc: about.familyBusinessDesc },
+    { icon: '/casa.png', isImage: true, filter: 'invert(75%) sepia(80%) saturate(600%) hue-rotate(10deg) brightness(110%) contrast(100%)', title: about.familyBusiness, desc: about.familyBusinessDesc },
   ];
 
   return (

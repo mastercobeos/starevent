@@ -4,7 +4,6 @@ import { Button } from '../ui/button';
 import { GlassCard } from '../ui/GlassCard';
 import { CarouselArrow } from '../ui/CarouselArrow';
 import { PaginationDots } from '../ui/PaginationDots';
-import { QuantityControl } from '../ui/QuantityControl';
 import { useResponsiveCount } from '../../hooks/useResponsiveCount';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { useSwipe } from '../../hooks/useSwipe';
@@ -102,7 +101,7 @@ export function PackagesModal({ showModal, setShowModal, modalType, language, ad
                             <Image src={sub.image} alt={language === 'en' ? sub.title : sub.titleEs} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover object-center" loading="lazy" quality={75} />
                           </div>
                         )}
-                        <div className="p-2 sm:p-4 md:p-6 flex flex-col flex-grow">
+                        <div className="p-2 sm:p-4 md:p-6 flex flex-col flex-grow text-center items-center">
                           <span className={`inline-block px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold mb-1.5 sm:mb-3 w-fit ${
                             sub.badge === 'Deluxe' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
                           }`}>
@@ -111,22 +110,17 @@ export function PackagesModal({ showModal, setShowModal, modalType, language, ad
                           <div className="text-lg sm:text-2xl md:text-4xl font-bold text-white mb-0">{sub.price}</div>
                           <p className="text-white/50 text-[9px] sm:text-xs mb-0.5 sm:mb-1">{tCommon.taxAndDelivery}</p>
                           <h4 className="text-xs sm:text-sm md:text-base font-semibold text-white mb-1.5 sm:mb-3">{language === 'en' ? sub.title : sub.titleEs}</h4>
-                          <ul className="space-y-0.5 sm:space-y-1.5 mb-2 sm:mb-4 flex-grow">
-                            {sub.includes.map((item, j) => (
-                              <li key={j} className="text-[10px] sm:text-xs md:text-sm text-white/90 flex items-start gap-1">
-                                <span className="text-primary mt-0.5 font-bold text-[10px] sm:text-xs">✓</span>
-                                <span className="leading-tight">{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2">
-                            <QuantityControl
-                              value={getQty(sub.id)}
-                              onDecrement={() => setQty(sub.id, getQty(sub.id) - 1)}
-                              onIncrement={() => setQty(sub.id, getQty(sub.id) + 1)}
-                            />
+                          <div className="w-fit mx-auto flex-grow flex flex-col justify-end">
+                            <ul className="space-y-0.5 sm:space-y-1.5 mb-2 sm:mb-4 text-left">
+                              {(language === 'es' && sub.includesEs ? sub.includesEs : sub.includes).map((item, j) => (
+                                <li key={j} className="text-[10px] sm:text-xs md:text-sm text-white/90 flex items-start gap-1">
+                                  <span className="text-primary mt-0.5 font-bold text-[10px] sm:text-xs">✓</span>
+                                  <span className="leading-tight">{item}</span>
+                                </li>
+                              ))}
+                            </ul>
                             <Button
-                              className="flex-1 font-semibold py-1.5 sm:py-2 px-2 sm:px-3 text-[10px] sm:text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl"
+                              className="font-semibold py-1 sm:py-1.5 px-3 sm:px-4 text-[10px] sm:text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl"
                               onClick={() => {
                                 const qty = getQty(sub.id);
                                 addItem({ id: sub.id, name: sub.title, nameEs: sub.titleEs, price: sub.priceNum, image: '', type: 'package', checkoutLink: sub.checkoutLink }, qty);
