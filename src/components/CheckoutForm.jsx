@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, CheckCircle, AlertCircle, Loader2, Clock, CreditCard, MapPin } from 'lucide-react';
 import { Button } from './ui/button';
@@ -6,9 +8,26 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../translations';
 import { createReservation, checkAvailability } from '../lib/supabase';
 
-const SQUARE_APP_ID = import.meta.env.VITE_SQUARE_APP_ID;
-const SQUARE_LOCATION_ID = import.meta.env.VITE_SQUARE_LOCATION_ID;
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const SQUARE_APP_ID = process.env.NEXT_PUBLIC_SQUARE_APP_ID;
+const SQUARE_LOCATION_ID = process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID;
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+function loadSquareSDK() {
+  if (window.Square) return Promise.resolve();
+  if (window._squareLoading) return window._squareLoading;
+  const url = process.env.NEXT_PUBLIC_SQUARE_ENVIRONMENT === 'production'
+    ? 'https://web.squarecdn.com/v1/square.js'
+    : 'https://sandbox.web.squarecdn.com/v1/square.js';
+  window._squareLoading = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = url;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Failed to load Square SDK'));
+    document.head.appendChild(script);
+  });
+  return window._squareLoading;
+}
 
 // Warehouse origin: 3730 Redwood Falls Dr, Houston, TX 77082
 const ORIGIN = { lat: 29.7233, lng: -95.5977 };
@@ -225,10 +244,7 @@ export default function CheckoutForm({ onBack }) {
     let card;
     const initSquare = async () => {
       try {
-        if (!window.Square) {
-          console.error('Square SDK not loaded');
-          return;
-        }
+        await loadSquareSDK();
         const payments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
         card = await payments.card();
         await card.attach('#square-card-container');
@@ -258,7 +274,7 @@ export default function CheckoutForm({ onBack }) {
 
       // Send token to Supabase Edge Function to process payment
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-payment`,
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-payment`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -299,7 +315,7 @@ export default function CheckoutForm({ onBack }) {
         <h3 className="text-white text-xl font-bold mb-2">{tc.pendingTitle}</h3>
         <p className="text-white/70 mb-6 text-sm leading-relaxed">{tc.reservationPending}</p>
         <Button onClick={onBack} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          {language === 'en' ? 'Close' : 'Cerrar'}
+          {translations[language].common.close}
         </Button>
       </div>
     );
@@ -315,7 +331,7 @@ export default function CheckoutForm({ onBack }) {
         </h3>
         <p className="text-white/70 mb-6 text-sm leading-relaxed">{tc.reservationSuccess}</p>
         <Button onClick={onBack} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          {language === 'en' ? 'Close' : 'Cerrar'}
+          {translations[language].common.close}
         </Button>
       </div>
     );

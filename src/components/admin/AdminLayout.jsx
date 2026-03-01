@@ -1,15 +1,18 @@
+'use client';
+
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { LogOut, LayoutDashboard, Package } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
   const { signOut } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/admin/login');
+    router.push('/admin/login');
   };
 
   return (
@@ -23,21 +26,21 @@ export default function AdminLayout({ children }) {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
-          <Link to="/admin" className="flex items-center gap-3">
+          <Link href="/admin" className="flex items-center gap-3">
             <img src="/logo.png" alt="Star Event Rental" className="h-8 sm:h-10 w-auto" />
             <span className="text-white font-bold text-base sm:text-lg hidden sm:inline">Admin Panel</span>
           </Link>
 
           <nav className="flex items-center gap-1 sm:gap-4">
             <Link
-              to="/admin"
+              href="/admin"
               className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors px-2 sm:px-3 py-2 rounded-lg hover:bg-white/10 text-sm"
             >
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">Reservations</span>
             </Link>
             <Link
-              to="/admin/inventory"
+              href="/admin/inventory"
               className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors px-2 sm:px-3 py-2 rounded-lg hover:bg-white/10 text-sm"
             >
               <Package className="w-4 h-4" />

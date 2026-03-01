@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { fetchInventorySummary } from '../../lib/supabase';
 import { Loader2, RefreshCw } from 'lucide-react';

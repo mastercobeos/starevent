@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npx vite:*)",
       "Bash(npm run build:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(wc:*)",
+      "Bash(npx next build)",
+      "Bash(node -e:*)"
     ]
   }
 }

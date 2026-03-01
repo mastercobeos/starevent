@@ -1,13 +1,14 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { fetchReservation, updateReservationStatus } from '../../lib/supabase';
-import StatusBadge from '../../components/admin/StatusBadge';
-import { Button } from '../../components/ui/button';
+import StatusBadge from './StatusBadge';
+import { Button } from '../ui/button';
 import { ArrowLeft, Loader2, User, MapPin, Calendar, Phone, Mail, FileText } from 'lucide-react';
 
-export default function ReservationDetail() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+export default function ReservationDetailPage({ id }) {
+  const router = useRouter();
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -58,7 +59,7 @@ export default function ReservationDetail() {
     return (
       <div className="text-center py-16">
         <p className="text-white/40 text-lg mb-4">Reservation not found</p>
-        <Button onClick={() => navigate('/admin')} variant="outline" className="border-white/20 text-white">
+        <Button onClick={() => router.push('/admin')} variant="outline" className="border-white/20 text-white">
           Back to Dashboard
         </Button>
       </div>
@@ -73,7 +74,7 @@ export default function ReservationDetail() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button
-          onClick={() => navigate('/admin')}
+          onClick={() => router.push('/admin')}
           className="text-white/70 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-all"
         >
           <ArrowLeft className="w-5 h-5" />

@@ -1,16 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-/**
- * Check availability for a list of products during a date range.
- * Returns an array with availability info per product.
- */
 export async function checkAvailability(requestedItems, eventDate, returnDate) {
-  // 1. Get total stock for each requested product
   const productIds = requestedItems.map((item) => item.id);
   const { data: products, error: prodError } = await supabase
     .from('products')
@@ -19,8 +14,6 @@ export async function checkAvailability(requestedItems, eventDate, returnDate) {
 
   if (prodError) throw prodError;
 
-  // 2. Get all active reservations that overlap with the requested date range
-  //    Overlap: existing.event_date <= returnDate AND existing.return_date >= eventDate
   const { data: overlapping, error: resError } = await supabase
     .from('reservations')
     .select('id, event_date, return_date, reservation_items(product_id, quantity)')
@@ -30,7 +23,6 @@ export async function checkAvailability(requestedItems, eventDate, returnDate) {
 
   if (resError) throw resError;
 
-  // 3. Calculate reserved quantities per product
   const reservedMap = {};
   for (const res of overlapping || []) {
     for (const ri of res.reservation_items || []) {
@@ -38,7 +30,6 @@ export async function checkAvailability(requestedItems, eventDate, returnDate) {
     }
   }
 
-  // 4. Determine availability for each requested item
   return requestedItems.map((item) => {
     const product = products.find((p) => p.id === item.id);
     if (!product) {
@@ -55,25 +46,17 @@ export async function checkAvailability(requestedItems, eventDate, returnDate) {
   });
 }
 
-/**
- * Create a reservation with its items.
- */
 export async function createReservation(data) {
   const { items, status = 'pending', ...reservationData } = data;
 
-  // 1. Insert the reservation
   const { data: reservation, error: resError } = await supabase
     .from('reservations')
-    .insert({
-      ...reservationData,
-      status,
-    })
+    .insert({ ...reservationData, status })
     .select('id')
     .single();
 
   if (resError) throw resError;
 
-  // 2. Insert reservation items
   const reservationItems = items.map((item) => ({
     reservation_id: reservation.id,
     product_id: item.product_id,
@@ -90,20 +73,10 @@ export async function createReservation(data) {
   return reservation;
 }
 
-// ---- ADMIN FUNCTIONS ----
-
 export async function fetchAllReservations() {
   const { data, error } = await supabase
     .from('reservations')
-    .select(`
-      *,
-      reservation_items (
-        product_id,
-        quantity,
-        unit_price,
-        subtotal
-      )
-    `)
+    .select(`*, reservation_items (product_id, quantity, unit_price, subtotal)`)
     .order('event_date', { ascending: false });
 
   if (error) throw error;
@@ -113,20 +86,7 @@ export async function fetchAllReservations() {
 export async function fetchReservation(id) {
   const { data, error } = await supabase
     .from('reservations')
-    .select(`
-      *,
-      reservation_items (
-        product_id,
-        quantity,
-        unit_price,
-        subtotal,
-        products (
-          name,
-          name_es,
-          category
-        )
-      )
-    `)
+    .select(`*, reservation_items (product_id, quantity, unit_price, subtotal, products (name, name_es, category))`)
     .eq('id', id)
     .single();
 

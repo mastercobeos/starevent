@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -10,7 +12,7 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ export default function AdminLogin() {
       setError(error.message);
       setLoading(false);
     } else {
-      navigate('/admin');
+      router.push('/admin');
     }
   };
 

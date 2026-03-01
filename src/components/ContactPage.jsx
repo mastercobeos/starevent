@@ -1,12 +1,17 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Button } from '../components/ui/button';
+import { BackgroundSection } from '../components/ui/BackgroundSection';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../translations';
+
+const BG_IMAGE = 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70';
 
 export default function Contact() {
   const { language } = useLanguage();
   const t = translations[language].contact;
-  
+
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -20,12 +25,12 @@ export default function Contact() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.consent1) {
-      alert(language === 'es' ? 'Por favor, consiente recibir mensajes transaccionales para continuar.' : 'Please consent to receive transactional messages to proceed.');
+      alert(t.consentRequired);
       return;
     }
-    
+
     const successMessage = t.thankYou(formData.fullName, formData.phone);
-    
+
     alert(successMessage);
     setFormData({
       fullName: '',
@@ -48,20 +53,12 @@ export default function Contact() {
 
   return (
     <div>
-      <section className="relative py-20 overflow-hidden text-foreground">
-        <div 
-          className="absolute inset-0 bg-cover bg-center z-0"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.65)), url(https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
-        <div className="relative z-10 max-w-7xl mx-auto px-6">
+      <BackgroundSection imageSrc={BG_IMAGE} className="py-20 text-foreground">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Info */}
             <div>
-              <h2 className="text-4xl font-bold mb-4">{t.contactTitle}</h2>
+              <h1 className="text-4xl font-bold mb-4">{t.contactTitle}</h1>
               <p className="text-lg text-muted-foreground mb-8">
                 {t.readyToPlan}
               </p>
@@ -73,7 +70,7 @@ export default function Contact() {
               </ul>
               <div className="bg-primary/20 p-4 rounded-lg border-l-4 border-primary">
                 <p className="italic text-muted-foreground">
-                  "En Star Event Rental, convertimos tus momentos especiales en recuerdos duraderos con la excelencia de un servicio profesional."
+                  &ldquo;{translations[language].common.inspirationalQuote}&rdquo;
                 </p>
               </div>
             </div>
@@ -118,11 +115,11 @@ export default function Contact() {
                 className="w-full px-4 py-2 border border-input bg-background rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
               >
                 <option value="">{t.selectPackage}</option>
-                <option value="Basic 20x20 - $399">Package 1: Basic 20x20 - $399</option>
-                <option value="Delux 20x20 - $749">Package 2: Delux 20x20 - $749</option>
-                <option value="Basic 20x40 - $849">Package 3: Basic 20x40 - $849</option>
-                <option value="Delux 20x40 - $1,299">Package 4: Delux 20x40 - $1,299</option>
-                <option value="Custom">Custom Package</option>
+                <option value="Basic 20x20 - $399">{t.package1}</option>
+                <option value="Delux 20x20 - $749">{t.package2}</option>
+                <option value="Basic 20x40 - $849">{t.package3}</option>
+                <option value="Delux 20x40 - $1,299">{t.package4}</option>
+                <option value="Custom">{translations[language].common.customPackage}</option>
               </select>
               <textarea
                 name="message"
@@ -163,7 +160,7 @@ export default function Contact() {
             </form>
           </div>
         </div>
-      </section>
+      </BackgroundSection>
     </div>
   );
 }

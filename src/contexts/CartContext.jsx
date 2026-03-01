@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
@@ -12,17 +14,18 @@ export const useCart = () => {
 
 const CART_STORAGE_KEY = 'star-event-cart';
 
-const loadCart = () => {
-  try {
-    const stored = localStorage.getItem(CART_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-};
-
 export const CartProvider = ({ children }) => {
-  const [items, setItems] = useState(loadCart);
+  const [items, setItems] = useState([]);
+
+  // Load cart from localStorage after mount (avoids SSR hydration mismatch)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(CART_STORAGE_KEY);
+      if (stored) {
+        setItems(JSON.parse(stored));
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));

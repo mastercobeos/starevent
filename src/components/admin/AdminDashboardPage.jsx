@@ -1,8 +1,10 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { fetchAllReservations, updateReservationStatus } from '../../lib/supabase';
-import StatusBadge from '../../components/admin/StatusBadge';
-import { Button } from '../../components/ui/button';
+import StatusBadge from './StatusBadge';
+import { Button } from '../ui/button';
 import { Loader2, Eye, Check, X, RefreshCw } from 'lucide-react';
 
 const TABS = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
@@ -137,7 +139,7 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <Link
-                          to={`/admin/reservations/${res.id}`}
+                          href={`/admin/reservations/${res.id}`}
                           className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                           title="View details"
                         >
@@ -203,7 +205,7 @@ export default function AdminDashboard() {
                   <span className="text-primary font-bold">${res.total?.toFixed(2) || '0.00'}</span>
                   <div className="flex items-center gap-1">
                     <Link
-                      to={`/admin/reservations/${res.id}`}
+                      href={`/admin/reservations/${res.id}`}
                       className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                     >
                       <Eye className="w-4 h-4" />
