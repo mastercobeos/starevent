@@ -2,7 +2,7 @@ export const productCards = [
   {
     name: 'Chairs',
     nameEs: 'Sillas',
-    image: '/sillas.jpg',
+    image: '/chiavariportada.jpg',
     items: [
       { id: 'chair-resin', name: 'Resin Garden Chair', nameEs: 'Silla de Resina de Jardín', price: 3.00, desc: 'Elegant white resin garden chairs, perfect for weddings and formal events.', descEs: 'Elegantes sillas de resina de jardín blanca, perfectas para bodas y eventos formales.', image: '/gardenchair.png', checkoutLink: '#' },
       { id: 'chair-wood', name: 'Wooden Chair', nameEs: 'Silla de Madera', price: 4.00, desc: 'Classic wooden chairs that bring warmth and elegance to any event setting.', descEs: 'Sillas de madera clásicas que aportan calidez y elegancia a cualquier evento.', image: '/woodchair.png', checkoutLink: '#' },
@@ -13,7 +13,7 @@ export const productCards = [
   {
     name: 'Tables',
     nameEs: 'Mesas',
-    image: '/mesas.jpg',
+    image: '/tablesportada.jpg',
     items: [
       { id: 'table-6ft', name: '6 FT Rectangular Table', nameEs: 'Mesa Rectangular de 6 pies', price: 8.00, desc: 'Versatile 6-foot folding tables, great for smaller setups and buffets.', descEs: 'Versátiles mesas plegables de 6 pies, ideales para montajes pequeños y buffets.', image: '/6ft.png', checkoutLink: '#' },
       { id: 'table-8ft', name: '8 FT Rectangular Table', nameEs: 'Mesa Rectangular de 8 pies', price: 10.00, desc: 'Sturdy 8-foot plastic folding tables built for versatility and strength.', descEs: 'Resistentes mesas plegables de plástico de 8 pies, construidas para versatilidad y fuerza.', image: '/8ft.png', checkoutLink: '#' },
@@ -24,7 +24,7 @@ export const productCards = [
   {
     name: 'Tablecloths',
     nameEs: 'Manteles',
-    image: '/manteles.jpg',
+    image: '/tableclothsportada.jpg',
     items: [
       { id: 'cloth-white', name: 'White Tablecloth', nameEs: 'Mantel Blanco', price: 10.00, desc: 'Elegant white tablecloths that add a clean, sophisticated touch to any event.', descEs: 'Elegantes manteles blancos que agregan un toque limpio y sofisticado a cualquier evento.', image: '/whitecloths.png', checkoutLink: '#' },
       { id: 'cloth-color', name: 'Colored Tablecloth', nameEs: 'Mantel de Color', price: 12.00, desc: 'Available in various colors to match your event theme and decoration.', descEs: 'Disponibles en varios colores para combinar con el tema y decoración de tu evento.', image: '/colorcloths.png', checkoutLink: '#' },
@@ -33,7 +33,7 @@ export const productCards = [
   {
     name: 'Tents',
     nameEs: 'Carpas',
-    image: '/tent.jpg',
+    image: '/tentsportada.png',
     items: [
       { id: 'tent-20x20', name: 'Tent 20x20', nameEs: 'Carpa 20x20', price: 250.00, desc: 'Perfect for intimate gatherings of up to 30 guests.', descEs: 'Perfecta para reuniones íntimas de hasta 30 invitados.', image: '/tent20x2040.png', checkoutLink: '#' },
       { id: 'tent-20x32', name: 'Tent 20x32', nameEs: 'Carpa 20x32', price: 350.00, desc: '70 people seated in chairs, 50 seated at tables. Fire proof.', descEs: '70 personas sentadas en sillas, 50 personas en mesas. A prueba de fuego.', image: '/tent20x32.png', checkoutLink: '#' },
