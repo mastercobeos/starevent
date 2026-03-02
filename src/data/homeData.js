@@ -41,6 +41,7 @@ export const productCards = [
       { id: 'tent-20x60', name: 'Tent 20x60', nameEs: 'Carpa 20x60', price: 700.00, desc: 'Extra large tent for big events and celebrations. Includes garden lights and walls.', descEs: 'Carpa extra grande para grandes eventos y celebraciones. Incluye luces de jardín y paredes.', image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
       { id: 'tent-hp-20x20', name: 'High Peak 20x20', nameEs: 'High Peak 20x20', price: 550.00, desc: 'High peak premium heavy duty tent 20x20 for a stunning visual impact.', descEs: 'Carpa high peak premium heavy duty 20x20 para un impacto visual impresionante.', image: '/tent20x20.png', checkoutLink: '#' },
       { id: 'tent-hp-20x40', name: 'High Peak 20x40', nameEs: 'High Peak 20x40', price: 1200.00, desc: 'High peak premium heavy duty tent 20x40 for grand events and weddings.', descEs: 'Carpa high peak premium heavy duty 20x40 para grandes eventos y bodas.', image: '/tent20x40highpeak.png', checkoutLink: '#' },
+      { id: 'tent-clear-20x40', name: 'Clear Tent 20x40', nameEs: 'Carpa Transparente 20x40', price: 750.00, desc: 'Stunning transparent 20x40 tent for an elegant open-sky experience at your event.', descEs: 'Impresionante carpa transparente 20x40 para una elegante experiencia a cielo abierto en tu evento.', image: '/cleartent.png', checkoutLink: '#' },
     ],
   },
   {
@@ -54,6 +55,8 @@ export const productCards = [
       { id: 'gas-propane', name: 'Gas Propane', nameEs: 'Gas Propano', price: 20.00, desc: 'Propane gas tanks for heaters and outdoor cooking equipment.', descEs: 'Tanques de gas propano para calentadores y equipos de cocina al aire libre.', image: '/gaspropano.png', checkoutLink: '#' },
       { id: 'dancefloor-16x16', name: 'Dance Floor 16x16', nameEs: 'Pista de Baile 16x16', price: 750.00, desc: 'Elegant 16x16 dance floor to make your event unforgettable.', descEs: 'Elegante pista de baile 16x16 para hacer tu evento inolvidable.', image: '/dancefloor.png', checkoutLink: '#' },
       { id: 'dancefloor-12x12', name: 'Dance Floor 12x12', nameEs: 'Pista de Baile 12x12', price: 500.00, desc: 'Compact 12x12 dance floor, perfect for smaller venues and gatherings.', descEs: 'Pista de baile compacta 12x12, perfecta para espacios y reuniones más pequeñas.', image: '/dancefloor.png', checkoutLink: '#' },
+      { id: 'garden-lights', name: 'Garden Lights (48 ft)', nameEs: 'Luces de Jardín (48 pies)', price: 50.00, desc: '48 feet of beautiful garden lights to illuminate your event.', descEs: '48 pies de hermosas luces de jardín para iluminar tu evento.', image: '/gardenlights.png', checkoutLink: '#' },
+      { id: 'water-barrel', name: 'Water Barrel', nameEs: 'Barril de Agua', price: 30.00, desc: 'Heavy-duty water barrel for tent anchoring and stabilization.', descEs: 'Barril de agua resistente para anclaje y estabilización de carpas.', image: '/waterbarrel.png', checkoutLink: '#' },
     ],
   },
 ];
