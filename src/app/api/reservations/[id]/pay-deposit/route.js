@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Client, Environment } from 'square';
+import { Client } from 'square';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { squareIdempotencyKey } from '@/lib/idempotency';
@@ -7,8 +7,8 @@ import { squareIdempotencyKey } from '@/lib/idempotency';
 const squareClient = new Client({
   accessToken: process.env.SQUARE_ACCESS_TOKEN,
   environment: process.env.NEXT_PUBLIC_SQUARE_ENVIRONMENT === 'production'
-    ? Environment.Production
-    : Environment.Sandbox,
+    ? 'production'
+    : 'sandbox',
 });
 
 export async function POST(request, { params }) {
