@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
-import { Client } from 'square';
+import { SquareClient, SquareEnvironment } from 'square';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { squareIdempotencyKey } from '@/lib/idempotency';
 
-const squareClient = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
+const squareClient = new SquareClient({
+  token: process.env.SQUARE_ACCESS_TOKEN,
   environment: process.env.NEXT_PUBLIC_SQUARE_ENVIRONMENT === 'production'
-    ? 'production'
-    : 'sandbox',
+    ? SquareEnvironment.Production
+    : SquareEnvironment.Sandbox,
 });
 
 export async function POST(request, { params }) {
@@ -69,7 +69,7 @@ export async function POST(request, { params }) {
     const depositCents = Math.round(reservation.deposit_amount * 100);
 
     // Process payment directly via Square Payments API
-    const { result } = await squareClient.paymentsApi.createPayment({
+    const payment = await squareClient.payments.create({
       sourceId,
       idempotencyKey: idempKey,
       amountMoney: {
@@ -81,7 +81,6 @@ export async function POST(request, { params }) {
       buyerEmailAddress: reservation.client_email,
     });
 
-    const payment = result.payment;
     const isCompleted = payment.status === 'COMPLETED';
 
     // Record payment
