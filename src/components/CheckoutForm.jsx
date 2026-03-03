@@ -170,9 +170,12 @@ export default function CheckoutForm({ onBack }) {
     initCard();
     return () => {
       cancelled = true;
-      if (card) card.destroy().catch(() => {});
+      if (card) {
+        card.destroy().catch(() => {});
+        setCardInstance(null);
+      }
     };
-  }, [step, cardInstance, squareReady]);
+  }, [step, squareReady]);
 
   const handlePayDeposit = async () => {
     if (!cardInstance) return;
