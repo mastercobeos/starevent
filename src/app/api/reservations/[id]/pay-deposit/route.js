@@ -77,7 +77,7 @@ export async function POST(request, { params }) {
         currency: 'USD',
       },
       locationId: process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID,
-      note: `Deposit (40%) — Reservation #${id.slice(0, 8)} — ${reservation.first_name} ${reservation.last_name}`,
+      note: `Deposit 40% #${id.slice(0, 8)}`,
       buyerEmailAddress: reservation.client_email,
     });
 
