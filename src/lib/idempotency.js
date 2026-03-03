@@ -78,7 +78,10 @@ export async function failIdempotencyKey(key) {
     .eq('key', key);
 }
 
-// Generate an idempotency key for Square API calls
+// Generate an idempotency key for Square API calls (max 45 chars)
 export function squareIdempotencyKey(reservationId, type) {
-  return `${reservationId}_${type}`;
+  // UUID (36) + '_' + type can exceed Square's 45-char limit.
+  // Use first 8 chars of UUID + short type abbreviation to stay under limit.
+  const shortId = reservationId.replace(/-/g, '').slice(0, 20);
+  return `${shortId}_${type}`;
 }
