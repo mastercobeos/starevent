@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { verifyReservationToken, getClientIp, checkRateLimit } from '@/lib/security';
+import { injectInitials } from '@/lib/contract-template';
 
 export async function POST(request, { params }) {
   try {
@@ -87,16 +88,23 @@ export async function POST(request, { params }) {
     const userAgent = request.headers.get('user-agent') || 'unknown';
     const signedAt = new Date().toISOString();
 
+    // Inject initials into contract HTML so admin sees signed version
+    const signedInitials = initials.trim().toUpperCase();
+    const signedHtml = contract.contract_html
+      ? injectInitials(contract.contract_html, signedInitials)
+      : contract.contract_html;
+
     // Update contract
     const { error: updateConError } = await supabaseAdmin
       .from('contracts')
       .update({
         status: 'signed',
-        initials: initials.trim().toUpperCase(),
+        initials: signedInitials,
         signed_at: signedAt,
         signer_ip: signerIp,
         signer_user_agent: userAgent,
         signed_contract_hash: contract_hash,
+        contract_html: signedHtml,
       })
       .eq('id', contract.id);
 

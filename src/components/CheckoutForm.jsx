@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Script from 'next/script';
 import {
   ArrowLeft, CheckCircle, AlertCircle, Loader2, Clock,
   CreditCard, MapPin, FileText, PenLine, ExternalLink,
@@ -101,6 +100,17 @@ export default function CheckoutForm({ onBack }) {
   const needsSurface = items.some((item) =>
     item.id.startsWith('tent-') || item.id.startsWith('pkg-') || item.id.startsWith('dancefloor-')
   );
+
+  // --- Load Square SDK ---
+  useEffect(() => {
+    if (window.Square) { setSquareReady(true); return; }
+    const script = document.createElement('script');
+    script.src = SQUARE_SDK_URL;
+    script.async = true;
+    script.onload = () => setSquareReady(true);
+    script.onerror = () => console.error('Square SDK failed to load');
+    document.head.appendChild(script);
+  }, []);
 
   // --- Google Maps ---
   useEffect(() => {
@@ -578,12 +588,6 @@ export default function CheckoutForm({ onBack }) {
   // =============================================
   return (
     <div>
-      <Script
-        src={SQUARE_SDK_URL}
-        strategy="lazyOnload"
-        onLoad={() => setSquareReady(true)}
-        onError={() => console.error('Square SDK failed to load')}
-      />
       <div className="flex items-center gap-3 mb-5">
         <button onClick={onBack} className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 transition-all">
           <ArrowLeft className="w-5 h-5" />
