@@ -3,6 +3,7 @@ import { SquareClient, SquareEnvironment } from 'square';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { squareIdempotencyKey } from '@/lib/idempotency';
+import { checkRateLimit, getClientIp, verifyReservationToken } from '@/lib/security';
 
 const squareClient = new SquareClient({
   token: process.env.SQUARE_ACCESS_TOKEN,
@@ -17,11 +18,26 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
     }
 
+    // Rate limit: 10 payment attempts per hour per IP
+    const ip = getClientIp(request);
+    const rl = checkRateLimit(`pay_deposit:${ip}`, 10, 60 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many payment attempts' }, { status: 429 });
+    }
+
     if (!process.env.SQUARE_ACCESS_TOKEN) {
       return NextResponse.json({ error: 'Payment system not configured' }, { status: 500 });
     }
 
     const { id } = await params;
+
+    // SECURITY: Verify reservation access token
+    const { searchParams } = new URL(request.url);
+    const token = searchParams.get('token');
+    if (!verifyReservationToken(id, token)) {
+      return NextResponse.json({ error: 'Invalid or missing access token' }, { status: 403 });
+    }
+
     const { sourceId } = await request.json();
 
     if (!sourceId) {
@@ -111,15 +127,14 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error('Pay deposit error:', error);
 
-    // Handle Square API errors
+    // Handle Square API errors — don't leak internal details to client
     const squareErrors = error?.errors;
     if (squareErrors) {
-      const msg = squareErrors.map(e => e.detail).join(', ');
-      return NextResponse.json({ error: msg }, { status: 400 });
+      return NextResponse.json({ error: 'Payment was declined. Please check your card details and try again.' }, { status: 400 });
     }
 
     return NextResponse.json(
-      { error: error.message || 'Failed to process payment' },
+      { error: 'Failed to process payment' },
       { status: 500 }
     );
   }

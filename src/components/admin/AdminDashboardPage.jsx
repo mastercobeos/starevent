@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { fetchAllReservations } from '../../lib/supabase';
+import { fetchAdminReservations, adminAction, archiveReservation, unarchiveReservation, deleteReservation } from '../../lib/admin-api';
 import StatusBadge from './StatusBadge';
 import { STATUS, TERMINAL_STATES } from '../../lib/reservation-state-machine';
-import { Loader2, Eye, Check, X, RefreshCw, Ban } from 'lucide-react';
+import { Loader2, Eye, Check, X, RefreshCw, Ban, Archive, ArchiveRestore, Trash2 } from 'lucide-react';
 
 const TABS = [
   { key: 'all', label: 'All' },
@@ -24,11 +24,12 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [actionLoading, setActionLoading] = useState(null);
+  const [showArchived, setShowArchived] = useState(false);
 
-  const loadReservations = async () => {
+  const loadReservations = async (archived = showArchived) => {
     setLoading(true);
     try {
-      const data = await fetchAllReservations();
+      const data = await fetchAdminReservations({ archived });
       setReservations(data || []);
     } catch (err) {
       console.error('Error loading reservations:', err);
@@ -43,22 +44,50 @@ export default function AdminDashboard() {
   const handleAdminAction = async (id, action) => {
     setActionLoading(id);
     try {
-      const res = await fetch(`/api/admin/reservations/${id}/${action}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        // Reload to get fresh data
-        await loadReservations();
-      } else {
-        console.error('Action failed:', data.error);
-        alert(data.error || 'Action failed');
-      }
+      await adminAction(id, action);
+      await loadReservations();
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Action failed:', err);
+      alert(err.message || 'Action failed');
     }
     setActionLoading(null);
+  };
+
+  const handleArchive = async (id, isArchived) => {
+    const action = isArchived ? 'unarchive' : 'archive';
+    if (!confirm(`Are you sure you want to ${action} this reservation?`)) return;
+    setActionLoading(id);
+    try {
+      if (isArchived) {
+        await unarchiveReservation(id);
+      } else {
+        await archiveReservation(id);
+      }
+      await loadReservations();
+    } catch (err) {
+      console.error(`${action} failed:`, err);
+      alert(err.message || `${action} failed`);
+    }
+    setActionLoading(null);
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('PERMANENTLY DELETE this reservation? This cannot be undone.')) return;
+    setActionLoading(id);
+    try {
+      await deleteReservation(id);
+      await loadReservations();
+    } catch (err) {
+      console.error('Delete failed:', err);
+      alert(err.message || 'Delete failed');
+    }
+    setActionLoading(null);
+  };
+
+  const toggleArchived = () => {
+    const next = !showArchived;
+    setShowArchived(next);
+    loadReservations(next);
   };
 
   const filtered =
@@ -151,6 +180,37 @@ export default function AdminDashboard() {
             <Ban className="w-4 h-4" />
           </button>
         )}
+
+        {/* Archive / Unarchive button */}
+        {res.archived_at ? (
+          <>
+            <button
+              onClick={() => handleArchive(res.id, true)}
+              disabled={isLoading}
+              className="p-2 text-blue-400/60 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all disabled:opacity-50"
+              title="Unarchive"
+            >
+              <ArchiveRestore className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => handleDelete(res.id)}
+              disabled={isLoading}
+              className="p-2 text-red-500/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all disabled:opacity-50"
+              title="Delete permanently"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => handleArchive(res.id, false)}
+            disabled={isLoading}
+            className="p-2 text-white/30 hover:text-white/60 hover:bg-white/10 rounded-lg transition-all disabled:opacity-50"
+            title="Archive"
+          >
+            <Archive className="w-4 h-4" />
+          </button>
+        )}
       </div>
     );
   };
@@ -159,13 +219,26 @@ export default function AdminDashboard() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">Reservations</h1>
-        <button
-          onClick={loadReservations}
-          className="flex items-center gap-2 text-white/60 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/10 text-sm"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleArchived}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+              showArchived
+                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                : 'text-white/60 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Archive className="w-4 h-4" />
+            {showArchived ? 'Showing Archived' : 'Show Archived'}
+          </button>
+          <button
+            onClick={() => loadReservations()}
+            className="flex items-center gap-2 text-white/60 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/10 text-sm"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}

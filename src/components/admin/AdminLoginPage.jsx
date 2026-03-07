@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/button';
@@ -11,19 +11,31 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
   const router = useRouter();
+
+  // Redirect to admin if already authenticated
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace('/admin');
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) {
-      setError(error.message);
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        setError(error.message);
+      } else {
+        router.replace('/admin');
+      }
+    } catch (err) {
+      setError(err.message || 'An unexpected error occurred. Please try again.');
+    } finally {
       setLoading(false);
-    } else {
-      router.push('/admin');
     }
   };
 

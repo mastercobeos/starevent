@@ -1,15 +1,33 @@
 import nodemailer from 'nodemailer';
 import { NextResponse } from 'next/server';
+import { escapeHtml, sanitizeField, isValidEmail, isValidPhone, checkRateLimit, getClientIp } from '@/lib/security';
 
 export async function POST(request) {
   try {
-    const { fullName, phone, email, package: pkg, message } = await request.json();
+    // Rate limit: 5 contact form submissions per hour per IP
+    const ip = getClientIp(request);
+    const rl = checkRateLimit(`contact:${ip}`, 5, 60 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+    }
+
+    const body = await request.json();
+
+    // Sanitize and validate inputs
+    const fullName = sanitizeField(body.fullName, 100);
+    const phone = sanitizeField(body.phone, 20);
+    const email = sanitizeField(body.email, 254);
+    const pkg = sanitizeField(body.package, 100);
+    const message = sanitizeField(body.message, 5000);
 
     if (!fullName || !phone || !email) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+    if (!isValidPhone(phone)) {
+      return NextResponse.json({ error: 'Invalid phone format' }, { status: 400 });
     }
 
     const transporter = nodemailer.createTransport({
@@ -22,11 +40,18 @@ export async function POST(request) {
       },
     });
 
+    // Escape all user inputs to prevent XSS in email clients
+    const safeName = escapeHtml(fullName);
+    const safePhone = escapeHtml(phone);
+    const safeEmail = escapeHtml(email);
+    const safePkg = escapeHtml(pkg || 'Not selected');
+    const safeMessage = message ? escapeHtml(message).replace(/\n/g, '<br>') : '';
+
     await transporter.sendMail({
       from: `"Star Event Rental Website" <${process.env.SMTP_USER}>`,
       to: 'info@stareventrentaltx.com',
       replyTo: email,
-      subject: `New Contact Form - ${fullName}`,
+      subject: `New Contact Form - ${safeName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #C9A84C; border-bottom: 2px solid #C9A84C; padding-bottom: 10px;">
@@ -35,28 +60,28 @@ export async function POST(request) {
           <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
             <tr>
               <td style="padding: 8px 12px; font-weight: bold; color: #333; width: 140px;">Full Name:</td>
-              <td style="padding: 8px 12px; color: #555;">${fullName}</td>
+              <td style="padding: 8px 12px; color: #555;">${safeName}</td>
             </tr>
             <tr style="background-color: #f9f9f9;">
               <td style="padding: 8px 12px; font-weight: bold; color: #333;">Phone:</td>
-              <td style="padding: 8px 12px; color: #555;">${phone}</td>
+              <td style="padding: 8px 12px; color: #555;">${safePhone}</td>
             </tr>
             <tr>
               <td style="padding: 8px 12px; font-weight: bold; color: #333;">Email:</td>
               <td style="padding: 8px 12px; color: #555;">
-                <a href="mailto:${email}" style="color: #C9A84C;">${email}</a>
+                <a href="mailto:${safeEmail}" style="color: #C9A84C;">${safeEmail}</a>
               </td>
             </tr>
             <tr style="background-color: #f9f9f9;">
               <td style="padding: 8px 12px; font-weight: bold; color: #333;">Package:</td>
-              <td style="padding: 8px 12px; color: #555;">${pkg || 'Not selected'}</td>
+              <td style="padding: 8px 12px; color: #555;">${safePkg}</td>
             </tr>
           </table>
-          ${message ? `
+          ${safeMessage ? `
           <div style="margin-top: 20px;">
             <h3 style="color: #333; margin-bottom: 8px;">Message:</h3>
             <p style="background-color: #f5f5f5; padding: 12px; border-radius: 8px; color: #555; line-height: 1.6;">
-              ${message.replace(/\n/g, '<br>')}
+              ${safeMessage}
             </p>
           </div>
           ` : ''}

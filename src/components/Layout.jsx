@@ -58,6 +58,15 @@ export default function Layout({ children }) {
     };
   }, []);
 
+  const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsAnyModalOpen(document.body.dataset.modalOpen === 'true');
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-modal-open'] });
+    return () => observer.disconnect();
+  }, []);
+
   const isHomePage = pathname === '/';
   const totalItems = getTotalItems();
 
@@ -358,7 +367,7 @@ export default function Layout({ children }) {
       {/* Social Media Buttons - Responsive: same position, proportional sizes */}
       <div
         className={`flex fixed right-3 sm:right-4 md:right-6 top-[3.8rem] sm:top-[4.5rem] md:top-[5.5rem] z-[9999] flex-col gap-2 sm:gap-3 md:gap-4 transition-[opacity,transform] duration-500 ease-in-out ${
-          isNavbarVisible && !isCartOpen && !isMobileMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 pointer-events-none'
+          isNavbarVisible && !isCartOpen && !isMobileMenuOpen && !isAnyModalOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 pointer-events-none'
         }`}
       >
         <a

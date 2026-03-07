@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchReservation } from '../../lib/supabase';
+import { fetchAdminReservation, adminAction, archiveReservation, unarchiveReservation, deleteReservation } from '../../lib/admin-api';
 import StatusBadge from './StatusBadge';
 import { STATUS, TERMINAL_STATES, STATUS_LABELS } from '../../lib/reservation-state-machine';
 import { Button } from '../ui/button';
 import {
   ArrowLeft, Loader2, User, MapPin, Calendar, Phone, Mail,
-  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink,
+  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2,
 } from 'lucide-react';
 
 export default function ReservationDetailPage({ id }) {
@@ -20,7 +20,7 @@ export default function ReservationDetailPage({ id }) {
 
   const load = async () => {
     try {
-      const data = await fetchReservation(id);
+      const data = await fetchAdminReservation(id);
       setReservation(data);
     } catch (err) {
       console.error('Error loading reservation:', err);
@@ -33,20 +33,44 @@ export default function ReservationDetailPage({ id }) {
   const handleAction = async (action) => {
     setActionLoading(true);
     try {
-      const res = await fetch(`/api/admin/reservations/${id}/${action}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        await load(); // Reload
-      } else {
-        alert(data.error || 'Action failed');
-      }
+      await adminAction(id, action);
+      await load();
     } catch (err) {
       console.error('Action error:', err);
+      alert(err.message || 'Action failed');
     }
     setActionLoading(false);
+  };
+
+  const handleArchive = async (isArchived) => {
+    const action = isArchived ? 'unarchive' : 'archive';
+    if (!confirm(`Are you sure you want to ${action} this reservation?`)) return;
+    setActionLoading(true);
+    try {
+      if (isArchived) {
+        await unarchiveReservation(id);
+      } else {
+        await archiveReservation(id);
+      }
+      await load();
+    } catch (err) {
+      console.error(`${action} failed:`, err);
+      alert(err.message || `${action} failed`);
+    }
+    setActionLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('PERMANENTLY DELETE this reservation and all its data? This cannot be undone.')) return;
+    setActionLoading(true);
+    try {
+      await deleteReservation(id);
+      router.push('/admin');
+    } catch (err) {
+      console.error('Delete failed:', err);
+      alert(err.message || 'Delete failed');
+      setActionLoading(false);
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -132,6 +156,36 @@ export default function ReservationDetailPage({ id }) {
             className="border-red-500/30 text-red-400/70 hover:bg-red-500/10"
           >
             <Ban className="w-4 h-4 mr-2" /> Cancel
+          </Button>
+        )}
+
+        {r.archived_at ? (
+          <>
+            <Button
+              onClick={() => handleArchive(true)}
+              disabled={actionLoading}
+              variant="outline"
+              className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+            >
+              <ArchiveRestore className="w-4 h-4 mr-2" /> Unarchive
+            </Button>
+            <Button
+              onClick={handleDelete}
+              disabled={actionLoading}
+              variant="outline"
+              className="border-red-600/30 text-red-500 hover:bg-red-600/10"
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Delete Permanently
+            </Button>
+          </>
+        ) : (
+          <Button
+            onClick={() => handleArchive(false)}
+            disabled={actionLoading}
+            variant="outline"
+            className="border-white/20 text-white/60 hover:bg-white/10"
+          >
+            <Archive className="w-4 h-4 mr-2" /> Archive
           </Button>
         )}
       </div>

@@ -75,6 +75,7 @@ export default function CheckoutForm({ onBack }) {
   // Step: form | submitting | contract | signing | deposit | pending | success | error | holdExpired
   const [step, setStep] = useState('form');
   const [reservationId, setReservationId] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
   const [contractHtml, setContractHtml] = useState('');
   const [contractHash, setContractHash] = useState('');
   const [depositAmount, setDepositAmount] = useState(0);
@@ -188,7 +189,7 @@ export default function CheckoutForm({ onBack }) {
         throw new Error(tokenResult.errors?.[0]?.message || 'Card validation failed');
       }
 
-      const response = await fetch(`/api/reservations/${reservationId}/pay-deposit`, {
+      const response = await fetch(`/api/reservations/${reservationId}/pay-deposit?token=${accessToken}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sourceId: tokenResult.token }),
@@ -283,6 +284,7 @@ export default function CheckoutForm({ onBack }) {
       }
 
       setReservationId(data.reservation_id);
+      setAccessToken(data.access_token);
 
       if (data.status === 'pending_out_of_stock') {
         // NO STOCK → show pending message
@@ -315,7 +317,7 @@ export default function CheckoutForm({ onBack }) {
     setErrorMessage('');
 
     try {
-      const response = await fetch(`/api/reservations/${reservationId}/sign-contract`, {
+      const response = await fetch(`/api/reservations/${reservationId}/sign-contract?token=${accessToken}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ initials: initials.trim(), contract_hash: contractHash }),

@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS } from '@/lib/reservation-state-machine';
+import { verifyAdmin } from '@/lib/auth-middleware';
 
 export async function PUT(request, { params }) {
   try {
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
+    }
+
+    const auth = await verifyAdmin(request);
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const { id } = await params;

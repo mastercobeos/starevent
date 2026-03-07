@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
+import { verifySquareWebhookSignature } from '@/lib/security';
 
 // Square webhook handler for invoice payment events
 export async function POST(request) {
@@ -9,12 +10,23 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
     }
 
-    const body = await request.json();
+    // Read raw body for signature verification
+    const rawBody = await request.text();
 
-    // TODO: Verify Square webhook signature
-    // const signature = request.headers.get('x-square-hmacsha256-signature');
-    // Verify against SQUARE_WEBHOOK_SIGNATURE_KEY
+    // SECURITY: Verify Square webhook signature (HMAC-SHA256) — mandatory
+    const signatureKey = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY;
+    if (!signatureKey) {
+      console.error('CRITICAL: SQUARE_WEBHOOK_SIGNATURE_KEY not configured — rejecting webhook');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 });
+    }
 
+    const isValid = verifySquareWebhookSignature(request, rawBody, signatureKey);
+    if (!isValid) {
+      console.error('Square webhook: invalid signature');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
+    }
+
+    const body = JSON.parse(rawBody);
     const eventType = body.type;
     const eventData = body.data?.object;
 

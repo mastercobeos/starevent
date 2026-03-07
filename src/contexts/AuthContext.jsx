@@ -20,10 +20,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!supabase) { setLoading(false); return; }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      })
+      .catch(() => {
+        setUser(null);
+        setLoading(false);
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -34,10 +39,21 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = (email, password) =>
-    supabase.auth.signInWithPassword({ email, password });
+  const signIn = async (email, password) => {
+    if (!supabase) {
+      return { error: { message: 'Authentication service is not available' } };
+    }
+    try {
+      return await supabase.auth.signInWithPassword({ email, password });
+    } catch (err) {
+      return { error: { message: err.message || 'Sign in failed' } };
+    }
+  };
 
-  const signOut = () => supabase.auth.signOut();
+  const signOut = async () => {
+    if (!supabase) return;
+    await supabase.auth.signOut();
+  };
 
   return (
     <AuthContext.Provider value={{ user, loading, signIn, signOut }}>

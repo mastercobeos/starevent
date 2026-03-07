@@ -3,11 +3,19 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, calculateSplit } from '@/lib/reservation-state-machine';
 import { renderContract, hashContract } from '@/lib/contract-template';
 import { checkIdempotencyKey, createIdempotencyKey, completeIdempotencyKey, failIdempotencyKey } from '@/lib/idempotency';
+import { generateReservationToken, checkRateLimit, getClientIp, sanitizeField, isValidEmail, isValidPhone } from '@/lib/security';
 
 export async function POST(request) {
   try {
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
+    }
+
+    // Rate limit: 5 reservations per hour per IP
+    const ip = getClientIp(request);
+    const rl = checkRateLimit(`create_reservation:${ip}`, 5, 60 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
     }
 
     const body = await request.json();
@@ -24,17 +32,17 @@ export async function POST(request) {
     if (!first_name?.trim() || !last_name?.trim()) {
       return NextResponse.json({ error: 'First name and last name are required' }, { status: 400 });
     }
-    if (!client_email?.trim()) {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    if (!client_email?.trim() || !isValidEmail(client_email)) {
+      return NextResponse.json({ error: 'A valid email is required' }, { status: 400 });
     }
-    if (!phone_1?.trim()) {
-      return NextResponse.json({ error: 'Phone is required' }, { status: 400 });
+    if (!phone_1?.trim() || !isValidPhone(phone_1)) {
+      return NextResponse.json({ error: 'A valid phone number is required' }, { status: 400 });
     }
     if (!event_date || !return_date) {
       return NextResponse.json({ error: 'Event date and return date are required' }, { status: 400 });
     }
-    if (!items || items.length === 0) {
-      return NextResponse.json({ error: 'At least one item is required' }, { status: 400 });
+    if (!items || items.length === 0 || items.length > 50) {
+      return NextResponse.json({ error: 'Between 1 and 50 items are required' }, { status: 400 });
     }
     if (!address?.trim()) {
       return NextResponse.json({ error: 'Address is required' }, { status: 400 });
@@ -141,6 +149,7 @@ export async function POST(request) {
 
       const response = {
         reservation_id: reservation.id,
+        access_token: generateReservationToken(reservation.id),
         status: STATUS.PENDING_OUT_OF_STOCK,
         unavailable_items: unavailableItems,
         message: 'out_of_stock',
@@ -214,6 +223,7 @@ export async function POST(request) {
 
     const response = {
       reservation_id: reservation.id,
+      access_token: generateReservationToken(reservation.id),
       status: STATUS.APPROVED_WAITING_CONTRACT,
       contract_html: contractHtml,
       contract_hash: contractHash,

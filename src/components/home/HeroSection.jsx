@@ -1,50 +1,69 @@
-import { useState, useCallback, useEffect, memo } from 'react';
+import { memo, useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '../ui/button';
-import { useSwipe } from '../../hooks/useSwipe';
 import { heroImages } from '../../data/homeData';
 
 export const HeroSection = memo(function HeroSection({ t }) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [prevIdx, setPrevIdx] = useState(null);
+  const timeoutRef = useRef(null);
 
-  const goNext = useCallback(() => setCurrentImageIndex((prev) => (prev + 1) % heroImages.length), []);
-  const goPrev = useCallback(() => setCurrentImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length), []);
-  const swipe = useSwipe(goNext, goPrev);
+  const advance = useCallback(() => {
+    setCurrentIdx((prev) => {
+      setPrevIdx(prev);
+      return (prev + 1) % heroImages.length;
+    });
+    // Clear prevIdx after transition completes
+    timeoutRef.current = setTimeout(() => setPrevIdx(null), 2000);
+  }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
+    const timer = setInterval(advance, 4000);
+    return () => {
+      clearInterval(timer);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [advance]);
+
+  const getImageStyle = (idx) => {
+    if (idx === currentIdx) {
+      // Active: slide in from top
+      return prevIdx !== null
+        ? 'translate-y-0 opacity-100'
+        : 'translate-y-0 opacity-100';
+    }
+    if (idx === prevIdx) {
+      // Exiting: slide down
+      return 'translate-y-[15%] opacity-0';
+    }
+    // Waiting: positioned above, hidden
+    return '-translate-y-[15%] opacity-0';
+  };
 
   return (
     <section
       className="relative min-h-screen flex items-center justify-center text-center text-foreground overflow-hidden -mt-[3.2rem] sm:-mt-16"
-      {...swipe}
     >
       <div className="absolute inset-0 z-0">
-        {heroImages.map((image, index) => (
+        {heroImages.map((src, idx) => (
           <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out ${
-              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-            aria-hidden={index !== currentImageIndex}
+            key={src}
+            className={`absolute inset-0 transition-[transform,opacity] duration-[2000ms] ease-in-out ${getImageStyle(idx)}`}
           >
             <Image
-              src={image}
-              alt={`Star Event Rental - Event setup ${index + 1}`}
+              src={src}
+              alt="Star Event Rental - Event Background"
               fill
               sizes="100vw"
               className="object-cover object-center"
-              priority={index <= 1}
+              priority={idx === 0}
+              loading={idx === 0 ? 'eager' : 'lazy'}
               quality={75}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/75 to-slate-900/65" />
           </div>
         ))}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/75 to-slate-900/65" />
       </div>
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 mt-[50px]">
         <div className="mb-6">

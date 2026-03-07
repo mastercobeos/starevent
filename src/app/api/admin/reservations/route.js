@@ -1,15 +1,24 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { verifyAdmin } from '@/lib/auth-middleware';
 
-export async function GET() {
+export async function GET(request) {
   try {
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
     }
 
-    // TODO: Verify admin auth from Authorization header
+    // Verify admin authentication
+    const auth = await verifyAdmin(request);
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
 
-    const { data, error } = await supabaseAdmin
+    // Filter archived reservations unless ?archived=true is passed
+    const { searchParams } = new URL(request.url);
+    const showArchived = searchParams.get('archived') === 'true';
+
+    let query = supabaseAdmin
       .from('reservations')
       .select(`
         *,
@@ -18,6 +27,12 @@ export async function GET() {
         payments (id, type, amount, status, square_invoice_url)
       `)
       .order('created_at', { ascending: false });
+
+    if (!showArchived) {
+      query = query.is('archived_at', null);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 

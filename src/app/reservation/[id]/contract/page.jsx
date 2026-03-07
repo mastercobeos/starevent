@@ -60,7 +60,8 @@ export default function ContractPage() {
       const contract = reservation.contracts?.[0];
       if (!contract) throw new Error('Contract not found');
 
-      const res = await fetch(`/api/reservations/${params.id}/sign-contract`, {
+      const token = searchParams.get('token') || '';
+      const res = await fetch(`/api/reservations/${params.id}/sign-contract?token=${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -75,7 +76,7 @@ export default function ContractPage() {
       setSigned(true);
 
       // Create deposit invoice
-      const payRes = await fetch(`/api/reservations/${params.id}/pay-deposit`, {
+      const payRes = await fetch(`/api/reservations/${params.id}/pay-deposit?token=${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });

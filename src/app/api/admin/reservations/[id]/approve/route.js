@@ -2,11 +2,17 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { renderContract, hashContract } from '@/lib/contract-template';
+import { verifyAdmin } from '@/lib/auth-middleware';
 
 export async function PUT(request, { params }) {
   try {
     if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
+    }
+
+    const auth = await verifyAdmin(request);
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
     const { id } = await params;
@@ -36,16 +42,53 @@ export async function PUT(request, { params }) {
       .select('product_id, quantity, unit_price, products(name, name_es)')
       .eq('reservation_id', id);
 
+    // Expand packages into component items before creating holds
+    const expandedHolds = [];
     for (const item of items || []) {
-      await supabaseAdmin.from('stock_holds').insert({
-        reservation_id: id,
-        product_id: item.product_id,
-        quantity: item.quantity,
-        event_date: reservation.event_date,
-        return_date: reservation.return_date,
-        status: 'active',
-        expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min hold
-      });
+      const { data: components } = await supabaseAdmin
+        .from('package_items')
+        .select('component_id, quantity')
+        .eq('package_id', item.product_id);
+
+      if (components && components.length > 0) {
+        // Package: create holds for each component
+        for (const comp of components) {
+          expandedHolds.push({
+            reservation_id: id,
+            product_id: comp.component_id,
+            quantity: comp.quantity * item.quantity,
+            event_date: reservation.event_date,
+            return_date: reservation.return_date,
+            status: 'active',
+            expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+          });
+        }
+      } else {
+        // Regular product: hold as-is
+        expandedHolds.push({
+          reservation_id: id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          event_date: reservation.event_date,
+          return_date: reservation.return_date,
+          status: 'active',
+          expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+        });
+      }
+    }
+
+    // Aggregate holds for same component (package + individual overlap)
+    const aggregated = {};
+    for (const hold of expandedHolds) {
+      if (aggregated[hold.product_id]) {
+        aggregated[hold.product_id].quantity += hold.quantity;
+      } else {
+        aggregated[hold.product_id] = { ...hold };
+      }
+    }
+
+    for (const hold of Object.values(aggregated)) {
+      await supabaseAdmin.from('stock_holds').insert(hold);
     }
 
     // Generate contract

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
+import { verifyReservationToken, getClientIp, checkRateLimit } from '@/lib/security';
 
 export async function POST(request, { params }) {
   try {
@@ -9,6 +10,21 @@ export async function POST(request, { params }) {
     }
 
     const { id } = await params;
+
+    // SECURITY: Verify reservation access token
+    const { searchParams } = new URL(request.url);
+    const token = searchParams.get('token');
+    if (!verifyReservationToken(id, token)) {
+      return NextResponse.json({ error: 'Invalid or missing access token' }, { status: 403 });
+    }
+
+    // Rate limiting
+    const ip = getClientIp(request);
+    const rl = checkRateLimit(`sign_contract:${ip}`, 10, 60 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const body = await request.json();
     const { initials, contract_hash } = body;
 
@@ -67,7 +83,7 @@ export async function POST(request, { params }) {
     }
 
     // Collect signature evidence
-    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const signerIp = getClientIp(request);
     const userAgent = request.headers.get('user-agent') || 'unknown';
     const signedAt = new Date().toISOString();
 
@@ -78,7 +94,7 @@ export async function POST(request, { params }) {
         status: 'signed',
         initials: initials.trim().toUpperCase(),
         signed_at: signedAt,
-        signer_ip: ip,
+        signer_ip: signerIp,
         signer_user_agent: userAgent,
         signed_contract_hash: contract_hash,
       })
@@ -105,7 +121,7 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error('Sign contract error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to sign contract' },
+      { error: 'Failed to sign contract' },
       { status: 500 }
     );
   }

@@ -2,6 +2,7 @@ export const productCards = [
   {
     name: 'Chairs',
     nameEs: 'Sillas',
+    slug: 'chairs',
     image: '/chiavariportada.jpg',
     items: [
       { id: 'chair-resin', name: 'Resin Garden Chair', nameEs: 'Silla de Resina de Jardín', price: 3.00, desc: 'Elegant white resin garden chairs, perfect for weddings and formal events.', descEs: 'Elegantes sillas de resina de jardín blanca, perfectas para bodas y eventos formales.', image: '/gardenchair.png', checkoutLink: '#' },
@@ -13,6 +14,7 @@ export const productCards = [
   {
     name: 'Tables',
     nameEs: 'Mesas',
+    slug: 'tables',
     image: '/tablesportada.jpg',
     items: [
       { id: 'table-6ft', name: '6 FT Rectangular Table', nameEs: 'Mesa Rectangular de 6 pies', price: 8.00, desc: 'Versatile 6-foot folding tables, great for smaller setups and buffets.', descEs: 'Versátiles mesas plegables de 6 pies, ideales para montajes pequeños y buffets.', image: '/6ft.png', checkoutLink: '#' },
@@ -24,6 +26,7 @@ export const productCards = [
   {
     name: 'Tablecloths',
     nameEs: 'Manteles',
+    slug: 'tablecloths',
     image: '/tableclothsportada.jpg',
     items: [
       { id: 'cloth-white', name: 'White Tablecloth', nameEs: 'Mantel Blanco', price: 10.00, desc: 'Elegant white tablecloths that add a clean, sophisticated touch to any event.', descEs: 'Elegantes manteles blancos que agregan un toque limpio y sofisticado a cualquier evento.', image: '/whitecloths.png', checkoutLink: '#' },
@@ -33,12 +36,13 @@ export const productCards = [
   {
     name: 'Tents',
     nameEs: 'Carpas',
+    slug: 'tents',
     image: '/tentsportada.jpg',
     items: [
       { id: 'tent-20x20', name: 'Tent 20x20', nameEs: 'Carpa 20x20', price: 250.00, desc: 'Perfect for intimate gatherings of up to 30 guests. Includes garden lights and walls.', descEs: 'Perfecta para reuniones íntimas de hasta 30 invitados. Incluye luces de jardín y paredes.', image: '/tent20x2040.png', checkoutLink: '#' },
       { id: 'tent-20x32', name: 'Tent 20x32', nameEs: 'Carpa 20x32', price: 350.00, desc: '70 people seated in chairs, 50 seated at tables. Fire proof. Includes garden lights and walls.', descEs: '70 personas sentadas en sillas, 50 personas en mesas. A prueba de fuego. Incluye luces de jardín y paredes.', image: '/tent20x32.png', checkoutLink: '#' },
       { id: 'tent-20x40', name: 'Tent 20x40', nameEs: 'Carpa 20x40', price: 450.00, desc: '100 people in chairs, 70 seated at tables. Fire proof. Includes garden lights and walls.', descEs: '100 personas en sillas, 70 en mesas ubicadas. A prueba de fuego. Incluye luces de jardín y paredes.', image: '/tent20x40.png', checkoutLink: '#' },
-      { id: 'tent-20x60', name: 'Tent 20x60', nameEs: 'Carpa 20x60', price: 700.00, desc: 'Extra large tent for big events and celebrations. Includes garden lights and walls.', descEs: 'Carpa extra grande para grandes eventos y celebraciones. Incluye luces de jardín y paredes.', image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', checkoutLink: '#' },
+      { id: 'tent-20x60', name: 'Tent 20x60', nameEs: 'Carpa 20x60', price: 700.00, desc: 'Extra large tent for big events and celebrations. Includes garden lights and walls.', descEs: 'Carpa extra grande para grandes eventos y celebraciones. Incluye luces de jardín y paredes.', image: '/tent20x60.png', checkoutLink: '#' },
       { id: 'tent-hp-20x20', name: 'High Peak 20x20', nameEs: 'High Peak 20x20', price: 550.00, desc: 'High peak premium heavy duty tent 20x20 for a stunning visual impact.', descEs: 'Carpa high peak premium heavy duty 20x20 para un impacto visual impresionante.', image: '/tent20x20.png', checkoutLink: '#' },
       { id: 'tent-hp-20x40', name: 'High Peak 20x40', nameEs: 'High Peak 20x40', price: 1200.00, desc: 'High peak premium heavy duty tent 20x40 for grand events and weddings.', descEs: 'Carpa high peak premium heavy duty 20x40 para grandes eventos y bodas.', image: '/tent20x40highpeak.png', checkoutLink: '#' },
       { id: 'tent-clear-20x40', name: 'Clear Tent 20x40', nameEs: 'Carpa Transparente 20x40', price: 750.00, desc: 'Stunning transparent 20x40 tent for an elegant open-sky experience at your event.', descEs: 'Impresionante carpa transparente 20x40 para una elegante experiencia a cielo abierto en tu evento.', image: '/cleartent.png', checkoutLink: '#' },
@@ -47,6 +51,7 @@ export const productCards = [
   {
     name: 'Others',
     nameEs: 'Otros',
+    slug: 'others',
     image: '/othersportada.jpg',
     items: [
       { id: 'heater', name: 'Heater', nameEs: 'Calentador', price: 65.00, desc: 'Outdoor heaters to keep your guests warm and cozy during cold weather events. 200 sq ft heating space.', descEs: 'Calentadores exteriores para mantener a tus invitados cálidos y cómodos durante eventos en clima frío. 200 pies cuadrados de espacio de calefacción.', image: '/heater.png', checkoutLink: '#' },
@@ -62,6 +67,8 @@ export const productCards = [
 ];
 
 export const deluxePackages = [
+  { id: 'pkg-deluxe-20x60-premium', badge: 'Deluxe', price: '$1,799', priceNum: 1799, title: 'Tent 20x60', titleEs: 'Carpa 20x60', image: '/20x60deluxpremium.png', includes: ['Chandeliers', 'Draping color in stock', 'Garden Lights', 'Walls', '120 Garden Chairs white', '15 Round Tables', '15 Tablecloths white or black', '1 Table cake'], includesEs: ['Candelabros', 'Drapeado color en stock', 'Luces de Jardín', 'Paredes', '120 Sillas de Jardín blancas', '15 Mesas Redondas', '15 Manteles blancos o negros', '1 Mesa para pastel'], checkoutLink: '#' },
+  { id: 'pkg-deluxe-20x60', badge: 'Deluxe', price: '$1,370', priceNum: 1370, title: 'Tent 20x60', titleEs: 'Carpa 20x60', image: '/20x60delux.png', includes: ['Garden Lights', 'Walls', '120 Garden Chairs white', '15 Round Tables', '15 Tablecloths white or black', '1 Table cake'], includesEs: ['Luces de Jardín', 'Paredes', '120 Sillas de Jardín blancas', '15 Mesas Redondas', '15 Manteles blancos o negros', '1 Mesa para pastel'], checkoutLink: '#' },
   { id: 'pkg-deluxe-20x40', badge: 'Deluxe', price: '$1,299', priceNum: 1299, title: 'Tent 20x40', titleEs: 'Carpa 20x40', image: '/20x40delux.png', includes: ['Draping color in stock', '2 Chandeliers', '7 Rectangular Tables', '7 Tablecloths white or black', '70 Garden Chairs white', 'Garden Lights', '1 Table cake'], includesEs: ['Drapeado color en stock', '2 Candelabros', '7 Mesas Rectangulares', '7 Manteles blancos o negros', '70 Sillas de Jardín blancas', 'Luces de Jardín', '1 Mesa para pastel'], checkoutLink: '#' },
   { id: 'pkg-deluxe-20x32', badge: 'Deluxe', price: '$1,100', priceNum: 1100, title: 'Tent 20x32', titleEs: 'Carpa 20x32', image: '/tentdeluxe.jpeg', includes: ['Draping color in stock', '1 Chandelier', '6 Round Tables', '6 Tablecloths white or black', '48 Garden Chairs white', 'Garden Lights', '1 Table cake'], includesEs: ['Drapeado color en stock', '1 Candelabro', '6 Mesas Redondas', '6 Manteles blancos o negros', '48 Sillas de Jardín blancas', 'Luces de Jardín', '1 Mesa para pastel'], checkoutLink: '#' },
   { id: 'pkg-deluxe-20x20', badge: 'Deluxe', price: '$789', priceNum: 789, title: 'Tent 20x20', titleEs: 'Carpa 20x20', image: '/20x20packagedelux.png', includes: ['Draping color in stock', '1 Chandelier', '3 Rectangular Tables', '3 Tablecloths white or black', '30 Garden Chairs white', 'Garden Lights', '1 Table cake'], includesEs: ['Drapeado color en stock', '1 Candelabro', '3 Mesas Rectangulares', '3 Manteles blancos o negros', '30 Sillas de Jardín blancas', 'Luces de Jardín', '1 Mesa para pastel'], checkoutLink: '#' },
@@ -74,10 +81,10 @@ export const basicPackages = [
 ];
 
 export const heroImages = [
-  'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70',
-  'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70',
-  'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70',
-  'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70',
+  '/fondo1.webp',
+  '/fondo2.jpg',
+  '/fondo3.jpg',
+  '/fondo4.png',
 ];
 
 export const googleReviews = [
