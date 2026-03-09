@@ -193,7 +193,7 @@ export default function CheckoutForm({ onBack }) {
         if (!SQUARE_APP_ID || !SQUARE_LOCATION_ID) {
           throw new Error('Square credentials not configured');
         }
-        const payments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
+        const payments = await window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
         card = await payments.card();
         if (cancelled) return;
         // Wait for DOM to be fully ready before attaching
@@ -209,10 +209,12 @@ export default function CheckoutForm({ onBack }) {
       } catch (err) {
         console.error('Square card init error:', err);
         if (!cancelled) {
+          const detail = err?.message || String(err);
           setPaymentError(
-            language === 'en'
+            (language === 'en'
               ? 'Could not load payment form. Please refresh the page and try again.'
-              : 'No se pudo cargar el formulario de pago. Actualice la página e intente de nuevo.'
+              : 'No se pudo cargar el formulario de pago. Actualice la página e intente de nuevo.')
+            + ` [${detail}]`
           );
         }
       } finally {
