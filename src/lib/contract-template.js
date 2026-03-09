@@ -20,7 +20,7 @@ export function renderContract(reservation, items, language = 'en') {
     first_name, last_name, client_email, phone_1, phone_2,
     event_date, return_date, event_start_time, event_end_time,
     event_address, property_type, installation_required, installation_details,
-    special_notes, subtotal, delivery_fee, total, deposit_amount, balance_amount,
+    special_notes, subtotal, delivery_fee, tax_amount, total, deposit_amount, balance_amount,
   } = reservation;
 
   const clientName = `${first_name} ${last_name}`.trim();
@@ -101,6 +101,7 @@ export function renderContract(reservation, items, language = 'en') {
         <div style="text-align:right;font-size:13px;margin-bottom:20px;">
           <div style="padding:3px 0;">Subtotal: <strong>${formatCurrency(subtotal)}</strong></div>
           <div style="padding:3px 0;">Delivery Fee: <strong>${formatCurrency(delivery_fee || 0)}</strong></div>
+          <div style="padding:3px 0;">Sales Tax (8.25%): <strong>${formatCurrency(tax_amount || 0)}</strong></div>
           <div style="padding:6px 0;font-size:15px;border-top:2px solid #1a1a1a;margin-top:4px;">
             <strong>Total: ${formatCurrency(total)}</strong>
           </div>

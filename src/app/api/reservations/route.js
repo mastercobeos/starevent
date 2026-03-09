@@ -25,7 +25,7 @@ export async function POST(request) {
       address, property_type, installation_required, installation_details,
       event_date, return_date, event_start_time, event_end_time,
       items, special_notes, language,
-      subtotal, delivery_fee, delivery_miles, total,
+      subtotal, delivery_fee, delivery_miles, tax_amount, total,
     } = body;
 
     // --- Validation ---
@@ -86,6 +86,7 @@ export async function POST(request) {
         subtotal: subtotal || 0,
         delivery_fee: delivery_fee || 0,
         delivery_miles: delivery_miles || null,
+        tax_amount: tax_amount || 0,
         total,
         deposit_amount: deposit,
         balance_amount: balance,
@@ -198,6 +199,7 @@ export async function POST(request) {
       special_notes,
       subtotal,
       delivery_fee,
+      tax_amount: tax_amount || 0,
       total,
       deposit_amount: deposit,
       balance_amount: balance,

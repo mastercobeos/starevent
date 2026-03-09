@@ -22,6 +22,7 @@ const SQUARE_ENV = process.env.NEXT_PUBLIC_SQUARE_ENVIRONMENT || 'sandbox';
 const ORIGIN = { lat: 29.7233, lng: -95.5977 };
 const DELIVERY_BASE_FEE = 35;
 const DELIVERY_PER_MILE = 2;
+const TAX_RATE = 0.0825;
 
 function loadGoogleMaps() {
   if (window.google?.maps) return Promise.resolve();
@@ -263,7 +264,9 @@ export default function CheckoutForm({ onBack }) {
     }
   };
 
-  const getGrandTotal = () => getTotal() + (deliveryFee || 0);
+  const getPreTaxTotal = () => getTotal() + (deliveryFee || 0);
+  const getTaxAmount = () => Math.round(getPreTaxTotal() * TAX_RATE * 100) / 100;
+  const getGrandTotal = () => getPreTaxTotal() + getTaxAmount();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -328,6 +331,7 @@ export default function CheckoutForm({ onBack }) {
           subtotal: getTotal(),
           delivery_fee: deliveryFee || 0,
           delivery_miles: deliveryMiles,
+          tax_amount: getTaxAmount(),
           total: grandTotal,
         }),
       });
@@ -692,6 +696,10 @@ export default function CheckoutForm({ onBack }) {
               <span className="flex items-center gap-1 text-white/50"><Loader2 className="w-3 h-3 animate-spin" /> {tc.calculatingDistance}</span>
             ) : deliveryFee != null ? `$${deliveryFee.toFixed(2)}` : <span className="text-white/40">&mdash;</span>}
           </span>
+        </div>
+        <div className="flex justify-between text-sm py-1">
+          <span className="text-white/70">{tc.salesTax}</span>
+          <span className="text-white/80">${getTaxAmount().toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm font-bold pt-2 mt-1 border-t border-white/10">
           <span className="text-white">{tc.total}</span>
