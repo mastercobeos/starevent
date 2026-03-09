@@ -85,6 +85,8 @@ export default function CheckoutForm({ onBack }) {
   // Square card payment state
   const [squareReady, setSquareReady] = useState(typeof window !== 'undefined' && !!window.Square);
   const [cardInstance, setCardInstance] = useState(null);
+  const [cardLoading, setCardLoading] = useState(false);
+  const [cardInitKey, setCardInitKey] = useState(0);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const cardContainerRef = useRef(null);
@@ -104,11 +106,28 @@ export default function CheckoutForm({ onBack }) {
   // --- Load Square SDK ---
   useEffect(() => {
     if (window.Square) { setSquareReady(true); return; }
+    // Avoid adding duplicate script tags
+    const existing = document.querySelector(`script[src="${SQUARE_SDK_URL}"]`);
+    if (existing) {
+      const check = () => { if (window.Square) setSquareReady(true); };
+      existing.addEventListener('load', check);
+      return () => existing.removeEventListener('load', check);
+    }
     const script = document.createElement('script');
     script.src = SQUARE_SDK_URL;
     script.async = true;
-    script.onload = () => setSquareReady(true);
-    script.onerror = () => console.error('Square SDK failed to load');
+    script.onload = () => {
+      if (window.Square) {
+        setSquareReady(true);
+      } else {
+        console.error('Square SDK loaded but window.Square is undefined');
+        setPaymentError('Payment system failed to initialize. Please refresh the page.');
+      }
+    };
+    script.onerror = () => {
+      console.error('Square SDK failed to load');
+      setPaymentError('Payment system could not be loaded. Please check your connection and refresh.');
+    };
     document.head.appendChild(script);
   }, []);
 
@@ -165,16 +184,39 @@ export default function CheckoutForm({ onBack }) {
     let cancelled = false;
 
     async function initCard() {
+      setCardLoading(true);
+      setPaymentError('');
       try {
+        if (!window.Square) {
+          throw new Error('Square SDK not available');
+        }
+        if (!SQUARE_APP_ID || !SQUARE_LOCATION_ID) {
+          throw new Error('Square credentials not configured');
+        }
         const payments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
         card = await payments.card();
         if (cancelled) return;
-        if (cardContainerRef.current) {
-          await card.attach(cardContainerRef.current);
+        // Wait for DOM to be fully ready before attaching
+        await new Promise((r) => setTimeout(r, 150));
+        if (cancelled) return;
+        const container = document.getElementById('sq-card-container');
+        if (container) {
+          await card.attach('#sq-card-container');
           if (!cancelled) setCardInstance(card);
+        } else {
+          throw new Error('Card container not found in DOM');
         }
       } catch (err) {
         console.error('Square card init error:', err);
+        if (!cancelled) {
+          setPaymentError(
+            language === 'en'
+              ? 'Could not load payment form. Please refresh the page and try again.'
+              : 'No se pudo cargar el formulario de pago. Actualice la página e intente de nuevo.'
+          );
+        }
+      } finally {
+        if (!cancelled) setCardLoading(false);
       }
     }
 
@@ -186,7 +228,7 @@ export default function CheckoutForm({ onBack }) {
         setCardInstance(null);
       }
     };
-  }, [step, squareReady]);
+  }, [step, squareReady, language, cardInitKey]);
 
   const handlePayDeposit = async () => {
     if (!cardInstance) return;
@@ -355,6 +397,16 @@ export default function CheckoutForm({ onBack }) {
     clearCart();
   };
 
+  // Retry card initialization (force re-run of the useEffect)
+  const retryCardInit = () => {
+    if (cardInstance) {
+      cardInstance.destroy().catch(() => {});
+    }
+    setCardInstance(null);
+    setPaymentError('');
+    setCardInitKey((k) => k + 1);
+  };
+
   // --- Date calculations ---
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -422,16 +474,34 @@ export default function CheckoutForm({ onBack }) {
             <CreditCard className="w-3.5 h-3.5 inline mr-1" />
             {language === 'en' ? 'Card Details' : 'Datos de Tarjeta'}
           </label>
-          <div
-            ref={cardContainerRef}
-            className="min-h-[90px] rounded-lg overflow-hidden bg-white/10 border border-white/20 p-1"
-          />
+          <div className="relative">
+            <div
+              id="sq-card-container"
+              ref={cardContainerRef}
+              className="min-h-[90px] rounded-lg bg-white/10 border border-white/20 p-2"
+            />
+            {cardLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/5 rounded-lg">
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              </div>
+            )}
+          </div>
         </div>
 
         {paymentError && (
-          <div className="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/30 flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-            <p className="text-red-300 text-sm">{paymentError}</p>
+          <div className="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/30">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+              <p className="text-red-300 text-sm">{paymentError}</p>
+            </div>
+            {!cardInstance && (
+              <button
+                onClick={retryCardInit}
+                className="mt-2 w-full text-sm text-primary hover:text-primary/80 underline"
+              >
+                {language === 'en' ? 'Retry' : 'Reintentar'}
+              </button>
+            )}
           </div>
         )}
 
