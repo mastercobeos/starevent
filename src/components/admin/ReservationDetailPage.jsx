@@ -8,7 +8,7 @@ import { STATUS, TERMINAL_STATES, STATUS_LABELS } from '../../lib/reservation-st
 import { Button } from '../ui/button';
 import {
   ArrowLeft, Loader2, User, MapPin, Calendar, Phone, Mail,
-  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2, Package, Globe,
+  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2, Package,
 } from 'lucide-react';
 
 export default function ReservationDetailPage({ id }) {
@@ -212,12 +212,7 @@ export default function ReservationDetailPage({ id }) {
                 <a href={`mailto:${r.client_email}`} className="text-white hover:text-primary">{r.client_email}</a>
               </div>
             )}
-            {r.traffic_source && (
-              <div className="flex items-center gap-2">
-                <Globe className="w-3.5 h-3.5 text-blue-400" />
-                <span className="text-blue-400 text-sm font-medium">{r.traffic_source}</span>
-              </div>
-            )}
+
             {r.property_type && (
               <div className="flex items-center gap-2">
                 {r.property_type === 'residential_backyard' ? <Home className="w-3.5 h-3.5 text-white/40" /> : <Building2 className="w-3.5 h-3.5 text-white/40" />}

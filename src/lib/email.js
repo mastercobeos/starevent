@@ -31,7 +31,6 @@ function buildItemsTable(items) {
 
 function confirmationEmailHtml(reservation, items, { forBusiness = false } = {}) {
   const clientName = `${reservation.first_name} ${reservation.last_name}`.trim();
-  const trafficSource = reservation.traffic_source || 'Direct';
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff;">
@@ -39,14 +38,6 @@ function confirmationEmailHtml(reservation, items, { forBusiness = false } = {})
         <h1 style="color:#1a1a1a;margin:0;font-size:22px;">Star Event Rental TX</h1>
         <p style="color:#C9A84C;margin:4px 0 0;font-size:14px;">Reservation Confirmed</p>
       </div>
-
-      ${forBusiness ? `
-      <div style="background:#e8f0fe;border:1px solid #4285f4;border-radius:8px;padding:12px;margin-top:16px;">
-        <p style="color:#1a73e8;font-size:13px;margin:0;font-weight:bold;">
-          📍 Client Source: ${trafficSource}
-        </p>
-      </div>
-      ` : ''}
 
       <div style="padding:20px 0;">
         <p style="color:#333;font-size:15px;">Hello <strong>${clientName}</strong>,</p>

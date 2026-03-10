@@ -12,7 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../translations';
 import { getInitials } from '../lib/contract-template';
 import { calculateSplit } from '../lib/reservation-state-machine';
-import { getTrafficSourceLabel } from '../lib/utm-tracking';
+
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 const SQUARE_APP_ID = process.env.NEXT_PUBLIC_SQUARE_APP_ID;
@@ -104,6 +104,7 @@ export default function CheckoutForm({ onBack }) {
   const [deliveryMiles, setDeliveryMiles] = useState(null);
   const [calculatingDelivery, setCalculatingDelivery] = useState(false);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [addressVerified, setAddressVerified] = useState(false);
   const addressInputRef = useRef(null);
   const autocompleteRef = useRef(null);
 
@@ -149,13 +150,19 @@ export default function CheckoutForm({ onBack }) {
     if (step !== 'form') return;
     const autocomplete = new window.google.maps.places.Autocomplete(addressInputRef.current, {
       componentRestrictions: { country: 'us' },
-      fields: ['formatted_address', 'geometry'],
+      fields: ['formatted_address', 'geometry', 'address_components'],
     });
     autocomplete.addListener('place_changed', () => {
       const place = autocomplete.getPlace();
       if (place.formatted_address) {
+        const zipComponent = place.address_components?.find((c) => c.types.includes('postal_code'));
+        const hasZip = !!zipComponent?.short_name;
         setForm((prev) => ({ ...prev, eventAddress: place.formatted_address }));
+        setAddressVerified(hasZip);
         if (errors.eventAddress) setErrors((prev) => ({ ...prev, eventAddress: '' }));
+        if (!hasZip) {
+          setErrors((prev) => ({ ...prev, eventAddress: tc.addressNeedsZip || 'Please select a complete address with zip code' }));
+        }
         calculateDistance(place);
       }
     });
@@ -297,7 +304,7 @@ export default function CheckoutForm({ onBack }) {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
-    if (name === 'eventAddress') { setDeliveryFee(null); setDeliveryMiles(null); }
+    if (name === 'eventAddress') { setDeliveryFee(null); setDeliveryMiles(null); setAddressVerified(false); }
   };
 
   // --- Validation ---
@@ -310,6 +317,7 @@ export default function CheckoutForm({ onBack }) {
     if (!form.eventDate) e.eventDate = tc.requiredField;
     if (!form.returnDate) e.returnDate = tc.requiredField;
     if (!form.eventAddress.trim()) e.eventAddress = tc.requiredField;
+    else if (!addressVerified) e.eventAddress = tc.addressSelectFromMap || 'Please select a valid address from the suggestions';
     else if (deliveryMiles != null && deliveryMiles > MAX_DELIVERY_MILES) e.eventAddress = tc.deliveryOutOfRange;
     if (!form.propertyType) e.propertyType = tc.requiredField;
     if (needsSurface && !form.surfaceType) e.surfaceType = tc.requiredField;
@@ -362,7 +370,7 @@ export default function CheckoutForm({ onBack }) {
           same_day_pickup_fee: getSameDayPickupFee(),
           tax_amount: getTaxAmount(),
           total: grandTotal,
-          traffic_source: getTrafficSourceLabel(),
+
         }),
       });
 
@@ -809,16 +817,26 @@ export default function CheckoutForm({ onBack }) {
         {/* Address */}
         <div>
           <label className={labelClass}>{tc.eventAddress} *</label>
-          <input
-            ref={addressInputRef}
-            type="text"
-            name="eventAddress"
-            value={form.eventAddress}
-            onChange={handleChange}
-            className={inputClass}
-            placeholder="123 Main St, Houston, TX 77001"
-            autoComplete="off"
-          />
+          <div className="relative">
+            <input
+              ref={addressInputRef}
+              type="text"
+              name="eventAddress"
+              value={form.eventAddress}
+              onChange={handleChange}
+              className={inputClass}
+              placeholder="123 Main St, Houston, TX 77001"
+              autoComplete="off"
+            />
+            {addressVerified && form.eventAddress && (
+              <CheckCircle className="w-4 h-4 text-green-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            )}
+          </div>
+          {!addressVerified && form.eventAddress && !errors.eventAddress && (
+            <p className="text-yellow-400/80 text-xs mt-1 flex items-center gap-1">
+              <MapPin className="w-3 h-3" /> {tc.addressSelectFromMap}
+            </p>
+          )}
           {errors.eventAddress && <p className={errorCls}>{errors.eventAddress}</p>}
           {deliveryFee != null && deliveryMiles != null && (
             <p className="text-primary/80 text-xs mt-1 flex items-center gap-1">
