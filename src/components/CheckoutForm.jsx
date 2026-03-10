@@ -196,44 +196,45 @@ export default function CheckoutForm({ onBack }) {
     async function initCard() {
       setCardLoading(true);
       setPaymentError('');
-      try {
-        if (!window.Square) {
-          throw new Error('Square SDK not available');
-        }
-        if (!SQUARE_APP_ID || !SQUARE_LOCATION_ID) {
-          throw new Error('Square credentials not configured');
-        }
-        const payments = await window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
-        card = await payments.card();
+      const MAX_RETRIES = 3;
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
         if (cancelled) return;
-        // Wait for DOM container to be ready before attaching
-        let container;
-        for (let i = 0; i < 20; i++) {
+        try {
+          if (!window.Square) throw new Error('Square SDK not available');
+          if (!SQUARE_APP_ID || !SQUARE_LOCATION_ID) throw new Error('Square credentials not configured');
+          // Wait before retry attempts
+          if (attempt > 0) await new Promise((r) => setTimeout(r, 1000 * attempt));
           if (cancelled) return;
-          container = document.getElementById('sq-card-container');
-          if (container) break;
-          await new Promise((r) => setTimeout(r, 100));
-        }
-        if (container) {
+          const payments = await window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
+          card = await payments.card();
+          if (cancelled) return;
+          // Wait for DOM container
+          let container;
+          for (let i = 0; i < 20; i++) {
+            if (cancelled) return;
+            container = document.getElementById('sq-card-container');
+            if (container) break;
+            await new Promise((r) => setTimeout(r, 100));
+          }
+          if (!container) throw new Error('Card container not found in DOM');
           await card.attach('#sq-card-container');
-          if (!cancelled) setCardInstance(card);
-        } else {
-          throw new Error('Card container not found in DOM');
+          if (!cancelled) { setCardInstance(card); setCardLoading(false); }
+          return; // Success — exit retry loop
+        } catch (err) {
+          console.error(`Square card init attempt ${attempt + 1} error:`, err);
+          if (card) { card.destroy().catch(() => {}); card = null; }
+          if (attempt === MAX_RETRIES - 1 && !cancelled) {
+            const detail = err?.message || String(err);
+            setPaymentError(
+              (language === 'en'
+                ? 'Could not load payment form. Please refresh the page and try again.'
+                : 'No se pudo cargar el formulario de pago. Actualice la página e intente de nuevo.')
+              + ` [${detail}]`
+            );
+          }
         }
-      } catch (err) {
-        console.error('Square card init error:', err);
-        if (!cancelled) {
-          const detail = err?.message || String(err);
-          setPaymentError(
-            (language === 'en'
-              ? 'Could not load payment form. Please refresh the page and try again.'
-              : 'No se pudo cargar el formulario de pago. Actualice la página e intente de nuevo.')
-            + ` [${detail}]`
-          );
-        }
-      } finally {
-        if (!cancelled) setCardLoading(false);
       }
+      if (!cancelled) setCardLoading(false);
     }
 
     initCard();
