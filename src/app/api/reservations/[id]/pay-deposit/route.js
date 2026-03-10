@@ -86,7 +86,7 @@ export async function POST(request, { params }) {
     const depositCents = Math.round(reservation.deposit_amount * 100);
 
     // Process payment directly via Square Payments API
-    const payment = await squareClient.payments.create({
+    const response = await squareClient.payments.create({
       sourceId,
       idempotencyKey: idempKey,
       amountMoney: {
@@ -98,7 +98,9 @@ export async function POST(request, { params }) {
       buyerEmailAddress: reservation.client_email,
     });
 
-    const isCompleted = payment.status === 'COMPLETED';
+    // Square SDK v44: response is { payment: { id, status, ... } }
+    const squarePayment = response.payment;
+    const isCompleted = squarePayment.status === 'COMPLETED';
 
     // Record payment
     await supabaseAdmin.from('payments').upsert({
@@ -106,40 +108,43 @@ export async function POST(request, { params }) {
       type: 'deposit',
       amount: reservation.deposit_amount,
       amount_cents: depositCents,
-      square_payment_id: payment.id,
+      square_payment_id: squarePayment.id,
       idempotency_key: idempKey,
       status: isCompleted ? 'completed' : 'pending',
     }, { onConflict: 'reservation_id,type' });
 
-    // Update reservation status if payment completed
+    // Update reservation status and send emails if payment completed
     if (isCompleted) {
       await supabaseAdmin
         .from('reservations')
         .update({ status: STATUS.DEPOSIT_PAID })
         .eq('id', id);
 
-      // Send confirmation emails (fire-and-forget)
-      supabaseAdmin
-        .from('reservations')
-        .select('*, reservation_items(product_id, quantity, unit_price, products(name))')
-        .eq('id', id)
-        .single()
-        .then(({ data: fullRes }) => {
-          if (!fullRes) return;
+      // Send confirmation emails (awaited so Vercel doesn't kill the function)
+      try {
+        const { data: fullRes } = await supabaseAdmin
+          .from('reservations')
+          .select('*, reservation_items(product_id, quantity, unit_price, products(name))')
+          .eq('id', id)
+          .single();
+
+        if (fullRes) {
           const items = (fullRes.reservation_items || []).map(ri => ({
             name: ri.products?.name || ri.product_id,
             quantity: ri.quantity,
             unit_price: ri.unit_price,
           }));
-          sendReservationConfirmation(fullRes, items);
-        })
-        .catch(err => console.error('Email fetch error:', err.message));
+          await sendReservationConfirmation(fullRes, items);
+        }
+      } catch (emailErr) {
+        console.error('Email send error:', emailErr.message);
+      }
     }
 
     return NextResponse.json({
       reservation_id: id,
-      payment_id: payment.id,
-      payment_status: payment.status,
+      payment_id: squarePayment.id,
+      payment_status: squarePayment.status,
       status: isCompleted ? STATUS.DEPOSIT_PAID : 'payment_pending',
     });
   } catch (error) {
