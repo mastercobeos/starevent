@@ -76,6 +76,17 @@ export async function unarchiveReservation(id) {
   return data;
 }
 
+// Fetch inventory summary via admin API (uses service_role to read stock_holds)
+export async function fetchAdminInventory(date) {
+  const url = date ? `/api/admin/inventory?date=${date}` : '/api/admin/inventory';
+  const res = await adminFetch(url);
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || 'Failed to fetch inventory');
+  }
+  return res.json();
+}
+
 // Permanently delete an archived reservation
 export async function deleteReservation(id) {
   const res = await adminFetch(`/api/admin/reservations/${id}`, {

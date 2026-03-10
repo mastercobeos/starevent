@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { fetchInventorySummary } from '../../lib/supabase';
-import { fetchAdminReservation } from '../../lib/admin-api';
+import { fetchAdminInventory, fetchAdminReservation } from '../../lib/admin-api';
 import StatusBadge from './StatusBadge';
 import { Loader2, RefreshCw, ChevronLeft, ChevronRight, CalendarDays, ExternalLink, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 
@@ -18,7 +17,7 @@ export default function InventorySummary() {
   const loadInventory = async (date = selectedDate) => {
     setLoading(true);
     try {
-      const data = await fetchInventorySummary(date);
+      const data = await fetchAdminInventory(date);
       setProducts(data || []);
     } catch (err) {
       console.error('Error loading inventory:', err);
