@@ -280,9 +280,17 @@ export default function CheckoutForm({ onBack }) {
     }
   };
 
-  const getTaxAmount = () => Math.round(getTotal() * TAX_RATE * 100) / 100;
+  const getRentalDays = () => {
+    if (!form.eventDate || !form.returnDate) return 1;
+    const start = new Date(form.eventDate);
+    const end = new Date(form.returnDate);
+    const days = Math.round((end - start) / 86400000);
+    return days > 0 ? days : 1;
+  };
+  const getAdjustedSubtotal = () => getTotal() * getRentalDays();
+  const getTaxAmount = () => Math.round(getAdjustedSubtotal() * TAX_RATE * 100) / 100;
   const getSameDayPickupFee = () => form.sameDayPickup ? SAME_DAY_PICKUP_FEE : 0;
-  const getGrandTotal = () => getTotal() + getTaxAmount() + (deliveryFee || 0) + getSameDayPickupFee();
+  const getGrandTotal = () => getAdjustedSubtotal() + getTaxAmount() + (deliveryFee || 0) + getSameDayPickupFee();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -345,7 +353,8 @@ export default function CheckoutForm({ onBack }) {
             quantity: item.quantity,
             unit_price: item.price,
           })),
-          subtotal: getTotal(),
+          subtotal: getAdjustedSubtotal(),
+          rental_days: getRentalDays(),
           delivery_fee: deliveryFee || 0,
           delivery_miles: deliveryMiles,
           same_day_pickup: form.sameDayPickup,
@@ -705,6 +714,12 @@ export default function CheckoutForm({ onBack }) {
           <span className="text-white/70">{tc.subtotal}</span>
           <span className="text-white/80">${getTotal().toFixed(2)}</span>
         </div>
+        {getRentalDays() > 1 && (
+          <div className="flex justify-between text-sm py-1">
+            <span className="text-white/70">× {getRentalDays()} {getRentalDays() === 1 ? tc.day : tc.days}</span>
+            <span className="text-white/80">${getAdjustedSubtotal().toFixed(2)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm py-1">
           <span className="text-white/70">{tc.salesTax}</span>
           <span className="text-white/80">${getTaxAmount().toFixed(2)}</span>

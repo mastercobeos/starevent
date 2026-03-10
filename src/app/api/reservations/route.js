@@ -25,7 +25,7 @@ export async function POST(request) {
       address, property_type, installation_required, installation_details,
       event_date, return_date, event_start_time, event_end_time,
       items, special_notes, language,
-      subtotal, delivery_fee, delivery_miles, same_day_pickup, same_day_pickup_fee, tax_amount, total,
+      subtotal, rental_days, delivery_fee, delivery_miles, same_day_pickup, same_day_pickup_fee, tax_amount, total,
     } = body;
 
     // --- Validation ---
@@ -84,6 +84,7 @@ export async function POST(request) {
         special_notes: special_notes?.trim() || null,
         language: language || 'en',
         subtotal: subtotal || 0,
+        rental_days: rental_days || 1,
         delivery_fee: delivery_fee || 0,
         delivery_miles: delivery_miles || null,
         same_day_pickup: same_day_pickup || false,

@@ -139,6 +139,9 @@ export const translations = {
       sameDayPickup: 'Same-day pickup',
       sameDayPickupQuestion: 'Do you need equipment picked up the same day?',
       sameDayPickupFee: 'Same-day pickup fee',
+      rentalDays: 'Rental days',
+      day: 'day',
+      days: 'days',
     },
     reservation: {
       // Form fields
@@ -387,6 +390,9 @@ export const translations = {
       sameDayPickup: 'Recolección el mismo día',
       sameDayPickupQuestion: '¿Necesita que recojamos el equipo el mismo día?',
       sameDayPickupFee: 'Cargo por recolección el mismo día',
+      rentalDays: 'Días de renta',
+      day: 'día',
+      days: 'días',
     },
     reservation: {
       // Form fields
