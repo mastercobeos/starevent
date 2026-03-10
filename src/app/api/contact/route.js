@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { escapeHtml, sanitizeField, isValidEmail, isValidPhone, checkRateLimit, getClientIp } from '@/lib/security';
 
@@ -30,15 +30,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid phone format' }, { status: 400 });
     }
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: Number(process.env.SMTP_PORT) === 465,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     // Escape all user inputs to prevent XSS in email clients
     const safeName = escapeHtml(fullName);
@@ -47,8 +39,8 @@ export async function POST(request) {
     const safePkg = escapeHtml(pkg || 'Not selected');
     const safeMessage = message ? escapeHtml(message).replace(/\n/g, '<br>') : '';
 
-    await transporter.sendMail({
-      from: `"Star Event Rental Website" <${process.env.SMTP_USER}>`,
+    await resend.emails.send({
+      from: 'Star Event Rental <info@stareventrentaltx.com>',
       to: 'info@stareventrentaltx.com',
       replyTo: email,
       subject: `New Contact Form - ${safeName}`,

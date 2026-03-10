@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { squareIdempotencyKey } from '@/lib/idempotency';
 import { checkRateLimit, getClientIp, verifyReservationToken } from '@/lib/security';
+import { sendReservationConfirmation } from '@/lib/email';
 
 const squareClient = new SquareClient({
   token: process.env.SQUARE_ACCESS_TOKEN,
@@ -116,6 +117,23 @@ export async function POST(request, { params }) {
         .from('reservations')
         .update({ status: STATUS.DEPOSIT_PAID })
         .eq('id', id);
+
+      // Send confirmation emails (fire-and-forget)
+      supabaseAdmin
+        .from('reservations')
+        .select('*, reservation_items(product_id, quantity, unit_price, products(name))')
+        .eq('id', id)
+        .single()
+        .then(({ data: fullRes }) => {
+          if (!fullRes) return;
+          const items = (fullRes.reservation_items || []).map(ri => ({
+            name: ri.products?.name || ri.product_id,
+            quantity: ri.quantity,
+            unit_price: ri.unit_price,
+          }));
+          sendReservationConfirmation(fullRes, items);
+        })
+        .catch(err => console.error('Email fetch error:', err.message));
     }
 
     return NextResponse.json({
