@@ -29,6 +29,7 @@ export async function GET(request, { params }) {
       .single();
 
     if (error || !reservation) {
+      console.error('Admin get reservation query error:', error);
       return NextResponse.json({ error: 'Reservation not found' }, { status: 404 });
     }
 

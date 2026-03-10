@@ -120,6 +120,9 @@ export async function POST(request, { params }) {
         .update({ status: STATUS.DEPOSIT_PAID })
         .eq('id', id);
 
+      // Confirm stock holds so inventory reflects the reservation
+      await supabaseAdmin.rpc('confirm_holds', { p_reservation_id: id });
+
       // Send confirmation emails (awaited so Vercel doesn't kill the function)
       try {
         const { data: fullRes } = await supabaseAdmin
