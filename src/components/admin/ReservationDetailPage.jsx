@@ -438,7 +438,7 @@ export default function ReservationDetailPage({ id }) {
               {r.stock_holds.map((hold) => (
                 <div key={hold.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/[0.03]">
                   <div className="flex items-center gap-3">
-                    <span className="text-white text-sm">{hold.products?.name || hold.product_id}</span>
+                    <span className="text-white text-sm">{hold.product_id}</span>
                     <span className={`text-xs px-1.5 py-0.5 rounded ${
                       hold.status === 'confirmed'
                         ? 'bg-green-500/20 text-green-400'
@@ -451,11 +451,8 @@ export default function ReservationDetailPage({ id }) {
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-yellow-300 font-medium text-sm">x{hold.quantity}</span>
-                    {hold.products?.total_stock && (
-                      <span className="text-white/40 text-xs">
-                        of {hold.products.total_stock} total
-                      </span>
-                    )}
+
+
                   </div>
                 </div>
               ))}

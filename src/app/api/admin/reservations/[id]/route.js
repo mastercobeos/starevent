@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
         reservation_items (product_id, quantity, unit_price, products(name, name_es, category)),
         contracts (id, status, contract_html, contract_hash, initials, signed_at, signer_ip),
         payments (id, type, amount, amount_cents, status, square_invoice_id, square_invoice_url, square_payment_id, error_message, created_at),
-        stock_holds (id, product_id, quantity, status, expires_at, event_date, return_date, products(name, name_es, total_stock)),
+        stock_holds (id, product_id, quantity, status, expires_at, event_date, return_date),
         reservation_status_log (id, from_status, to_status, changed_by, reason, created_at)
       `)
       .eq('id', id)
