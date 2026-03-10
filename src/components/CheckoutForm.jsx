@@ -206,10 +206,14 @@ export default function CheckoutForm({ onBack }) {
         const payments = await window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
         card = await payments.card();
         if (cancelled) return;
-        // Wait for DOM to be fully ready before attaching
-        await new Promise((r) => setTimeout(r, 150));
-        if (cancelled) return;
-        const container = document.getElementById('sq-card-container');
+        // Wait for DOM container to be ready before attaching
+        let container;
+        for (let i = 0; i < 20; i++) {
+          if (cancelled) return;
+          container = document.getElementById('sq-card-container');
+          if (container) break;
+          await new Promise((r) => setTimeout(r, 100));
+        }
         if (container) {
           await card.attach('#sq-card-container');
           if (!cancelled) setCardInstance(card);
