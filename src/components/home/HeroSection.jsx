@@ -49,7 +49,7 @@ export const HeroSection = memo(function HeroSection({ t }) {
         {heroImages.map((src, idx) => (
           <div
             key={src}
-            className={`absolute inset-0 transition-[transform,opacity] duration-[2000ms] ease-in-out ${getImageStyle(idx)}`}
+            className={`absolute inset-0 transition-[transform,opacity] duration-2000 ease-in-out ${getImageStyle(idx)}`}
           >
             <Image
               src={src}

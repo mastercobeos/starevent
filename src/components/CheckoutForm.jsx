@@ -20,8 +20,12 @@ const SQUARE_ENV = process.env.NEXT_PUBLIC_SQUARE_ENVIRONMENT || 'sandbox';
 
 // Warehouse origin: 3730 Redwood Falls Dr, Houston, TX 77082
 const ORIGIN = { lat: 29.7233, lng: -95.5977 };
-const DELIVERY_BASE_FEE = 35;
-const DELIVERY_PER_MILE = 2;
+const DELIVERY_TIERS = [
+  { maxMiles: 20, fee: 35 },
+  { maxMiles: 40, fee: 60 },
+  { maxMiles: 60, fee: 120 },
+];
+const MAX_DELIVERY_MILES = 60;
 const TAX_RATE = 0.0825;
 
 function loadGoogleMaps() {
@@ -172,7 +176,12 @@ export default function CheckoutForm({ onBack }) {
           const distanceMeters = response.rows[0].elements[0].distance.value;
           const miles = Math.round(distanceMeters / 1609.34);
           setDeliveryMiles(miles);
-          setDeliveryFee(DELIVERY_BASE_FEE + miles * DELIVERY_PER_MILE);
+          if (miles > MAX_DELIVERY_MILES) {
+            setDeliveryFee(null);
+          } else {
+            const tier = DELIVERY_TIERS.find((t) => miles <= t.maxMiles);
+            setDeliveryFee(tier.fee);
+          }
         }
       }
     );
@@ -264,9 +273,8 @@ export default function CheckoutForm({ onBack }) {
     }
   };
 
-  const getPreTaxTotal = () => getTotal() + (deliveryFee || 0);
-  const getTaxAmount = () => Math.round(getPreTaxTotal() * TAX_RATE * 100) / 100;
-  const getGrandTotal = () => getPreTaxTotal() + getTaxAmount();
+  const getTaxAmount = () => Math.round(getTotal() * TAX_RATE * 100) / 100;
+  const getGrandTotal = () => getTotal() + getTaxAmount() + (deliveryFee || 0);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -285,6 +293,7 @@ export default function CheckoutForm({ onBack }) {
     if (!form.eventDate) e.eventDate = tc.requiredField;
     if (!form.returnDate) e.returnDate = tc.requiredField;
     if (!form.eventAddress.trim()) e.eventAddress = tc.requiredField;
+    else if (deliveryMiles != null && deliveryMiles > MAX_DELIVERY_MILES) e.eventAddress = tc.deliveryOutOfRange;
     if (!form.propertyType) e.propertyType = tc.requiredField;
     if (needsSurface && !form.surfaceType) e.surfaceType = tc.requiredField;
     setErrors(e);
@@ -687,6 +696,10 @@ export default function CheckoutForm({ onBack }) {
           <span className="text-white/80">${getTotal().toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm py-1">
+          <span className="text-white/70">{tc.salesTax}</span>
+          <span className="text-white/80">${getTaxAmount().toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between text-sm py-1">
           <span className="text-white/70 flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5" /> {tc.deliveryFee}
             {deliveryMiles != null && <span className="text-white/40">({deliveryMiles} {tc.miles})</span>}
@@ -694,12 +707,10 @@ export default function CheckoutForm({ onBack }) {
           <span className="text-white/80">
             {calculatingDelivery ? (
               <span className="flex items-center gap-1 text-white/50"><Loader2 className="w-3 h-3 animate-spin" /> {tc.calculatingDistance}</span>
+            ) : deliveryMiles != null && deliveryMiles > MAX_DELIVERY_MILES ? (
+              <span className="text-amber-400 text-xs">{tc.deliveryOutOfRange}</span>
             ) : deliveryFee != null ? `$${deliveryFee.toFixed(2)}` : <span className="text-white/40">&mdash;</span>}
           </span>
-        </div>
-        <div className="flex justify-between text-sm py-1">
-          <span className="text-white/70">{tc.salesTax}</span>
-          <span className="text-white/80">${getTaxAmount().toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm font-bold pt-2 mt-1 border-t border-white/10">
           <span className="text-white">{tc.total}</span>

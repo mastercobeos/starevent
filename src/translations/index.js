@@ -135,6 +135,7 @@ export const translations = {
       calculatingDistance: 'Calculating distance...',
       miles: 'mi',
       deliveryIncluded: 'Delivery included',
+      deliveryOutOfRange: 'Contact us for delivery over 60 miles',
     },
     reservation: {
       // Form fields
@@ -379,6 +380,7 @@ export const translations = {
       calculatingDistance: 'Calculando distancia...',
       miles: 'mi',
       deliveryIncluded: 'Envío incluido',
+      deliveryOutOfRange: 'Contáctenos para envíos a más de 60 millas',
     },
     reservation: {
       // Form fields
