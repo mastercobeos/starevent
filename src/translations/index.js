@@ -136,6 +136,9 @@ export const translations = {
       miles: 'mi',
       deliveryIncluded: 'Delivery included',
       deliveryOutOfRange: 'Contact us for delivery over 60 miles',
+      sameDayPickup: 'Same-day pickup',
+      sameDayPickupQuestion: 'Do you need equipment picked up the same day?',
+      sameDayPickupFee: 'Same-day pickup fee',
     },
     reservation: {
       // Form fields
@@ -381,6 +384,9 @@ export const translations = {
       miles: 'mi',
       deliveryIncluded: 'Envío incluido',
       deliveryOutOfRange: 'Contáctenos para envíos a más de 60 millas',
+      sameDayPickup: 'Recolección el mismo día',
+      sameDayPickupQuestion: '¿Necesita que recojamos el equipo el mismo día?',
+      sameDayPickupFee: 'Cargo por recolección el mismo día',
     },
     reservation: {
       // Form fields

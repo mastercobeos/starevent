@@ -27,6 +27,7 @@ const DELIVERY_TIERS = [
 ];
 const MAX_DELIVERY_MILES = 60;
 const TAX_RATE = 0.0825;
+const SAME_DAY_PICKUP_FEE = 40;
 
 function loadGoogleMaps() {
   if (window.google?.maps) return Promise.resolve();
@@ -71,6 +72,7 @@ export default function CheckoutForm({ onBack }) {
     eventEndTime: '',
     specialNotes: '',
     surfaceType: '',
+    sameDayPickup: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -279,7 +281,8 @@ export default function CheckoutForm({ onBack }) {
   };
 
   const getTaxAmount = () => Math.round(getTotal() * TAX_RATE * 100) / 100;
-  const getGrandTotal = () => getTotal() + getTaxAmount() + (deliveryFee || 0);
+  const getSameDayPickupFee = () => form.sameDayPickup ? SAME_DAY_PICKUP_FEE : 0;
+  const getGrandTotal = () => getTotal() + getTaxAmount() + (deliveryFee || 0) + getSameDayPickupFee();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -345,6 +348,8 @@ export default function CheckoutForm({ onBack }) {
           subtotal: getTotal(),
           delivery_fee: deliveryFee || 0,
           delivery_miles: deliveryMiles,
+          same_day_pickup: form.sameDayPickup,
+          same_day_pickup_fee: getSameDayPickupFee(),
           tax_amount: getTaxAmount(),
           total: grandTotal,
         }),
@@ -717,6 +722,12 @@ export default function CheckoutForm({ onBack }) {
             ) : deliveryFee != null ? `$${deliveryFee.toFixed(2)}` : <span className="text-white/40">&mdash;</span>}
           </span>
         </div>
+        {form.sameDayPickup && (
+          <div className="flex justify-between text-sm py-1">
+            <span className="text-white/70">{tc.sameDayPickupFee}</span>
+            <span className="text-white/80">${SAME_DAY_PICKUP_FEE.toFixed(2)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm font-bold pt-2 mt-1 border-t border-white/10">
           <span className="text-white">{tc.total}</span>
           <span className="text-primary">${getGrandTotal().toFixed(2)}</span>
@@ -876,6 +887,20 @@ export default function CheckoutForm({ onBack }) {
             <label className={labelClass}>{tr.endTime}</label>
             <input type="time" name="eventEndTime" value={form.eventEndTime} onChange={handleChange} className={`${inputClass} [color-scheme:dark]`} />
           </div>
+        </div>
+
+        {/* Same-day pickup */}
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+          <input
+            type="checkbox"
+            id="sameDayPickup"
+            checked={form.sameDayPickup}
+            onChange={(e) => setForm((prev) => ({ ...prev, sameDayPickup: e.target.checked }))}
+            className="w-4 h-4 accent-primary"
+          />
+          <label htmlFor="sameDayPickup" className="text-sm text-white/80 cursor-pointer">
+            {tc.sameDayPickupQuestion} <span className="text-primary font-semibold">(+${SAME_DAY_PICKUP_FEE})</span>
+          </label>
         </div>
 
         {/* Surface Type (conditional) */}
