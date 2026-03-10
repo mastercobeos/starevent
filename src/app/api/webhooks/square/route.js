@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { verifySquareWebhookSignature } from '@/lib/security';
+import { sendReservationConfirmation, sendPaymentCompleteEmail } from '@/lib/email';
 
 // Square webhook handler for invoice payment events
 export async function POST(request) {
@@ -94,8 +95,10 @@ export async function POST(request) {
 
           // Create balance invoice automatically
           try {
+            const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
+              || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
             const res = await fetch(
-              `${process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL || 'http://localhost:3000'}/api/reservations/${reservation.id}/pay-balance`,
+              `${baseUrl}/api/reservations/${reservation.id}/pay-balance`,
               {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -108,7 +111,25 @@ export async function POST(request) {
             console.error('Auto-create balance invoice error:', e);
           }
 
-          // TODO: Send deposit confirmation notification
+          // Send deposit confirmation email to client + business
+          try {
+            const { data: fullRes } = await supabaseAdmin
+              .from('reservations')
+              .select('*, reservation_items(product_id, quantity, unit_price, products(name))')
+              .eq('id', reservation.id)
+              .single();
+
+            if (fullRes) {
+              const items = (fullRes.reservation_items || []).map(ri => ({
+                name: ri.products?.name || ri.product_id,
+                quantity: ri.quantity,
+                unit_price: ri.unit_price,
+              }));
+              await sendReservationConfirmation(fullRes, items);
+            }
+          } catch (emailErr) {
+            console.error('Deposit confirmation email error:', emailErr.message);
+          }
         }
       } else if (payment.type === 'balance') {
         // Balance paid → paid_in_full
@@ -118,7 +139,25 @@ export async function POST(request) {
             .update({ status: STATUS.PAID_IN_FULL })
             .eq('id', reservation.id);
 
-          // TODO: Send final confirmation notification
+          // Send payment complete email to client + business
+          try {
+            const { data: fullRes } = await supabaseAdmin
+              .from('reservations')
+              .select('*, reservation_items(product_id, quantity, unit_price, products(name))')
+              .eq('id', reservation.id)
+              .single();
+
+            if (fullRes) {
+              const items = (fullRes.reservation_items || []).map(ri => ({
+                name: ri.products?.name || ri.product_id,
+                quantity: ri.quantity,
+                unit_price: ri.unit_price,
+              }));
+              await sendPaymentCompleteEmail(fullRes, items);
+            }
+          } catch (emailErr) {
+            console.error('Payment complete email error:', emailErr.message);
+          }
         }
       }
 

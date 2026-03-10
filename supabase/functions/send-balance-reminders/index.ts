@@ -73,9 +73,48 @@ Deno.serve(async (req) => {
 
       const sentTypes = (sentNotifications || []).map((n: { type: string }) => n.type);
 
-      // Reminder #1: at 8:00 AM Chicago time
-      if (chicagoHour === 8 && chicagoMinute < 15 && !sentTypes.includes("balance_reminder_1")) {
-        const message = `Pago pendiente (60%) — Evento hoy ${res.event_date}\n\nA la llegada del mobiliario se debe realizar el 2do pago (60%) antes del set-up.\n\nMonto: $${res.balance_amount}\n${invoiceUrl ? `Paga aquí: ${invoiceUrl}` : "Contacta a Star Event Rental para el pago."}`;
+      // Reminder #1: at 9:00 AM Houston time
+      if (chicagoHour === 9 && chicagoMinute < 15 && !sentTypes.includes("balance_reminder_1")) {
+        const clientName = `${res.first_name} ${res.last_name}`.trim();
+        const plainMessage = `Hola ${clientName},\n\nTu evento es hoy (${res.event_date}). El pago del 60% restante ($${res.balance_amount}) se debe realizar al momento de la entrega del mobiliario, antes de iniciar el set-up.\n\n${invoiceUrl ? `Paga aquí: ${invoiceUrl}` : "Contacta a Star Event Rental para coordinar el pago."}`;
+
+        const htmlMessage = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff;">
+            <div style="text-align:center;padding:20px 0;border-bottom:3px solid #C9A84C;">
+              <h1 style="color:#1a1a1a;margin:0;font-size:22px;">Star Event Rental TX</h1>
+              <p style="color:#e67e22;margin:4px 0 0;font-size:14px;">Recordatorio de Pago — Balance Pendiente (60%)</p>
+            </div>
+            <div style="padding:20px 0;">
+              <p style="color:#333;font-size:15px;">Hola <strong>${clientName}</strong>,</p>
+              <p style="color:#555;font-size:14px;line-height:1.6;">
+                Tu evento es hoy <strong>(${res.event_date})</strong>. El pago del 60% restante se debe realizar
+                <strong>al momento de la entrega del mobiliario</strong>, antes de iniciar el set-up.
+              </p>
+            </div>
+            <div style="background:#fff3e0;border:1px solid #ffcc02;border-radius:8px;padding:16px;margin-bottom:16px;">
+              <table style="width:100%;font-size:14px;">
+                <tr>
+                  <td style="padding:4px 0;color:#e67e22;font-weight:bold;">Balance pendiente (60%):</td>
+                  <td style="padding:4px 0;color:#e67e22;font-weight:bold;text-align:right;font-size:18px;">$${res.balance_amount}</td>
+                </tr>
+              </table>
+            </div>
+            ${invoiceUrl ? `
+            <div style="text-align:center;margin:20px 0;">
+              <a href="${invoiceUrl}" style="display:inline-block;background:#C9A84C;color:#fff;font-weight:bold;padding:14px 28px;border-radius:8px;text-decoration:none;font-size:15px;">
+                Pagar ahora
+              </a>
+            </div>` : ""}
+            <div style="background:#fffbe6;border:1px solid #f0e68c;border-radius:8px;padding:12px;margin-bottom:16px;">
+              <p style="color:#856404;font-size:13px;margin:0;line-height:1.5;">
+                <strong>Importante:</strong> El pago debe completarse al momento de la entrega del mobiliario para poder iniciar el set-up de su evento.
+              </p>
+            </div>
+            <hr style="border:none;border-top:1px solid #eee;margin:20px 0;" />
+            <p style="color:#999;font-size:11px;text-align:center;">
+              Star Event Rental TX &bull; Houston, TX &bull; info@stareventrentaltx.com
+            </p>
+          </div>`;
 
         // Send email
         if (res.client_email) {
@@ -84,8 +123,8 @@ Deno.serve(async (req) => {
             type: "balance_reminder_1",
             channel: "email",
             recipient: res.client_email,
-            subject: `Pago pendiente (60%) — Evento hoy ${res.event_date}`,
-            message: `<p>${message.replace(/\n/g, "<br>")}</p>`,
+            subject: `Recordatorio de pago (60%) — Evento hoy ${res.event_date}`,
+            message: htmlMessage,
           });
         }
 
@@ -96,7 +135,7 @@ Deno.serve(async (req) => {
             type: "balance_reminder_1",
             channel: "whatsapp",
             recipient: res.phone_1,
-            message,
+            message: plainMessage,
           });
         }
 
@@ -107,7 +146,7 @@ Deno.serve(async (req) => {
       let reminder2Hour = 12;
       if (res.event_start_time) {
         const startHour = parseInt(res.event_start_time.split(":")[0]);
-        reminder2Hour = Math.max(startHour - 2, 9); // At least 9 AM
+        reminder2Hour = Math.max(startHour - 2, 10); // At least 10 AM (after 9 AM reminder)
       }
 
       if (chicagoHour === reminder2Hour && chicagoMinute < 15 && !sentTypes.includes("balance_reminder_2")) {
