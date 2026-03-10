@@ -127,10 +127,12 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error('Pay deposit error:', error);
 
-    // Handle Square API errors — don't leak internal details to client
+    // Handle Square API errors — log details for debugging
     const squareErrors = error?.errors;
     if (squareErrors) {
-      return NextResponse.json({ error: 'Payment was declined. Please check your card details and try again.' }, { status: 400 });
+      console.error('Square API errors:', JSON.stringify(squareErrors, null, 2));
+      const detail = squareErrors[0]?.detail || 'Payment was declined';
+      return NextResponse.json({ error: `Payment was declined: ${detail}` }, { status: 400 });
     }
 
     return NextResponse.json(

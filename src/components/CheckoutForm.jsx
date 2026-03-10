@@ -253,18 +253,7 @@ export default function CheckoutForm({ onBack }) {
     setPaymentError('');
 
     try {
-      const tokenResult = await cardInstance.tokenize({
-        amount: depositAmount.toFixed(2),
-        currencyCode: 'USD',
-        intent: 'CHARGE',
-        customerInitiated: true,
-        sellerKeyedIn: false,
-        billingContact: {
-          givenName: form.firstName,
-          familyName: form.lastName,
-          email: form.email,
-        },
-      });
+      const tokenResult = await cardInstance.tokenize();
       if (tokenResult.status !== 'OK') {
         throw new Error(tokenResult.errors?.[0]?.message || 'Card validation failed');
       }
