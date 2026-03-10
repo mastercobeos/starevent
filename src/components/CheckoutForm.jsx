@@ -783,7 +783,7 @@ export default function CheckoutForm({ onBack }) {
             value={form.eventAddress}
             onChange={handleChange}
             className={inputClass}
-            placeholder="123 Main St, Houston, TX"
+            placeholder="123 Main St, Houston, TX 77001"
             autoComplete="off"
           />
           {errors.eventAddress && <p className={errorCls}>{errors.eventAddress}</p>}
