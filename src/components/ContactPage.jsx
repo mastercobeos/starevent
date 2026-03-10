@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button';
 import { BackgroundSection } from '../components/ui/BackgroundSection';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../translations';
+import { getTrafficSourceLabel } from '../lib/utm-tracking';
 
 const BG_IMAGE = 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70';
 
@@ -41,6 +42,7 @@ export default function Contact() {
           email: formData.email,
           package: formData.package,
           message: formData.message,
+          trafficSource: getTrafficSourceLabel(),
         }),
       });
 

@@ -8,7 +8,7 @@ import { STATUS, TERMINAL_STATES, STATUS_LABELS } from '../../lib/reservation-st
 import { Button } from '../ui/button';
 import {
   ArrowLeft, Loader2, User, MapPin, Calendar, Phone, Mail,
-  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2,
+  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2, Package, Globe,
 } from 'lucide-react';
 
 export default function ReservationDetailPage({ id }) {
@@ -212,6 +212,12 @@ export default function ReservationDetailPage({ id }) {
                 <a href={`mailto:${r.client_email}`} className="text-white hover:text-primary">{r.client_email}</a>
               </div>
             )}
+            {r.traffic_source && (
+              <div className="flex items-center gap-2">
+                <Globe className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-blue-400 text-sm font-medium">{r.traffic_source}</span>
+              </div>
+            )}
             {r.property_type && (
               <div className="flex items-center gap-2">
                 {r.property_type === 'residential_backyard' ? <Home className="w-3.5 h-3.5 text-white/40" /> : <Building2 className="w-3.5 h-3.5 text-white/40" />}
@@ -380,6 +386,88 @@ export default function ReservationDetailPage({ id }) {
           </table>
         </div>
       </div>
+
+      {/* Inventory Impact */}
+      {r.stock_holds?.length > 0 && (() => {
+        const formatTime12 = (time24) => {
+          if (!time24) return null;
+          const [h, m] = time24.split(':').map(Number);
+          const ampm = h >= 12 ? 'PM' : 'AM';
+          const hour = h % 12 || 12;
+          return `${hour}:${String(m).padStart(2, '0')} ${ampm}`;
+        };
+        const endTime = r.event_end_time;
+        let availAgainLabel = null;
+        if (r.return_date && endTime) {
+          const [h, m] = endTime.split(':').map(Number);
+          const availH = h + 3;
+          const availDate = new Date(r.return_date + 'T00:00:00');
+          if (availH >= 24) {
+            availDate.setDate(availDate.getDate() + 1);
+            const fH = availH - 24;
+            availAgainLabel = `${formatDate(availDate.toISOString().split('T')[0])} ${fH % 12 || 12}:${String(m).padStart(2, '0')} ${fH >= 12 ? 'PM' : 'AM'}`;
+          } else {
+            availAgainLabel = `${formatDate(r.return_date)} ${availH % 12 || 12}:${String(m).padStart(2, '0')} ${availH >= 12 ? 'PM' : 'AM'}`;
+          }
+        } else if (r.return_date) {
+          const nextDay = new Date(r.return_date + 'T00:00:00');
+          nextDay.setDate(nextDay.getDate() + 1);
+          availAgainLabel = formatDate(nextDay.toISOString().split('T')[0]);
+        }
+        return (
+          <div className={`${cardClass} mb-4`}>
+            <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
+              <Package className="w-4 h-4 text-primary" /> Inventory Impact
+            </h2>
+            <p className="text-white/50 text-xs mb-3">
+              Physical items held by this reservation (packages expanded into components)
+            </p>
+            {/* Hold period & availability */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4 px-3 py-2 rounded-lg bg-white/[0.03]">
+              <span className="text-white/50 text-xs flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {formatDate(r.event_date)}
+                {r.event_start_time && `, ${formatTime12(r.event_start_time)}`}
+                {r.event_end_time && ` — ${formatTime12(r.event_end_time)}`}
+              </span>
+              {r.return_date && r.return_date !== r.event_date && (
+                <span className="text-white/40 text-xs">Return: {formatDate(r.return_date)}</span>
+              )}
+              {availAgainLabel && (
+                <span className="text-green-400/80 text-xs font-medium">
+                  Items available again: {availAgainLabel}
+                </span>
+              )}
+            </div>
+            <div className="space-y-2">
+              {r.stock_holds.map((hold) => (
+                <div key={hold.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/[0.03]">
+                  <div className="flex items-center gap-3">
+                    <span className="text-white text-sm">{hold.products?.name || hold.product_id}</span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded ${
+                      hold.status === 'confirmed'
+                        ? 'bg-green-500/20 text-green-400'
+                        : hold.status === 'active'
+                        ? 'bg-blue-500/20 text-blue-400'
+                        : 'bg-gray-500/20 text-gray-400'
+                    }`}>
+                      {hold.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-yellow-300 font-medium text-sm">x{hold.quantity}</span>
+                    {hold.products?.total_stock && (
+                      <span className="text-white/40 text-xs">
+                        of {hold.products.total_stock} total
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Status Timeline */}
       {statusLog.length > 0 && (

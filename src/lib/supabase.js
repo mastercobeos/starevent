@@ -108,7 +108,7 @@ export async function updateReservationStatus(id, status) {
   return data;
 }
 
-export async function fetchInventorySummary() {
+export async function fetchInventorySummary(targetDate = null) {
   // Fetch only physical products (exclude virtual packages)
   const { data: products, error: prodError } = await supabase
     .from('products')
@@ -119,27 +119,36 @@ export async function fetchInventorySummary() {
 
   if (prodError) throw prodError;
 
-  const today = new Date().toISOString().split('T')[0];
+  const date = targetDate || new Date().toISOString().split('T')[0];
 
   // Use stock_holds instead of reservation_items because holds contain
   // expanded package components (individual chairs, tables, tents, etc.)
   const { data: activeHolds, error: holdError } = await supabase
     .from('stock_holds')
-    .select('product_id, quantity')
+    .select('product_id, quantity, reservation_id')
     .in('status', ['active', 'confirmed'])
-    .lte('event_date', today)
-    .gte('return_date', today);
+    .lte('event_date', date)
+    .gte('return_date', date);
 
   if (holdError) throw holdError;
 
   const reservedMap = {};
+  const holdsByProduct = {};
   for (const hold of activeHolds || []) {
     reservedMap[hold.product_id] = (reservedMap[hold.product_id] || 0) + hold.quantity;
+    if (!holdsByProduct[hold.product_id]) {
+      holdsByProduct[hold.product_id] = [];
+    }
+    holdsByProduct[hold.product_id].push({
+      reservation_id: hold.reservation_id,
+      quantity: hold.quantity,
+    });
   }
 
   return products.map((p) => ({
     ...p,
     reserved: reservedMap[p.id] || 0,
     available: p.total_stock - (reservedMap[p.id] || 0),
+    holds: holdsByProduct[p.id] || [],
   }));
 }

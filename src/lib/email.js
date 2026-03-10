@@ -29,8 +29,9 @@ function buildItemsTable(items) {
   `).join('');
 }
 
-function confirmationEmailHtml(reservation, items) {
+function confirmationEmailHtml(reservation, items, { forBusiness = false } = {}) {
   const clientName = `${reservation.first_name} ${reservation.last_name}`.trim();
+  const trafficSource = reservation.traffic_source || 'Direct';
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff;">
@@ -38,6 +39,14 @@ function confirmationEmailHtml(reservation, items) {
         <h1 style="color:#1a1a1a;margin:0;font-size:22px;">Star Event Rental TX</h1>
         <p style="color:#C9A84C;margin:4px 0 0;font-size:14px;">Reservation Confirmed</p>
       </div>
+
+      ${forBusiness ? `
+      <div style="background:#e8f0fe;border:1px solid #4285f4;border-radius:8px;padding:12px;margin-top:16px;">
+        <p style="color:#1a73e8;font-size:13px;margin:0;font-weight:bold;">
+          📍 Client Source: ${trafficSource}
+        </p>
+      </div>
+      ` : ''}
 
       <div style="padding:20px 0;">
         <p style="color:#333;font-size:15px;">Hello <strong>${clientName}</strong>,</p>
@@ -268,25 +277,26 @@ export async function sendReservationConfirmation(reservation, items) {
   }
 
   const clientName = `${reservation.first_name} ${reservation.last_name}`.trim();
-  const html = confirmationEmailHtml(reservation, items);
+  const businessHtml = confirmationEmailHtml(reservation, items, { forBusiness: true });
+  const clientHtml = confirmationEmailHtml(reservation, items, { forBusiness: false });
   const from = `Star Event Rental <${BUSINESS_EMAIL}>`;
 
   try {
-    // Email to business
+    // Email to business (includes traffic source)
     await resend.emails.send({
       from,
       to: BUSINESS_EMAIL,
       subject: `New Reservation Confirmed - ${clientName} - ${formatDate(reservation.event_date)}`,
-      html,
+      html: businessHtml,
     });
 
-    // Email to client
+    // Email to client (no traffic source)
     if (reservation.client_email) {
       await resend.emails.send({
         from,
         to: reservation.client_email,
         subject: 'Your Reservation is Confirmed - Star Event Rental',
-        html,
+        html: clientHtml,
       });
     }
 

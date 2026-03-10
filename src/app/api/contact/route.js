@@ -19,6 +19,7 @@ export async function POST(request) {
     const email = sanitizeField(body.email, 254);
     const pkg = sanitizeField(body.package, 100);
     const message = sanitizeField(body.message, 5000);
+    const trafficSource = sanitizeField(body.trafficSource, 200) || 'Direct';
 
     if (!fullName || !phone || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -38,6 +39,7 @@ export async function POST(request) {
     const safeEmail = escapeHtml(email);
     const safePkg = escapeHtml(pkg || 'Not selected');
     const safeMessage = message ? escapeHtml(message).replace(/\n/g, '<br>') : '';
+    const safeSource = escapeHtml(trafficSource);
 
     await resend.emails.send({
       from: 'Star Event Rental <info@stareventrentaltx.com>',
@@ -67,6 +69,10 @@ export async function POST(request) {
             <tr style="background-color: #f9f9f9;">
               <td style="padding: 8px 12px; font-weight: bold; color: #333;">Package:</td>
               <td style="padding: 8px 12px; color: #555;">${safePkg}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; font-weight: bold; color: #333;">📍 Traffic Source:</td>
+              <td style="padding: 8px 12px; color: #C9A84C; font-weight: bold;">${safeSource}</td>
             </tr>
           </table>
           ${safeMessage ? `

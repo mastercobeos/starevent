@@ -26,6 +26,7 @@ export async function POST(request) {
       event_date, return_date, event_start_time, event_end_time,
       items, special_notes, language,
       subtotal, rental_days, delivery_fee, delivery_miles, same_day_pickup, same_day_pickup_fee, tax_amount, total,
+      traffic_source,
     } = body;
 
     // --- Validation ---
@@ -94,6 +95,7 @@ export async function POST(request) {
         deposit_amount: deposit,
         balance_amount: balance,
         balance_due_date: event_date,
+        traffic_source: sanitizeField(traffic_source, 200) || 'Direct',
         status: 'pending', // Temporary — will update after stock check
       })
       .select('id')

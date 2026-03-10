@@ -12,6 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../translations';
 import { getInitials } from '../lib/contract-template';
 import { calculateSplit } from '../lib/reservation-state-machine';
+import { getTrafficSourceLabel } from '../lib/utm-tracking';
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 const SQUARE_APP_ID = process.env.NEXT_PUBLIC_SQUARE_APP_ID;
@@ -361,6 +362,7 @@ export default function CheckoutForm({ onBack }) {
           same_day_pickup_fee: getSameDayPickupFee(),
           tax_amount: getTaxAmount(),
           total: grandTotal,
+          traffic_source: getTrafficSourceLabel(),
         }),
       });
 
