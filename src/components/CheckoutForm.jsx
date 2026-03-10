@@ -257,6 +257,8 @@ export default function CheckoutForm({ onBack }) {
         amount: depositAmount.toFixed(2),
         currencyCode: 'USD',
         intent: 'CHARGE',
+        customerInitiated: true,
+        sellerKeyedIn: false,
         billingContact: {
           givenName: form.firstName,
           familyName: form.lastName,
