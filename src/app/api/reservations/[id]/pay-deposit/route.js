@@ -82,8 +82,8 @@ export async function POST(request, { params }) {
       });
     }
 
-    const idempKey = squareIdempotencyKey(id, 'pay_deposit');
     const depositCents = Math.round(reservation.deposit_amount * 100);
+    const idempKey = squareIdempotencyKey(id, `dep_${depositCents}_${sourceId.slice(-8)}`);
 
     // Process payment directly via Square Payments API
     const response = await squareClient.payments.create({
