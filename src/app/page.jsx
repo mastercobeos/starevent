@@ -2,14 +2,25 @@ import { ClientProviders } from '../components/ClientProviders';
 import HomePage from '../components/HomePage';
 
 export const metadata = {
-  title: 'Star Event Rental - Event Rental Services in Houston TX',
-  description: 'At Star Event Rental, we believe every celebration deserves comfort, elegance, and reliability. Family-owned event rental in Houston, TX. Tents, tables, chairs, linens and more. | En Star Event Rental, creemos que cada celebración merece comodidad, elegancia y confiabilidad. Renta de carpas, mesas, sillas y manteles en Houston, TX.',
-  keywords: ['event rental Houston', 'tent rental Houston TX', 'table chair rental', 'party rental Houston', 'wedding rental Houston', 'quinceañera rentals', 'renta de carpas Houston', 'renta de mesas y sillas', 'eventos Houston TX'],
+  title: 'Star Event Rental - Tent Rental & Event Rentals Houston TX',
+  description: 'Tent rental Houston TX. Chair, table & dance floor rentals for weddings, corporate events & parties. Serving Houston, Katy, Tomball, The Woodlands & Baytown. Free quotes!',
+  keywords: [
+    'tent rental Houston', 'chair rental Houston', 'event rentals Houston',
+    'party rentals katy tx', 'wedding tent rental Houston', 'corporate event rentals Houston',
+    'corporate event tent rental Houston', 'company event rentals Houston',
+    'corporate party rentals Houston', 'event rentals for companies Houston',
+    'dance floor rental Houston', 'dance floor white Houston', 'dance floor in the woodlands',
+    'high peak tent Baytown', 'wedding rental Tomball', 'graduation party rental Houston',
+    'table and chair rental Houston', 'wedding rental Houston', 'quinceañera rentals Houston',
+    'renta de carpas Houston', 'renta de sillas Houston', 'renta de mesas y sillas Houston',
+    'renta para eventos Houston', 'alquiler de carpas para bodas Houston',
+    'pista de baile Houston', 'renta para fiestas Houston', 'eventos corporativos Houston',
+  ],
   openGraph: {
-    title: 'Star Event Rental - Event Rental Services in Houston TX',
-    description: 'Family-owned event rental in Houston, TX. Tents, tables, chairs, linens for weddings, quinceañeras & more.',
+    title: 'Star Event Rental - Tent Rental & Event Rentals Houston TX',
+    description: 'Tent, chair, table & dance floor rentals in Houston TX. Weddings, corporate events, graduations & parties. Family-owned. Free quotes!',
     url: 'https://stareventrentaltx.com/',
-    images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'Star Event Rental - Event Rentals in Houston TX' }],
+    images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'Star Event Rental - Tent Rental & Event Rentals in Houston TX' }],
   },
   alternates: {
     canonical: 'https://stareventrentaltx.com/',
@@ -49,7 +60,24 @@ const jsonLd = {
     { '@type': 'City', name: 'Richmond' },
     { '@type': 'City', name: 'Rosenberg' },
     { '@type': 'City', name: 'Sugar Land' },
+    { '@type': 'City', name: 'The Woodlands' },
+    { '@type': 'City', name: 'Baytown' },
+    { '@type': 'City', name: 'Tomball' },
+    { '@type': 'City', name: 'Spring' },
+    { '@type': 'City', name: 'Humble' },
+    { '@type': 'City', name: 'Pearland' },
   ],
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Event Rental Services',
+    itemListElement: [
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Tent Rental' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Chair Rental' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Table Rental' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Dance Floor Rental' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Tablecloth & Linen Rental' } },
+    ],
+  },
   priceRange: '$$',
   openingHoursSpecification: {
     '@type': 'OpeningHoursSpecification',

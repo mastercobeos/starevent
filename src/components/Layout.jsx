@@ -440,7 +440,7 @@ export default function Layout({ children }) {
       {/* Footer */}
       <footer className="bg-background text-muted-foreground py-12 border-t border-border">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 pb-8 border-b border-border">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 mb-8 pb-8 border-b border-border">
             <div>
               <h3 className="text-foreground font-bold text-xl mb-3">Star Event Rental</h3>
               <p className="text-sm">
@@ -456,6 +456,17 @@ export default function Layout({ children }) {
                 <li><a href="https://stareventrentaltx.com/rent-supplies/" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">{translations[language].nav.rentSupplies}</a></li>
                 <li><a href="/#about" className="hover:text-primary transition-colors">{translations[language].nav.about}</a></li>
                 <li><Link href="/contact" className="hover:text-primary transition-colors">{translations[language].nav.contact}</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-foreground font-semibold mb-3">{language === 'en' ? 'Services' : 'Servicios'}</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/services/tent-rental-houston" className="hover:text-primary transition-colors">{language === 'en' ? 'Tent Rental Houston' : 'Renta de Carpas Houston'}</Link></li>
+                <li><Link href="/services/corporate-event-rentals-houston" className="hover:text-primary transition-colors">{language === 'en' ? 'Corporate Events' : 'Eventos Corporativos'}</Link></li>
+                <li><Link href="/services/party-rentals-katy-tx" className="hover:text-primary transition-colors">{language === 'en' ? 'Party Rentals Katy TX' : 'Fiestas en Katy TX'}</Link></li>
+                <li><Link href="/services/dance-floor-rental-houston" className="hover:text-primary transition-colors">{language === 'en' ? 'Dance Floor Rental' : 'Pista de Baile'}</Link></li>
+                <li><Link href="/services/wedding-rental-tomball" className="hover:text-primary transition-colors">{language === 'en' ? 'Wedding Rental Tomball' : 'Bodas en Tomball'}</Link></li>
+                <li><Link href="/services/graduation-party-rental-houston" className="hover:text-primary transition-colors">{language === 'en' ? 'Graduation Party' : 'Fiesta de Graduación'}</Link></li>
               </ul>
             </div>
             <div>
