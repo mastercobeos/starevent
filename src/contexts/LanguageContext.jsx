@@ -12,16 +12,11 @@ export const useLanguage = () => {
   return context;
 };
 
-export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en');
+export const LanguageProvider = ({ children, initialLocale }) => {
+  const [language, setLanguage] = useState(initialLocale || 'en');
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlLang = params.get('lang');
-    if (urlLang === 'es' || urlLang === 'en') {
-      setLanguage(urlLang);
-      return;
-    }
+    if (initialLocale) return;
     const stored = localStorage.getItem('star-event-lang');
     if (stored === 'en' || stored === 'es') {
       setLanguage(stored);
@@ -30,7 +25,7 @@ export const LanguageProvider = ({ children }) => {
     if (navigator.language?.startsWith('es')) {
       setLanguage('es');
     }
-  }, []);
+  }, [initialLocale]);
 
   useEffect(() => {
     localStorage.setItem('star-event-lang', language);
@@ -38,7 +33,19 @@ export const LanguageProvider = ({ children }) => {
   }, [language]);
 
   const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'es' : 'en');
+    const newLang = language === 'en' ? 'es' : 'en';
+    setLanguage(newLang);
+    // Navigate to the locale-based URL
+    const { pathname } = window.location;
+    if (newLang === 'es') {
+      // Going to Spanish: add /es prefix
+      const cleanPath = pathname.replace(/^\/(en|es)/, '') || '/';
+      window.location.href = `/es${cleanPath === '/' ? '' : cleanPath}`;
+    } else {
+      // Going to English: remove /es prefix
+      const cleanPath = pathname.replace(/^\/es/, '') || '/';
+      window.location.href = cleanPath;
+    }
   };
 
   return (

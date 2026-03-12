@@ -113,16 +113,8 @@ export function getClientIp(request) {
 // Input Sanitization
 // ============================================
 
-// Escape HTML special characters to prevent XSS
-export function escapeHtml(str) {
-  if (typeof str !== 'string') return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
-}
+// Re-export escapeHtml from format.js (single source of truth)
+export { escapeHtml } from './format';
 
 // Validate and sanitize a string field with length limit
 export function sanitizeField(value, maxLength = 255) {

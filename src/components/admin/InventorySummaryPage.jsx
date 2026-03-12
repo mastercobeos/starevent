@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { fetchAdminInventory, fetchAdminReservation } from '../../lib/admin-api';
 import StatusBadge from './StatusBadge';
 import { Loader2, RefreshCw, ChevronLeft, ChevronRight, CalendarDays, ExternalLink, ChevronDown, ChevronUp, Clock } from 'lucide-react';
+import { formatDate as formatDateUtil } from '../../lib/format';
 
 export default function InventorySummary() {
   const [products, setProducts] = useState([]);
@@ -75,14 +76,7 @@ export default function InventorySummary() {
     }
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+  const formatDate = (dateStr) => formatDateUtil(dateStr, { weekday: undefined, month: 'short' });
 
   const getClientName = (r) => {
     if (r.first_name && r.last_name) return `${r.first_name} ${r.last_name}`;

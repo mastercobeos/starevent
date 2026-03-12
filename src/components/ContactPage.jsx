@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { BackgroundSection } from '../components/ui/BackgroundSection';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useToast } from '../components/ui/Toast';
 import { translations } from '../translations';
 
 
@@ -11,6 +12,7 @@ const BG_IMAGE = 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?i
 
 export default function Contact() {
   const { language } = useLanguage();
+  const toast = useToast();
   const t = translations[language].contact;
 
   const [formData, setFormData] = useState({
@@ -27,7 +29,7 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.consent1) {
-      alert(t.consentRequired);
+      toast(t.consentRequired, 'warning');
       return;
     }
 
@@ -48,7 +50,7 @@ export default function Contact() {
 
       if (!res.ok) throw new Error('Failed to send');
 
-      alert(t.thankYou(formData.fullName, formData.phone));
+      toast(t.thankYou(formData.fullName, formData.phone), 'success', 6000);
       setFormData({
         fullName: '',
         phone: '',
@@ -59,9 +61,12 @@ export default function Contact() {
         consent2: false
       });
     } catch {
-      alert(language === 'en'
-        ? 'There was an error sending your message. Please try again or call us at 281-636-0615.'
-        : 'Hubo un error al enviar tu mensaje. Intenta de nuevo o llámanos al 281-636-0615.'
+      toast(
+        language === 'en'
+          ? 'There was an error sending your message. Please try again or call us at 281-636-0615.'
+          : 'Hubo un error al enviar tu mensaje. Intenta de nuevo o llámanos al 281-636-0615.',
+        'error',
+        6000,
       );
     } finally {
       setSending(false);
@@ -117,7 +122,7 @@ export default function Contact() {
                 WebkitBackdropFilter: 'blur(8px) saturate(180%)',
               }}
             >
-              <h3 className="text-2xl font-bold text-white mb-6 text-center">{t.bookNow}</h3>
+              <h2 className="text-2xl font-bold text-white mb-6 text-center">{t.bookNow}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <input
                   type="text"

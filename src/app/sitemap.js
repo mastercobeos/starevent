@@ -1,5 +1,6 @@
 export default function sitemap() {
   const baseUrl = 'https://stareventrentaltx.com';
+  const lastModified = '2026-03-11';
 
   const servicePages = [
     'tent-rental-houston',
@@ -8,42 +9,68 @@ export default function sitemap() {
     'dance-floor-rental-houston',
     'wedding-rental-tomball',
     'graduation-party-rental-houston',
+    'event-rentals-cypress-tx',
+    'event-rentals-sugar-land-tx',
+    'tent-rental-the-woodlands-tx',
+    'tent-rental-baytown-tx',
+    'event-rentals-spring-tx',
+    'party-rentals-pearland-tx',
+  ];
+
+  const productCategories = [
+    'chairs',
+    'tables',
+    'tablecloths',
+    'tents',
+    'others',
   ];
 
   return [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: 'weekly',
       priority: 1,
       alternates: {
         languages: {
           en: baseUrl,
-          es: `${baseUrl}?lang=es`,
+          es: `${baseUrl}/es`,
         },
       },
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: 'monthly',
       priority: 0.8,
       alternates: {
         languages: {
           en: `${baseUrl}/contact`,
-          es: `${baseUrl}/contact?lang=es`,
+          es: `${baseUrl}/es/contact`,
         },
       },
     },
     ...servicePages.map((slug) => ({
       url: `${baseUrl}/services/${slug}`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: 'monthly',
       priority: 0.9,
       alternates: {
         languages: {
           en: `${baseUrl}/services/${slug}`,
-          es: `${baseUrl}/services/${slug}?lang=es`,
+          es: `${baseUrl}/es/services/${slug}`,
+        },
+      },
+    })),
+    ...productCategories.map((slug) => ({
+      url: `${baseUrl}/products/${slug}`,
+      lastModified,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+      alternates: {
+        languages: {
+          en: `${baseUrl}/products/${slug}`,
+          es: `${baseUrl}/es/products/${slug}`,
         },
       },
     })),

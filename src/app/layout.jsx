@@ -1,4 +1,5 @@
 import Script from 'next/script';
+import { headers } from 'next/headers';
 import './globals.css';
 
 const GA_ID = 'G-GCJZGJCNW8';
@@ -18,22 +19,33 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-  },
-  alternates: {
-    languages: {
-      'en': 'https://stareventrentaltx.com',
-      'es': 'https://stareventrentaltx.com?lang=es',
-    },
+    title: 'Star Event Rental - Event Rentals Houston TX',
+    description: 'Tent, chair, table & dance floor rentals in Houston TX. Weddings, corporate events, graduations & parties. Family-owned. Free quotes!',
+    images: ['/logo.png'],
   },
   icons: {
     icon: '/logo.png',
   },
+  manifest: '/manifest.json',
+  other: {
+    'theme-color': '#1a1a2e',
+  },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const headersList = await headers();
+  const locale = headersList.get('x-locale') || 'en';
+
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang={locale} className="scroll-smooth">
       <head>
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://flagcdn.com" />
+        <link rel="dns-prefetch" href="https://web.squarecdn.com" />
+        <link rel="dns-prefetch" href="https://maps.googleapis.com" />
+      </head>
+      <body>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           strategy="afterInteractive"
@@ -46,13 +58,8 @@ export default function RootLayout({ children }) {
             gtag('config', '${GA_ID}');
           `}
         </Script>
-        <link rel="preconnect" href="https://images.unsplash.com" />
-        <link rel="dns-prefetch" href="https://images.unsplash.com" />
-        <link rel="dns-prefetch" href="https://flagcdn.com" />
-        <link rel="dns-prefetch" href="https://web.squarecdn.com" />
-        <link rel="dns-prefetch" href="https://maps.googleapis.com" />
-      </head>
-      <body>{children}</body>
+        {children}
+      </body>
     </html>
   );
 }

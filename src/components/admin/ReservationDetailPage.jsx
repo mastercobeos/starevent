@@ -10,9 +10,14 @@ import {
   ArrowLeft, Loader2, User, MapPin, Calendar, Phone, Mail,
   FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2, Package,
 } from 'lucide-react';
+import { formatDate } from '../../lib/format';
+import { useToast } from '../ui/Toast';
+import { useConfirm } from '../ui/ConfirmModal';
 
 export default function ReservationDetailPage({ id }) {
   const router = useRouter();
+  const toast = useToast();
+  const confirm = useConfirm();
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -37,14 +42,14 @@ export default function ReservationDetailPage({ id }) {
       await load();
     } catch (err) {
       console.error('Action error:', err);
-      alert(err.message || 'Action failed');
+      toast(err.message || 'Action failed', 'error');
     }
     setActionLoading(false);
   };
 
   const handleArchive = async (isArchived) => {
     const action = isArchived ? 'unarchive' : 'archive';
-    if (!confirm(`Are you sure you want to ${action} this reservation?`)) return;
+    if (!(await confirm(`Are you sure you want to ${action} this reservation?`, { title: `${action.charAt(0).toUpperCase() + action.slice(1)} Reservation` }))) return;
     setActionLoading(true);
     try {
       if (isArchived) {
@@ -55,30 +60,24 @@ export default function ReservationDetailPage({ id }) {
       await load();
     } catch (err) {
       console.error(`${action} failed:`, err);
-      alert(err.message || `${action} failed`);
+      toast(err.message || `${action} failed`, 'error');
     }
     setActionLoading(false);
   };
 
   const handleDelete = async () => {
-    if (!confirm('PERMANENTLY DELETE this reservation and all its data? This cannot be undone.')) return;
+    if (!(await confirm('PERMANENTLY DELETE this reservation and all its data? This cannot be undone.', { title: 'Delete Reservation', destructive: true, confirmText: 'Delete' }))) return;
     setActionLoading(true);
     try {
       await deleteReservation(id);
       router.push('/admin');
     } catch (err) {
       console.error('Delete failed:', err);
-      alert(err.message || 'Delete failed');
+      toast(err.message || 'Delete failed', 'error');
       setActionLoading(false);
     }
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
-      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
-    });
-  };
 
   if (loading) {
     return (
@@ -150,7 +149,7 @@ export default function ReservationDetailPage({ id }) {
 
         {!isTerminal && r.status !== STATUS.PENDING_OUT_OF_STOCK && r.status !== 'pending' && (
           <Button
-            onClick={() => { if (confirm('Cancel this reservation?')) handleAction('cancel'); }}
+            onClick={async () => { if (await confirm('Cancel this reservation?', { title: 'Cancel Reservation', destructive: true, confirmText: 'Cancel Reservation' })) handleAction('cancel'); }}
             disabled={actionLoading}
             variant="outline"
             className="border-red-500/30 text-red-400/70 hover:bg-red-500/10"

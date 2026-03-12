@@ -8,9 +8,9 @@ const BG_IMAGE = 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?i
 export const FeaturesSection = memo(function FeaturesSection({ t }) {
   const goldFilter = 'invert(75%) sepia(80%) saturate(600%) hue-rotate(10deg) brightness(110%) contrast(100%)';
   const features = [
-    { icon: '/casa.png', filter: goldFilter, size: 56, title: t.familyOwned, desc: t.familyOwnedDesc },
-    { icon: '/reloj.png', filter: goldFilter, size: 56, title: t.reliableSetup, desc: t.reliableSetupDesc },
-    { icon: '/silla.png', filter: goldFilter, size: 56, title: t.eventReady, desc: t.eventReadyDesc },
+    { icon: '/casa.webp', filter: goldFilter, size: 56, title: t.familyOwned, desc: t.familyOwnedDesc },
+    { icon: '/reloj.webp', filter: goldFilter, size: 56, title: t.reliableSetup, desc: t.reliableSetupDesc },
+    { icon: '/silla.webp', filter: goldFilter, size: 56, title: t.eventReady, desc: t.eventReadyDesc },
   ];
 
   return (

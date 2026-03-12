@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { escapeHtml, formatDate, formatCurrency } from './format';
 
 const BUSINESS_EMAIL = 'info@stareventrentaltx.com';
 
@@ -7,30 +8,19 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Chicago',
-  });
-}
-
-function formatCurrency(amount) {
-  return `$${Number(amount || 0).toFixed(2)}`;
-}
-
 function buildItemsTable(items) {
   if (!items || items.length === 0) return '';
   return items.map(item => `
     <tr>
-      <td style="padding:6px 12px;border-bottom:1px solid #eee;color:#444;">${item.name || item.product_id}</td>
-      <td style="padding:6px 12px;border-bottom:1px solid #eee;color:#444;text-align:center;">${item.quantity}</td>
+      <td style="padding:6px 12px;border-bottom:1px solid #eee;color:#444;">${escapeHtml(item.name || item.product_id)}</td>
+      <td style="padding:6px 12px;border-bottom:1px solid #eee;color:#444;text-align:center;">${Number(item.quantity)}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee;color:#444;text-align:right;">${formatCurrency(item.unit_price)}</td>
     </tr>
   `).join('');
 }
 
 function confirmationEmailHtml(reservation, items, { forBusiness = false } = {}) {
-  const clientName = `${reservation.first_name} ${reservation.last_name}`.trim();
+  const clientName = escapeHtml(`${reservation.first_name} ${reservation.last_name}`.trim());
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff;">
@@ -56,11 +46,11 @@ function confirmationEmailHtml(reservation, items, { forBusiness = false } = {})
           </tr>
           <tr>
             <td style="padding:4px 0;color:#777;">Email:</td>
-            <td style="padding:4px 0;color:#333;">${reservation.client_email}</td>
+            <td style="padding:4px 0;color:#333;">${escapeHtml(reservation.client_email)}</td>
           </tr>
           <tr>
             <td style="padding:4px 0;color:#777;">Phone:</td>
-            <td style="padding:4px 0;color:#333;">${reservation.phone_1 || '—'}</td>
+            <td style="padding:4px 0;color:#333;">${escapeHtml(reservation.phone_1) || '—'}</td>
           </tr>
           <tr>
             <td style="padding:4px 0;color:#777;">Event Date:</td>
@@ -72,11 +62,11 @@ function confirmationEmailHtml(reservation, items, { forBusiness = false } = {})
           </tr>
           ${reservation.rental_days > 1 ? `<tr>
             <td style="padding:4px 0;color:#777;">Rental Days:</td>
-            <td style="padding:4px 0;color:#333;">${reservation.rental_days} days</td>
+            <td style="padding:4px 0;color:#333;">${Number(reservation.rental_days)} days</td>
           </tr>` : ''}
           <tr>
             <td style="padding:4px 0;color:#777;">Address:</td>
-            <td style="padding:4px 0;color:#333;">${reservation.event_address || '—'}</td>
+            <td style="padding:4px 0;color:#333;">${escapeHtml(reservation.event_address) || '—'}</td>
           </tr>
         </table>
       </div>
@@ -146,7 +136,7 @@ function confirmationEmailHtml(reservation, items, { forBusiness = false } = {})
 }
 
 function paymentCompleteEmailHtml(reservation, items) {
-  const clientName = `${reservation.first_name} ${reservation.last_name}`.trim();
+  const clientName = escapeHtml(`${reservation.first_name} ${reservation.last_name}`.trim());
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff;">
@@ -176,7 +166,7 @@ function paymentCompleteEmailHtml(reservation, items) {
           </tr>
           <tr>
             <td style="padding:4px 0;color:#777;">Address:</td>
-            <td style="padding:4px 0;color:#333;">${reservation.event_address || '—'}</td>
+            <td style="padding:4px 0;color:#333;">${escapeHtml(reservation.event_address) || '—'}</td>
           </tr>
         </table>
       </div>
@@ -241,7 +231,7 @@ export async function sendPaymentCompleteEmail(reservation, items) {
     await resend.emails.send({
       from,
       to: BUSINESS_EMAIL,
-      subject: `Payment Complete - ${clientName} - ${formatDate(reservation.event_date)}`,
+      subject: `Payment Complete - ${clientName} - ${formatDate(reservation.event_date, { weekday: undefined })}`,
       html,
     });
 
@@ -277,7 +267,7 @@ export async function sendReservationConfirmation(reservation, items) {
     await resend.emails.send({
       from,
       to: BUSINESS_EMAIL,
-      subject: `New Reservation Confirmed - ${clientName} - ${formatDate(reservation.event_date)}`,
+      subject: `New Reservation Confirmed - ${clientName} - ${formatDate(reservation.event_date, { weekday: undefined })}`,
       html: businessHtml,
     });
 

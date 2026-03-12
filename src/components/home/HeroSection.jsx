@@ -53,7 +53,7 @@ export const HeroSection = memo(function HeroSection({ t }) {
           >
             <Image
               src={src}
-              alt="Star Event Rental - Event Background"
+              alt="Star Event Rental - Tent, chair & table rentals for weddings and events in Houston TX"
               fill
               sizes="100vw"
               className="object-cover object-center"

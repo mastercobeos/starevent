@@ -5,6 +5,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'flagcdn.com' },
       { protocol: 'https', hostname: 'stareventrentaltx.com' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200],

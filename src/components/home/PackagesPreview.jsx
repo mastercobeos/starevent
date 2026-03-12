@@ -5,8 +5,8 @@ import { BackgroundSection } from '../ui/BackgroundSection';
 const BG_IMAGE = 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70';
 
 const previewCards = [
-  { badge: 'Deluxe', image: '/tentdeluxe1.jpeg' },
-  { badge: 'Basic', image: '/basic1.png' },
+  { badge: 'Deluxe', image: '/tentdeluxe1.webp' },
+  { badge: 'Basic', image: '/basic1.webp' },
 ];
 
 export const PackagesPreview = memo(function PackagesPreview({ t, onSelectPackage }) {
@@ -24,7 +24,7 @@ export const PackagesPreview = memo(function PackagesPreview({ t, onSelectPackag
             {previewCards.map((pkg, idx) => (
               <div key={idx} onClick={() => onSelectPackage(pkg.badge)}>
                 <div className="relative rounded-2xl shadow-xl hover:-translate-y-3 transition-[transform,box-shadow] duration-300 hover:shadow-2xl overflow-hidden h-[280px] sm:h-[350px] md:h-[400px] group cursor-pointer">
-                  <Image src={pkg.image} alt={pkg.badge + ' package'} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover object-center transition-transform duration-500 group-hover:scale-110" loading="lazy" quality={75} />
+                  <Image src={pkg.image} alt={`${pkg.badge} event rental package - tents, tables & chairs in Houston TX`} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover object-center transition-transform duration-500 group-hover:scale-110" loading="lazy" quality={75} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute top-4 left-4">
                     <span className={`px-4 py-2 rounded-full text-sm font-bold ${

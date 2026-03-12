@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, memo } from 'react';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import { BackgroundSection } from '../ui/BackgroundSection';
@@ -127,10 +128,13 @@ export const ReviewsSection = memo(function ReviewsSection({ t }) {
                           </p>
                           <div className="flex items-center gap-2">
                             {review.photo && (
-                              <img
+                              <Image
                                 src={review.photo}
-                                alt={review.author}
+                                alt={`${review.author} - Star Event Rental review`}
+                                width={20}
+                                height={20}
                                 className="w-5 h-5 rounded-full object-cover"
+                                loading="lazy"
                                 referrerPolicy="no-referrer"
                               />
                             )}

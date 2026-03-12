@@ -6,6 +6,9 @@ import { fetchAdminReservations, adminAction, archiveReservation, unarchiveReser
 import StatusBadge from './StatusBadge';
 import { STATUS, TERMINAL_STATES } from '../../lib/reservation-state-machine';
 import { Loader2, Eye, Check, X, RefreshCw, Ban, Archive, ArchiveRestore, Trash2 } from 'lucide-react';
+import { formatDate as formatDateUtil } from '../../lib/format';
+import { useToast } from '../ui/Toast';
+import { useConfirm } from '../ui/ConfirmModal';
 
 const TABS = [
   { key: 'all', label: 'All' },
@@ -25,6 +28,8 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('all');
   const [actionLoading, setActionLoading] = useState(null);
   const [showArchived, setShowArchived] = useState(false);
+  const toast = useToast();
+  const confirm = useConfirm();
 
   const loadReservations = async (archived = showArchived) => {
     setLoading(true);
@@ -48,14 +53,14 @@ export default function AdminDashboard() {
       await loadReservations();
     } catch (err) {
       console.error('Action failed:', err);
-      alert(err.message || 'Action failed');
+      toast(err.message || 'Action failed', 'error');
     }
     setActionLoading(null);
   };
 
   const handleArchive = async (id, isArchived) => {
     const action = isArchived ? 'unarchive' : 'archive';
-    if (!confirm(`Are you sure you want to ${action} this reservation?`)) return;
+    if (!(await confirm(`Are you sure you want to ${action} this reservation?`, { title: `${action.charAt(0).toUpperCase() + action.slice(1)} Reservation` }))) return;
     setActionLoading(id);
     try {
       if (isArchived) {
@@ -66,20 +71,20 @@ export default function AdminDashboard() {
       await loadReservations();
     } catch (err) {
       console.error(`${action} failed:`, err);
-      alert(err.message || `${action} failed`);
+      toast(err.message || `${action} failed`, 'error');
     }
     setActionLoading(null);
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('PERMANENTLY DELETE this reservation? This cannot be undone.')) return;
+    if (!(await confirm('PERMANENTLY DELETE this reservation? This cannot be undone.', { title: 'Delete Reservation', destructive: true, confirmText: 'Delete' }))) return;
     setActionLoading(id);
     try {
       await deleteReservation(id);
       await loadReservations();
     } catch (err) {
       console.error('Delete failed:', err);
-      alert(err.message || 'Delete failed');
+      toast(err.message || 'Delete failed', 'error');
     }
     setActionLoading(null);
   };
@@ -95,12 +100,7 @@ export default function AdminDashboard() {
       ? reservations
       : reservations.filter((r) => r.status === activeTab);
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric',
-    });
-  };
+  const formatDate = (dateStr) => formatDateUtil(dateStr, { weekday: undefined, month: 'short' });
 
   const getClientName = (r) => {
     if (r.first_name && r.last_name) return `${r.first_name} ${r.last_name}`;
@@ -168,8 +168,8 @@ export default function AdminDashboard() {
         {/* Cancel button for non-terminal states */}
         {!TERMINAL_STATES.includes(res.status) && res.status !== STATUS.PENDING_OUT_OF_STOCK && res.status !== 'pending' && (
           <button
-            onClick={() => {
-              if (confirm('Are you sure you want to cancel this reservation?')) {
+            onClick={async () => {
+              if (await confirm('Are you sure you want to cancel this reservation?', { title: 'Cancel Reservation', destructive: true, confirmText: 'Cancel Reservation' })) {
                 handleAdminAction(res.id, 'cancel');
               }
             }}

@@ -14,6 +14,7 @@ export const ServiceLandingPage = memo(function ServiceLandingPage({ service }) 
   const t = translations[language].home;
   const isEs = language === 'es';
 
+  const prefix = isEs ? '/es' : '';
   const h1 = isEs ? service.h1Es : service.h1;
   const subtitle = isEs ? service.heroSubtitleEs : service.heroSubtitle;
   const intro = isEs ? service.introEs : service.intro;
@@ -36,7 +37,7 @@ export const ServiceLandingPage = memo(function ServiceLandingPage({ service }) 
             {subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <Link href="/contact">
+            <Link href={`${prefix}/contact`}>
               <Button variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-5 text-lg font-semibold transition-transform duration-300 hover:scale-110 w-full sm:w-auto">
                 {isEs ? 'Cotización Gratis' : 'Free Quote'}
               </Button>
@@ -50,6 +51,21 @@ export const ServiceLandingPage = memo(function ServiceLandingPage({ service }) 
         </div>
       </BackgroundSection>
 
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb" className="bg-slate-950 pt-6 pb-0">
+        <ol className="max-w-4xl mx-auto px-4 sm:px-6 flex items-center gap-2 text-sm text-white/50">
+          <li>
+            <Link href={`${prefix}/`} className="hover:text-primary transition-colors">
+              {isEs ? 'Inicio' : 'Home'}
+            </Link>
+          </li>
+          <li><span className="mx-1">/</span></li>
+          <li>
+            <span className="text-white/80">{h1}</span>
+          </li>
+        </ol>
+      </nav>
+
       {/* Introduction / Description Section */}
       <section className="py-12 sm:py-16 bg-slate-950">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -58,6 +74,24 @@ export const ServiceLandingPage = memo(function ServiceLandingPage({ service }) 
           </p>
         </div>
       </section>
+
+      {/* Content Sections */}
+      {service.contentSections && service.contentSections.length > 0 && (
+        <section className="py-12 sm:py-16 bg-slate-900">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 space-y-10">
+            {service.contentSections.map((section, idx) => (
+              <div key={idx}>
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
+                  {isEs ? section.titleEs : section.title}
+                </h2>
+                <p className="text-white/80 text-sm sm:text-base leading-relaxed">
+                  {isEs ? section.textEs : section.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Products Grid */}
       {products.length > 0 && (
@@ -78,7 +112,7 @@ export const ServiceLandingPage = memo(function ServiceLandingPage({ service }) 
                   <div className="relative h-56 sm:h-64 overflow-hidden">
                     <Image
                       src={item.image}
-                      alt={isEs ? (item.nameEs || item.name) : item.name}
+                      alt={isEs ? `${item.nameEs || item.name} para renta en Houston TX - Star Event Rental` : `${item.name} for rent in Houston TX - Star Event Rental`}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -103,12 +137,14 @@ export const ServiceLandingPage = memo(function ServiceLandingPage({ service }) 
                 </div>
               ))}
             </div>
-            <div className="text-center mt-10">
-              <Link href="/#products">
-                <Button variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-5 text-lg font-semibold">
-                  {isEs ? 'Ver Todos los Productos' : 'View All Products'}
-                </Button>
-              </Link>
+            <div className="flex flex-wrap justify-center gap-3 mt-10">
+              {(service.productCategories || []).map((cat) => (
+                <Link key={cat.slug} href={`${prefix}/products/${cat.slug}`}>
+                  <Button variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-4 text-base font-semibold">
+                    {isEs ? cat.nameEs : cat.name}
+                  </Button>
+                </Link>
+              ))}
             </div>
           </div>
         </BackgroundSection>
@@ -170,7 +206,7 @@ export const ServiceLandingPage = memo(function ServiceLandingPage({ service }) 
               : 'Contact us today for a free quote. Professional delivery and setup included.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/contact">
+            <Link href={`${prefix}/contact`}>
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-5 text-lg font-bold rounded-lg border-2 border-[#C9A84C] w-full sm:w-auto">
                 {isEs ? 'Solicitar Cotización' : 'Request a Quote'}
               </Button>

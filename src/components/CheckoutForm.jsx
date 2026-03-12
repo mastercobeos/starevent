@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   ArrowLeft, CheckCircle, AlertCircle, Loader2, Clock,
   CreditCard, MapPin, FileText, PenLine, ExternalLink,
@@ -12,42 +12,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../translations';
 import { getInitials } from '../lib/contract-template';
 import { calculateSplit } from '../lib/reservation-state-machine';
+import { useSquareCard } from '../hooks/useSquareCard';
+import { useGoogleMapsAddress } from '../hooks/useGoogleMapsAddress';
 
-
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-const SQUARE_APP_ID = process.env.NEXT_PUBLIC_SQUARE_APP_ID;
-const SQUARE_LOCATION_ID = process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID;
-const SQUARE_ENV = process.env.NEXT_PUBLIC_SQUARE_ENVIRONMENT || 'sandbox';
-
-// Warehouse origin: 3730 Redwood Falls Dr, Houston, TX 77082
-const ORIGIN = { lat: 29.7233, lng: -95.5977 };
-const DELIVERY_TIERS = [
-  { maxMiles: 20, fee: 35 },
-  { maxMiles: 40, fee: 60 },
-  { maxMiles: 60, fee: 120 },
-];
-const MAX_DELIVERY_MILES = 60;
 const TAX_RATE = 0.0825;
 const SAME_DAY_PICKUP_FEE = 40;
-
-function loadGoogleMaps() {
-  if (window.google?.maps) return Promise.resolve();
-  if (!GOOGLE_MAPS_API_KEY) return Promise.reject(new Error('No API key'));
-  if (window._gmapsLoading) return window._gmapsLoading;
-  window._gmapsLoading = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Google Maps'));
-    document.head.appendChild(script);
-  });
-  return window._gmapsLoading;
-}
-
-const SQUARE_SDK_URL = SQUARE_ENV === 'production'
-  ? 'https://web.squarecdn.com/v1/square.js'
-  : 'https://sandbox.web.squarecdn.com/v1/square.js';
 
 export default function CheckoutForm({ onBack }) {
   const { items, getTotal, clearCart } = useCart();
@@ -90,172 +59,31 @@ export default function CheckoutForm({ onBack }) {
   const [invoiceUrl, setInvoiceUrl] = useState('');
   const [initials, setInitials] = useState('');
 
-  // Square card payment state
-  const [squareReady, setSquareReady] = useState(typeof window !== 'undefined' && !!window.Square);
-  const [cardInstance, setCardInstance] = useState(null);
-  const [cardLoading, setCardLoading] = useState(false);
-  const [cardInitKey, setCardInitKey] = useState(0);
+  // Square card payment
+  const {
+    cardInstance, cardLoading, paymentError, setPaymentError,
+    retryCardInit, resetCard, cardContainerRef,
+  } = useSquareCard({ active: step === 'deposit', language });
   const [processingPayment, setProcessingPayment] = useState(false);
-  const [paymentError, setPaymentError] = useState('');
-  const cardContainerRef = useRef(null);
 
-  // Delivery fee state
-  const [deliveryFee, setDeliveryFee] = useState(null);
-  const [deliveryMiles, setDeliveryMiles] = useState(null);
-  const [calculatingDelivery, setCalculatingDelivery] = useState(false);
-  const [mapsLoaded, setMapsLoaded] = useState(false);
-  const [addressVerified, setAddressVerified] = useState(false);
-  const addressInputRef = useRef(null);
-  const autocompleteRef = useRef(null);
+  // Google Maps address + delivery
+  const {
+    addressInputRef, deliveryFee, deliveryMiles,
+    calculatingDelivery, addressVerified, resetAddress, MAX_DELIVERY_MILES,
+  } = useGoogleMapsAddress({
+    enabled: step === 'form',
+    onPlaceSelected: ({ address, hasZip }) => {
+      setForm((prev) => ({ ...prev, eventAddress: address }));
+      if (errors.eventAddress) setErrors((prev) => ({ ...prev, eventAddress: '' }));
+      if (!hasZip) {
+        setErrors((prev) => ({ ...prev, eventAddress: tc.addressNeedsZip || 'Please select a complete address with zip code' }));
+      }
+    },
+  });
 
   const needsSurface = items.some((item) =>
     item.id.startsWith('tent-') || item.id.startsWith('pkg-') || item.id.startsWith('dancefloor-')
   );
-
-  // --- Load Square SDK ---
-  useEffect(() => {
-    if (window.Square) { setSquareReady(true); return; }
-    // Avoid adding duplicate script tags
-    const existing = document.querySelector(`script[src="${SQUARE_SDK_URL}"]`);
-    if (existing) {
-      const check = () => { if (window.Square) setSquareReady(true); };
-      existing.addEventListener('load', check);
-      return () => existing.removeEventListener('load', check);
-    }
-    const script = document.createElement('script');
-    script.src = SQUARE_SDK_URL;
-    script.async = true;
-    script.onload = () => {
-      if (window.Square) {
-        setSquareReady(true);
-      } else {
-        console.error('Square SDK loaded but window.Square is undefined');
-        setPaymentError('Payment system failed to initialize. Please refresh the page.');
-      }
-    };
-    script.onerror = () => {
-      console.error('Square SDK failed to load');
-      setPaymentError('Payment system could not be loaded. Please check your connection and refresh.');
-    };
-    document.head.appendChild(script);
-  }, []);
-
-  // --- Google Maps ---
-  useEffect(() => {
-    loadGoogleMaps().then(() => setMapsLoaded(true)).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (!mapsLoaded || !addressInputRef.current || autocompleteRef.current) return;
-    if (step !== 'form') return;
-    const autocomplete = new window.google.maps.places.Autocomplete(addressInputRef.current, {
-      componentRestrictions: { country: 'us' },
-      fields: ['formatted_address', 'geometry', 'address_components'],
-    });
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      if (place.formatted_address) {
-        const zipComponent = place.address_components?.find((c) => c.types.includes('postal_code'));
-        const hasZip = !!zipComponent?.short_name;
-        setForm((prev) => ({ ...prev, eventAddress: place.formatted_address }));
-        setAddressVerified(hasZip);
-        if (errors.eventAddress) setErrors((prev) => ({ ...prev, eventAddress: '' }));
-        if (!hasZip) {
-          setErrors((prev) => ({ ...prev, eventAddress: tc.addressNeedsZip || 'Please select a complete address with zip code' }));
-        }
-        calculateDistance(place);
-      }
-    });
-    autocompleteRef.current = autocomplete;
-  }, [mapsLoaded, step]);
-
-  const calculateDistance = useCallback((place) => {
-    if (!window.google?.maps || !place.geometry) return;
-    setCalculatingDelivery(true);
-    const service = new window.google.maps.DistanceMatrixService();
-    service.getDistanceMatrix(
-      {
-        origins: [new window.google.maps.LatLng(ORIGIN.lat, ORIGIN.lng)],
-        destinations: [place.geometry.location],
-        travelMode: window.google.maps.TravelMode.DRIVING,
-        unitSystem: window.google.maps.UnitSystem.IMPERIAL,
-      },
-      (response, status) => {
-        setCalculatingDelivery(false);
-        if (status === 'OK' && response.rows[0]?.elements[0]?.status === 'OK') {
-          const distanceMeters = response.rows[0].elements[0].distance.value;
-          const miles = Math.round(distanceMeters / 1609.34);
-          setDeliveryMiles(miles);
-          if (miles > MAX_DELIVERY_MILES) {
-            setDeliveryFee(null);
-          } else {
-            const tier = DELIVERY_TIERS.find((t) => miles <= t.maxMiles);
-            setDeliveryFee(tier.fee);
-          }
-        }
-      }
-    );
-  }, []);
-
-  // --- Square Web Payments SDK ---
-  useEffect(() => {
-    if (step !== 'deposit' || cardInstance || !squareReady) return;
-    let card;
-    let cancelled = false;
-
-    async function initCard() {
-      setCardLoading(true);
-      setPaymentError('');
-      const MAX_RETRIES = 3;
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        if (cancelled) return;
-        try {
-          if (!window.Square) throw new Error('Square SDK not available');
-          if (!SQUARE_APP_ID || !SQUARE_LOCATION_ID) throw new Error('Square credentials not configured');
-          // Wait before retry attempts
-          if (attempt > 0) await new Promise((r) => setTimeout(r, 1000 * attempt));
-          if (cancelled) return;
-          const payments = await window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
-          card = await payments.card();
-          if (cancelled) return;
-          // Wait for DOM container
-          let container;
-          for (let i = 0; i < 20; i++) {
-            if (cancelled) return;
-            container = document.getElementById('sq-card-container');
-            if (container) break;
-            await new Promise((r) => setTimeout(r, 100));
-          }
-          if (!container) throw new Error('Card container not found in DOM');
-          await card.attach('#sq-card-container');
-          if (!cancelled) { setCardInstance(card); setCardLoading(false); }
-          return; // Success — exit retry loop
-        } catch (err) {
-          console.error(`Square card init attempt ${attempt + 1} error:`, err);
-          if (card) { card.destroy().catch(() => {}); card = null; }
-          if (attempt === MAX_RETRIES - 1 && !cancelled) {
-            const detail = err?.message || String(err);
-            setPaymentError(
-              (language === 'en'
-                ? 'Could not load payment form. Please refresh the page and try again.'
-                : 'No se pudo cargar el formulario de pago. Actualice la página e intente de nuevo.')
-              + ` [${detail}]`
-            );
-          }
-        }
-      }
-      if (!cancelled) setCardLoading(false);
-    }
-
-    initCard();
-    return () => {
-      cancelled = true;
-      if (card) {
-        card.destroy().catch(() => {});
-        setCardInstance(null);
-      }
-    };
-  }, [step, squareReady, language, cardInitKey]);
 
   const handlePayDeposit = async () => {
     if (!cardInstance) return;
@@ -304,7 +132,7 @@ export default function CheckoutForm({ onBack }) {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
-    if (name === 'eventAddress') { setDeliveryFee(null); setDeliveryMiles(null); setAddressVerified(false); }
+    if (name === 'eventAddress') { resetAddress(); }
   };
 
   // --- Validation ---
@@ -435,20 +263,9 @@ export default function CheckoutForm({ onBack }) {
 
   // --- Show card payment form after contract signing ---
   const showDepositPayment = () => {
-    setCardInstance(null);
-    setPaymentError('');
+    resetCard();
     setStep('deposit');
     clearCart();
-  };
-
-  // Retry card initialization (force re-run of the useEffect)
-  const retryCardInit = () => {
-    if (cardInstance) {
-      cardInstance.destroy().catch(() => {});
-    }
-    setCardInstance(null);
-    setPaymentError('');
-    setCardInitKey((k) => k + 1);
   };
 
   // --- Date calculations ---

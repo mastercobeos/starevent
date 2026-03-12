@@ -9,10 +9,10 @@ export const AboutSection = memo(function AboutSection({ language }) {
   const about = translations[language].about;
 
   const benefits = [
-    { icon: '/diamante.png', isImage: true, filter: 'invert(70%) sepia(60%) saturate(500%) hue-rotate(10deg) brightness(90%) contrast(90%)', imgStyle: { transform: 'scale(0.85)' }, title: about.personalizedService, desc: about.personalizedServiceDesc },
-    { icon: '/reloj.png', isImage: true, filter: 'invert(75%) sepia(80%) saturate(600%) hue-rotate(10deg) brightness(110%) contrast(100%)', imgStyle: { transform: 'scale(1.3)' }, title: about.punctuality, desc: about.punctualityDesc },
-    { icon: '/quality.png', isImage: true, filter: 'invert(70%) sepia(60%) saturate(500%) hue-rotate(10deg) brightness(90%) contrast(90%)', title: about.quality, desc: about.qualityDesc },
-    { icon: '/casa.png', isImage: true, filter: 'invert(75%) sepia(80%) saturate(600%) hue-rotate(10deg) brightness(110%) contrast(100%)', title: about.familyBusiness, desc: about.familyBusinessDesc },
+    { icon: '/diamante.webp', isImage: true, filter: 'invert(70%) sepia(60%) saturate(500%) hue-rotate(10deg) brightness(90%) contrast(90%)', imgStyle: { transform: 'scale(0.85)' }, title: about.personalizedService, desc: about.personalizedServiceDesc },
+    { icon: '/reloj.webp', isImage: true, filter: 'invert(75%) sepia(80%) saturate(600%) hue-rotate(10deg) brightness(110%) contrast(100%)', imgStyle: { transform: 'scale(1.3)' }, title: about.punctuality, desc: about.punctualityDesc },
+    { icon: '/quality.webp', isImage: true, filter: 'invert(70%) sepia(60%) saturate(500%) hue-rotate(10deg) brightness(90%) contrast(90%)', title: about.quality, desc: about.qualityDesc },
+    { icon: '/casa.webp', isImage: true, filter: 'invert(75%) sepia(80%) saturate(600%) hue-rotate(10deg) brightness(110%) contrast(100%)', title: about.familyBusiness, desc: about.familyBusinessDesc },
   ];
 
   return (
@@ -22,16 +22,16 @@ export const AboutSection = memo(function AboutSection({ language }) {
           <div>
             <Image
               src="https://images.unsplash.com/photo-1527529482837-4698179dc6ce?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-              alt="Star Event Rental professional event setup with elegant table decorations in Houston TX"
+              alt="Star Event Rental professional tent and table setup for weddings and corporate events in Houston TX"
               width={800}
               height={533}
               className="rounded-2xl shadow-lg w-full"
             />
           </div>
           <div>
-            <h4 className="text-primary uppercase text-xs sm:text-sm font-bold tracking-wider mb-2">
+            <p className="text-primary uppercase text-xs sm:text-sm font-bold tracking-wider mb-2">
               {about.whyChoose}
-            </h4>
+            </p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6">
               {about.inspire}
             </h2>

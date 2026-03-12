@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { verifySquareWebhookSignature } from '@/lib/security';
 import { sendReservationConfirmation, sendPaymentCompleteEmail } from '@/lib/email';
+import { createBalanceInvoice } from '@/lib/create-balance-invoice';
 
 // Square webhook handler for invoice payment events
 export async function POST(request) {
@@ -95,17 +96,9 @@ export async function POST(request) {
 
           // Create balance invoice automatically
           try {
-            const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
-              || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-            const res = await fetch(
-              `${baseUrl}/api/reservations/${reservation.id}/pay-balance`,
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-              }
-            );
-            if (!res.ok) {
-              console.error('Failed to auto-create balance invoice');
+            const invoiceResult = await createBalanceInvoice(reservation.id);
+            if (!invoiceResult.ok) {
+              console.error('Failed to auto-create balance invoice:', invoiceResult.data?.error);
             }
           } catch (e) {
             console.error('Auto-create balance invoice error:', e);

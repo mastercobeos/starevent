@@ -1,18 +1,6 @@
 // Contract template renderer with merge fields
 import { DEPOSIT_PERCENTAGE, BALANCE_PERCENTAGE } from './reservation-state-machine';
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-US', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    timeZone: 'America/Chicago',
-  });
-}
-
-function formatCurrency(amount) {
-  return `$${Number(amount).toFixed(2)}`;
-}
+import { escapeHtml, formatDate, formatCurrency } from './format';
 
 // Render the contract HTML with reservation data
 export function renderContract(reservation, items, language = 'en') {
@@ -23,15 +11,15 @@ export function renderContract(reservation, items, language = 'en') {
     special_notes, subtotal, rental_days, delivery_fee, same_day_pickup, same_day_pickup_fee, tax_amount, total, deposit_amount, balance_amount,
   } = reservation;
 
-  const clientName = `${first_name} ${last_name}`.trim();
+  const clientName = escapeHtml(`${first_name} ${last_name}`.trim());
   const today = new Date().toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Chicago',
   });
 
   const itemsRows = items.map((item) => `
     <tr>
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e5e5;">${item.product_name || item.product_id}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e5e5;text-align:center;">${item.quantity}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #e5e5e5;">${escapeHtml(item.product_name || item.product_id)}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #e5e5e5;text-align:center;">${Number(item.quantity)}</td>
       <td style="padding:6px 10px;border-bottom:1px solid #e5e5e5;text-align:right;">${formatCurrency(item.unit_price)}</td>
       <td style="padding:6px 10px;border-bottom:1px solid #e5e5e5;text-align:right;">${formatCurrency(item.quantity * item.unit_price)}</td>
     </tr>
@@ -52,7 +40,7 @@ export function renderContract(reservation, items, language = 'en') {
           <strong>STAR EVENT RENTAL, LLC</strong>, hereinafter "THE LESSOR", with registered address in Houston, TX 77082, and
         </p>
         <p style="font-size:13px;color:#444;line-height:1.7;">
-          <strong>${clientName}</strong> (${client_email || '—'}), hereinafter "THE CLIENT".
+          <strong>${clientName}</strong> (${escapeHtml(client_email) || '—'}), hereinafter "THE CLIENT".
         </p>
         <p style="font-size:13px;color:#444;">Both parties agree to the following:</p>
 
@@ -60,9 +48,9 @@ export function renderContract(reservation, items, language = 'en') {
         <h2 style="font-size:15px;color:#1a1a1a;border-bottom:1px solid #ddd;padding-bottom:6px;margin-top:20px;">Client Information</h2>
         <table style="width:100%;font-size:13px;margin-bottom:16px;">
           <tr><td style="padding:3px 0;color:#666;width:140px;">Name:</td><td><strong>${clientName}</strong></td></tr>
-          <tr><td style="padding:3px 0;color:#666;">Email:</td><td>${client_email || '—'}</td></tr>
-          <tr><td style="padding:3px 0;color:#666;">Phone:</td><td>${phone_1}${phone_2 ? ` / ${phone_2}` : ''}</td></tr>
-          <tr><td style="padding:3px 0;color:#666;">Address:</td><td>${event_address}</td></tr>
+          <tr><td style="padding:3px 0;color:#666;">Email:</td><td>${escapeHtml(client_email) || '—'}</td></tr>
+          <tr><td style="padding:3px 0;color:#666;">Phone:</td><td>${escapeHtml(phone_1)}${phone_2 ? ` / ${escapeHtml(phone_2)}` : ''}</td></tr>
+          <tr><td style="padding:3px 0;color:#666;">Address:</td><td>${escapeHtml(event_address)}</td></tr>
         </table>
 
         <!-- 1. PURPOSE -->
@@ -76,10 +64,10 @@ export function renderContract(reservation, items, language = 'en') {
         <table style="width:100%;font-size:13px;margin-bottom:16px;">
           <tr><td style="padding:3px 0;color:#666;width:140px;">Event Date:</td><td><strong>${formatDate(event_date)}</strong></td></tr>
           <tr><td style="padding:3px 0;color:#666;">Return Date:</td><td>${formatDate(return_date)}</td></tr>
-          ${event_start_time ? `<tr><td style="padding:3px 0;color:#666;">Event Time:</td><td>${event_start_time}${event_end_time ? ` — ${event_end_time}` : ''}</td></tr>` : ''}
-          <tr><td style="padding:3px 0;color:#666;">Event Address:</td><td>${event_address}</td></tr>
-          ${installation_required ? `<tr><td style="padding:3px 0;color:#666;">Installation:</td><td>Required${installation_details ? ` — ${installation_details}` : ''}</td></tr>` : ''}
-          ${special_notes ? `<tr><td style="padding:3px 0;color:#666;">Notes:</td><td>${special_notes}</td></tr>` : ''}
+          ${event_start_time ? `<tr><td style="padding:3px 0;color:#666;">Event Time:</td><td>${escapeHtml(event_start_time)}${event_end_time ? ` — ${escapeHtml(event_end_time)}` : ''}</td></tr>` : ''}
+          <tr><td style="padding:3px 0;color:#666;">Event Address:</td><td>${escapeHtml(event_address)}</td></tr>
+          ${installation_required ? `<tr><td style="padding:3px 0;color:#666;">Installation:</td><td>Required${installation_details ? ` — ${escapeHtml(installation_details)}` : ''}</td></tr>` : ''}
+          ${special_notes ? `<tr><td style="padding:3px 0;color:#666;">Notes:</td><td>${escapeHtml(special_notes)}</td></tr>` : ''}
         </table>
 
         <!-- RENTAL ITEMS -->
@@ -236,7 +224,7 @@ export function renderContract(reservation, items, language = 'en') {
 export function injectInitials(contractHtml, initials) {
   return contractHtml.replace(
     /<span id="contract-initials"([^>]*)><\/span>/,
-    `<span id="contract-initials"$1>${initials}</span>`
+    `<span id="contract-initials"$1>${escapeHtml(initials)}</span>`
   );
 }
 
