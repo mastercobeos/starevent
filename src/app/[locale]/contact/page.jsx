@@ -50,6 +50,7 @@ function getContactJsonLd(locale) {
       email: 'info@stareventrentaltx.com',
       address: {
         '@type': 'PostalAddress',
+        streetAddress: '3730 Redwood Falls Dr',
         addressLocality: 'Houston',
         addressRegion: 'TX',
         postalCode: '77082',

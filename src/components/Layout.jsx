@@ -499,7 +499,7 @@ export default function Layout({ children }) {
             <div>
               <h4 className="text-foreground font-semibold mb-3">{translations[language].footer.getInTouch}</h4>
               <ul className="space-y-2 text-sm">
-                <li>📍 Houston 77082, USA</li>
+                <li>📍 3730 Redwood Falls Dr, Houston, TX 77082</li>
                 <li>📞 <a href="tel:2816360615" className="hover:text-primary transition-colors">281-636-0615</a></li>
                 <li>✉️ <a href="mailto:info@stareventrentaltx.com" className="hover:text-primary transition-colors">info@stareventrentaltx.com</a></li>
               </ul>

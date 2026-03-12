@@ -93,7 +93,7 @@ export default function Contact() {
                 {t.readyToPlan}
               </p>
               <ul className="space-y-4 mb-8 text-white/90">
-                <li><strong>📍 {t.location}</strong> Houston 77082, USA</li>
+                <li><strong>📍 {t.location}</strong> 3730 Redwood Falls Dr, Houston, TX 77082</li>
                 <li><strong>📞 {t.phone}</strong> <a href="tel:2816360615" className="underline hover:text-primary transition-colors">281-636-0615</a></li>
                 <li><strong>✉️ {t.email}</strong> <a href="mailto:info@stareventrentaltx.com" className="underline hover:text-primary transition-colors">info@stareventrentaltx.com</a></li>
                 <li><strong>🌎 {t.serviceAreas}</strong> {t.serviceAreasDesc}</li>

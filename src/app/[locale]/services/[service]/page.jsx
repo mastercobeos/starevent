@@ -60,6 +60,14 @@ export default async function Page({ params }) {
         name: 'Star Event Rental',
         telephone: '+1-281-636-0615',
         url: baseUrl,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: '3730 Redwood Falls Dr',
+          addressLocality: 'Houston',
+          addressRegion: 'TX',
+          postalCode: '77082',
+          addressCountry: 'US',
+        },
       },
       areaServed: [
         { '@type': 'City', name: 'Houston' },

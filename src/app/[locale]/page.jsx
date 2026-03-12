@@ -45,6 +45,7 @@ const jsonLd = {
   description: 'Family-owned event rental company in Houston, TX. We offer tents, tables, chairs, linens, heaters, coolers, and dance floors for weddings, quinceañeras, baby showers, and corporate events.',
   address: {
     '@type': 'PostalAddress',
+    streetAddress: '3730 Redwood Falls Dr',
     addressLocality: 'Houston',
     addressRegion: 'TX',
     postalCode: '77082',
@@ -81,12 +82,20 @@ const jsonLd = {
     ],
   },
   priceRange: '$$',
-  openingHoursSpecification: {
-    '@type': 'OpeningHoursSpecification',
-    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-    opens: '08:00',
-    closes: '20:00',
-  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '08:00',
+      closes: '17:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Saturday', 'Sunday'],
+      opens: '08:00',
+      closes: '17:00',
+    },
+  ],
   sameAs: [
     'https://www.facebook.com/people/Star-Event-Rental-supplies/61561128338857/',
     'https://www.instagram.com/stareventrentaltx',
