@@ -36,6 +36,26 @@ export function verifyReservationToken(reservationId, token) {
 }
 
 // ============================================
+// UUID Validation
+// ============================================
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export function isValidUUID(value) {
+  return typeof value === 'string' && UUID_RE.test(value);
+}
+
+// ============================================
+// Access Token Extraction (prefer header over URL)
+// ============================================
+
+export function getAccessToken(request) {
+  const fromHeader = request.headers.get('x-access-token');
+  if (fromHeader) return fromHeader;
+  const { searchParams } = new URL(request.url);
+  return searchParams.get('token');
+}
+
+// ============================================
 // Square Webhook Signature Verification
 // ============================================
 

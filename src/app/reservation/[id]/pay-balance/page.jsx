@@ -20,7 +20,9 @@ export default function PayBalancePage() {
     const fetchData = async () => {
       try {
         const token = searchParams.get('token') || '';
-        const res = await fetch(`/api/reservations/${params.id}?token=${token}`);
+        const res = await fetch(`/api/reservations/${params.id}`, {
+          headers: { 'x-access-token': token },
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Not found');
         setReservation(data);

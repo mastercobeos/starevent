@@ -27,7 +27,9 @@ export default function ContractPage() {
     const fetchReservation = async () => {
       try {
         const token = searchParams.get('token') || '';
-        const res = await fetch(`/api/reservations/${params.id}?token=${token}`);
+        const res = await fetch(`/api/reservations/${params.id}`, {
+          headers: { 'x-access-token': token },
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Not found');
         setReservation(data);
@@ -61,9 +63,9 @@ export default function ContractPage() {
       if (!contract) throw new Error('Contract not found');
 
       const token = searchParams.get('token') || '';
-      const res = await fetch(`/api/reservations/${params.id}/sign-contract?token=${token}`, {
+      const res = await fetch(`/api/reservations/${params.id}/sign-contract`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-access-token': token },
         body: JSON.stringify({
           initials: initials.trim(),
           contract_hash: contract.contract_hash,
@@ -76,9 +78,9 @@ export default function ContractPage() {
       setSigned(true);
 
       // Create deposit invoice
-      const payRes = await fetch(`/api/reservations/${params.id}/pay-deposit?token=${token}`, {
+      const payRes = await fetch(`/api/reservations/${params.id}/pay-deposit`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-access-token': token },
       });
       const payData = await payRes.json();
       if (payData.invoice_url) setInvoiceUrl(payData.invoice_url);

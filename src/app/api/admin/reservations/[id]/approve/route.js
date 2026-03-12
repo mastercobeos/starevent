@@ -3,6 +3,8 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { renderContract, hashContract } from '@/lib/contract-template';
 import { verifyAdmin } from '@/lib/auth-middleware';
+import { isValidUUID, generateReservationToken } from '@/lib/security';
+import { sendApprovalEmail } from '@/lib/email';
 
 export async function PUT(request, { params }) {
   try {
@@ -16,6 +18,9 @@ export async function PUT(request, { params }) {
     }
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid reservation ID' }, { status: 400 });
+    }
 
     // Fetch reservation
     const { data: reservation, error: resError } = await supabaseAdmin
@@ -133,9 +138,14 @@ export async function PUT(request, { params }) {
       .update({ status: STATUS.APPROVED_WAITING_CONTRACT })
       .eq('id', id);
 
-    // TODO: Send notification to client (email + SMS)
-    // "Your reservation has been approved! Please review and sign your contract."
-    // Include link: /reservation/{id}/contract?token={hmac_token}
+    // Send approval email with contract link
+    const token = generateReservationToken(id);
+    const lang = reservation.language || 'en';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://stareventrentaltx.com';
+    const contractUrl = `${baseUrl}/reservation/${id}/contract?token=${token}&lang=${lang}`;
+    await sendApprovalEmail(reservation, contractUrl).catch((err) =>
+      console.error('Approval email failed (non-blocking):', err.message)
+    );
 
     return NextResponse.json({
       reservation_id: id,
@@ -145,7 +155,7 @@ export async function PUT(request, { params }) {
   } catch (error) {
     console.error('Admin approve error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to approve reservation' },
+      { error: 'Failed to approve reservation' },
       { status: 500 }
     );
   }

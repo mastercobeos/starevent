@@ -3,6 +3,18 @@ import { NextResponse } from 'next/server';
 export function proxy(request) {
   const { pathname } = request.nextUrl;
 
+  // Admin pages: require session cookie (except login page)
+  if (pathname.startsWith('/admin')) {
+    if (pathname === '/admin/login') {
+      return NextResponse.next();
+    }
+    const hasSession = request.cookies.get('has_admin_session')?.value === '1';
+    if (!hasSession) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+    return NextResponse.next();
+  }
+
   // Redirect /en and /en/* → / and /* (301) — avoid duplicate content
   if (pathname === '/en' || pathname.startsWith('/en/')) {
     const newPath = pathname.replace(/^\/en/, '') || '/';
@@ -26,6 +38,6 @@ export function proxy(request) {
 
 export const config = {
   matcher: [
-    '/((?!admin|api|_next|reservation|sitemap\\.xml|robots\\.txt|manifest\\.json|.*\\..*).*)',
+    '/((?!api|_next|reservation|sitemap\\.xml|robots\\.txt|manifest\\.json|.*\\..*).*)',
   ],
 };

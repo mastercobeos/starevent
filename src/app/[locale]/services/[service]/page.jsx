@@ -30,7 +30,7 @@ export async function generateMetadata({ params }) {
       title,
       description,
       url,
-      images: [{ url: '/logo.png', width: 1200, height: 630, alt: title }],
+      images: [{ url: '/og-image.webp', width: 1200, height: 630, alt: title }],
     },
     alternates: {
       canonical: url,

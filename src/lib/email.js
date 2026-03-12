@@ -250,6 +250,107 @@ export async function sendPaymentCompleteEmail(reservation, items) {
   }
 }
 
+function approvalEmailHtml(reservation, contractUrl) {
+  const clientName = escapeHtml(`${reservation.first_name} ${reservation.last_name}`.trim());
+  const isSpanish = reservation.language === 'es';
+
+  const heading = isSpanish ? 'Reservación Aprobada' : 'Reservation Approved';
+  const greeting = isSpanish ? 'Hola' : 'Hello';
+  const bodyText = isSpanish
+    ? 'Tu reservación ha sido aprobada. Por favor revisa y firma tu contrato para continuar con el proceso.'
+    : 'Your reservation has been approved! Please review and sign your contract to continue.';
+  const btnLabel = isSpanish ? 'Revisar y Firmar Contrato' : 'Review & Sign Contract';
+  const eventLabel = isSpanish ? 'Fecha del Evento' : 'Event Date';
+  const totalLabel = isSpanish ? 'Total' : 'Total';
+  const depositLabel = isSpanish ? 'Depósito (40%)' : 'Deposit (40%)';
+  const noteText = isSpanish
+    ? 'Después de firmar el contrato, podrás pagar el depósito en línea.'
+    : 'After signing the contract, you will be able to pay your deposit online.';
+
+  return `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff;">
+      <div style="text-align:center;padding:20px 0;border-bottom:3px solid #C9A84C;">
+        <h1 style="color:#1a1a1a;margin:0;font-size:22px;">Star Event Rental TX</h1>
+        <p style="color:#27ae60;margin:4px 0 0;font-size:14px;">${heading}</p>
+      </div>
+
+      <div style="padding:20px 0;">
+        <p style="color:#333;font-size:15px;">${greeting} <strong>${clientName}</strong>,</p>
+        <p style="color:#555;font-size:14px;line-height:1.6;">${bodyText}</p>
+      </div>
+
+      <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin-bottom:16px;">
+        <table style="width:100%;font-size:13px;">
+          <tr>
+            <td style="padding:4px 0;color:#777;">${eventLabel}:</td>
+            <td style="padding:4px 0;color:#333;font-weight:bold;">${formatDate(reservation.event_date)}</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;color:#777;">${totalLabel}:</td>
+            <td style="padding:4px 0;color:#333;font-weight:bold;">${formatCurrency(reservation.total)}</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;color:#777;">${depositLabel}:</td>
+            <td style="padding:4px 0;color:#333;">${formatCurrency(reservation.deposit_amount)}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="text-align:center;padding:20px 0;">
+        <a href="${contractUrl}" style="display:inline-block;background:#C9A84C;color:#fff;font-weight:bold;font-size:16px;padding:14px 32px;border-radius:8px;text-decoration:none;">
+          ${btnLabel}
+        </a>
+      </div>
+
+      <div style="background:#fffbe6;border:1px solid #f0e68c;border-radius:8px;padding:12px;margin-bottom:16px;">
+        <p style="color:#856404;font-size:13px;margin:0;line-height:1.5;">${noteText}</p>
+      </div>
+
+      <hr style="border:none;border-top:1px solid #eee;margin:20px 0;" />
+      <p style="color:#999;font-size:11px;text-align:center;">
+        Star Event Rental TX &bull; Houston, TX &bull; info@stareventrentaltx.com
+      </p>
+    </div>
+  `;
+}
+
+export async function sendApprovalEmail(reservation, contractUrl) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn('RESEND_API_KEY not configured — skipping approval email');
+    return;
+  }
+
+  const clientName = `${reservation.first_name} ${reservation.last_name}`.trim();
+  const from = `Star Event Rental <${BUSINESS_EMAIL}>`;
+  const isSpanish = reservation.language === 'es';
+
+  try {
+    if (reservation.client_email) {
+      await resend.emails.send({
+        from,
+        to: reservation.client_email,
+        subject: isSpanish
+          ? 'Reservación Aprobada — Firma tu Contrato - Star Event Rental'
+          : 'Reservation Approved — Sign Your Contract - Star Event Rental',
+        html: approvalEmailHtml(reservation, contractUrl),
+      });
+    }
+
+    // Notify business too
+    await resend.emails.send({
+      from,
+      to: BUSINESS_EMAIL,
+      subject: `Approval Sent - ${clientName} - ${formatDate(reservation.event_date, { weekday: undefined })}`,
+      html: approvalEmailHtml(reservation, contractUrl),
+    });
+
+    console.log(`Approval email sent for reservation ${reservation.id}`);
+  } catch (err) {
+    console.error('Failed to send approval email:', err.message);
+  }
+}
+
 export async function sendReservationConfirmation(reservation, items) {
   const resend = getResend();
   if (!resend) {

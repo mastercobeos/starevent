@@ -3,7 +3,7 @@ import { SquareClient, SquareEnvironment } from 'square';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { squareIdempotencyKey } from '@/lib/idempotency';
-import { checkRateLimit, getClientIp, verifyReservationToken } from '@/lib/security';
+import { checkRateLimit, getClientIp, verifyReservationToken, isValidUUID, getAccessToken } from '@/lib/security';
 import { sendReservationConfirmation } from '@/lib/email';
 
 const squareClient = new SquareClient({
@@ -31,10 +31,12 @@ export async function POST(request, { params }) {
     }
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid reservation ID' }, { status: 400 });
+    }
 
     // SECURITY: Verify reservation access token
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
+    const token = getAccessToken(request);
     if (!verifyReservationToken(id, token)) {
       return NextResponse.json({ error: 'Invalid or missing access token' }, { status: 403 });
     }
@@ -59,7 +61,7 @@ export async function POST(request, { params }) {
     // Validate state
     if (!canTransition(reservation.status, STATUS.DEPOSIT_PAID)) {
       return NextResponse.json(
-        { error: `Cannot pay deposit in status "${reservation.status}"` },
+        { error: 'Deposit cannot be processed at this time' },
         { status: 409 }
       );
     }
@@ -157,8 +159,7 @@ export async function POST(request, { params }) {
     const squareErrors = error?.errors;
     if (squareErrors) {
       console.error('Square API errors:', JSON.stringify(squareErrors, null, 2));
-      const detail = squareErrors[0]?.detail || 'Payment was declined';
-      return NextResponse.json({ error: `Payment was declined: ${detail}` }, { status: 400 });
+      return NextResponse.json({ error: 'Payment was declined. Please try a different card or contact your bank.' }, { status: 400 });
     }
 
     return NextResponse.json(

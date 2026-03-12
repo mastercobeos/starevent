@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS } from '@/lib/reservation-state-machine';
 import { verifyAdmin } from '@/lib/auth-middleware';
+import { isValidUUID } from '@/lib/security';
 
 export async function PUT(request, { params }) {
   try {
@@ -15,6 +16,9 @@ export async function PUT(request, { params }) {
     }
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid reservation ID' }, { status: 400 });
+    }
     const body = await request.json().catch(() => ({}));
     const reason = body.reason || 'Rejected by admin';
 
@@ -64,7 +68,7 @@ export async function PUT(request, { params }) {
   } catch (error) {
     console.error('Admin reject error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to reject reservation' },
+      { error: 'Failed to reject reservation' },
       { status: 500 }
     );
   }

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
-import { verifyReservationToken, checkRateLimit, getClientIp } from '@/lib/security';
+import { verifyReservationToken, checkRateLimit, getClientIp, isValidUUID, getAccessToken } from '@/lib/security';
 
 export async function GET(request, { params }) {
   try {
@@ -9,6 +9,9 @@ export async function GET(request, { params }) {
     }
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid reservation ID' }, { status: 400 });
+    }
 
     // Rate limit: 30 requests per hour per IP
     const ip = getClientIp(request);
@@ -18,8 +21,7 @@ export async function GET(request, { params }) {
     }
 
     // Verify HMAC token for client-facing access
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
+    const token = getAccessToken(request);
     if (!token || !verifyReservationToken(id, token)) {
       return NextResponse.json({ error: 'Invalid or missing access token' }, { status: 403 });
     }

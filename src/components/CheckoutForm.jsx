@@ -96,9 +96,9 @@ export default function CheckoutForm({ onBack }) {
         throw new Error(tokenResult.errors?.[0]?.message || 'Card validation failed');
       }
 
-      const response = await fetch(`/api/reservations/${reservationId}/pay-deposit?token=${accessToken}`, {
+      const response = await fetch(`/api/reservations/${reservationId}/pay-deposit`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-access-token': accessToken },
         body: JSON.stringify({ sourceId: tokenResult.token }),
       });
 
@@ -241,9 +241,9 @@ export default function CheckoutForm({ onBack }) {
     setErrorMessage('');
 
     try {
-      const response = await fetch(`/api/reservations/${reservationId}/sign-contract?token=${accessToken}`, {
+      const response = await fetch(`/api/reservations/${reservationId}/sign-contract`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-access-token': accessToken },
         body: JSON.stringify({ initials: initials.trim(), contract_hash: contractHash }),
       });
 

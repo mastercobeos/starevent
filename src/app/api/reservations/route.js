@@ -313,7 +313,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Create reservation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create reservation' },
+      { error: 'Failed to create reservation' },
       { status: 500 }
     );
   }

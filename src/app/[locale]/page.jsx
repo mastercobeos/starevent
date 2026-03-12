@@ -21,7 +21,7 @@ export async function generateMetadata({ params }) {
         ? 'Renta de carpas, sillas desde $3, mesas desde $8 y pistas de baile en Houston TX. Paquetes completos desde $399. Negocio familiar. Llama 281-636-0615.'
         : 'Tent, chair ($3+), table ($8+) & dance floor rentals in Houston TX. Complete packages from $399. Family-owned. Call 281-636-0615!',
       url: isEs ? `${baseUrl}/es` : `${baseUrl}/`,
-      images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'Star Event Rental - Event Rentals in Houston TX' }],
+      images: [{ url: '/og-image.webp', width: 1200, height: 630, alt: 'Star Event Rental - Event Rentals in Houston TX' }],
     },
     alternates: {
       canonical: isEs ? `${baseUrl}/es` : `${baseUrl}/`,
@@ -37,7 +37,7 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
   name: 'Star Event Rental',
-  image: 'https://stareventrentaltx.com/logo.png',
+  image: 'https://stareventrentaltx.com/og-image.webp',
   '@id': 'https://stareventrentaltx.com',
   url: 'https://stareventrentaltx.com',
   telephone: '+1-281-636-0615',
@@ -92,7 +92,6 @@ const jsonLd = {
     'https://www.instagram.com/stareventrentaltx',
   ],
 };
-
 
 const homeFaq = [
   {

@@ -24,6 +24,9 @@ export const AuthProvider = ({ children }) => {
       .then(({ data: { session } }) => {
         setUser(session?.user ?? null);
         setLoading(false);
+        if (session?.user) {
+          document.cookie = 'has_admin_session=1; path=/admin; SameSite=Lax; max-age=86400';
+        }
       })
       .catch(() => {
         setUser(null);
@@ -33,6 +36,12 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
+        // Set/remove lightweight cookie so proxy can gate admin pages
+        if (session?.user) {
+          document.cookie = 'has_admin_session=1; path=/admin; SameSite=Lax; max-age=86400';
+        } else {
+          document.cookie = 'has_admin_session=; path=/admin; max-age=0';
+        }
       }
     );
 
@@ -52,6 +61,7 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     if (!supabase) return;
+    document.cookie = 'has_admin_session=; path=/admin; max-age=0';
     await supabase.auth.signOut();
   };
 

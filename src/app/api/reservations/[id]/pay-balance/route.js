@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
-import { checkRateLimit, getClientIp, verifyReservationToken } from '@/lib/security';
+import { checkRateLimit, getClientIp, verifyReservationToken, isValidUUID, getAccessToken } from '@/lib/security';
 import { createBalanceInvoice } from '@/lib/create-balance-invoice';
 
 export async function POST(request, { params }) {
@@ -17,10 +17,12 @@ export async function POST(request, { params }) {
     }
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid reservation ID' }, { status: 400 });
+    }
 
     // SECURITY: Verify reservation access token
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
+    const token = getAccessToken(request);
     if (!verifyReservationToken(id, token)) {
       return NextResponse.json({ error: 'Invalid or missing access token' }, { status: 403 });
     }
@@ -30,7 +32,7 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error('Pay balance error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to process balance' },
+      { error: 'Failed to process balance' },
       { status: 500 }
     );
   }

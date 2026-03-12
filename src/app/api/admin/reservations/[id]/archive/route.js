@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { verifyAdmin } from '@/lib/auth-middleware';
+import { isValidUUID } from '@/lib/security';
 
 // PUT → Archive reservation
 export async function PUT(request, { params }) {
@@ -15,6 +16,9 @@ export async function PUT(request, { params }) {
     }
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid reservation ID' }, { status: 400 });
+    }
 
     const { error } = await supabaseAdmin
       .from('reservations')
@@ -47,6 +51,9 @@ export async function DELETE(request, { params }) {
     }
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid reservation ID' }, { status: 400 });
+    }
 
     const { error } = await supabaseAdmin
       .from('reservations')

@@ -15,13 +15,13 @@ export const metadata = {
     type: 'website',
     siteName: 'Star Event Rental',
     locale: 'en_US',
-    images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'Star Event Rental - Event Rentals in Houston TX' }],
+    images: [{ url: '/og-image.webp', width: 1200, height: 630, alt: 'Star Event Rental - Event Rentals in Houston TX' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Star Event Rental - Event Rentals Houston TX',
     description: 'Tent, chair, table & dance floor rentals in Houston TX. Weddings, corporate events, graduations & parties. Family-owned. Free quotes!',
-    images: ['/logo.png'],
+    images: ['/og-image.webp'],
   },
   icons: {
     icon: '/logo.png',

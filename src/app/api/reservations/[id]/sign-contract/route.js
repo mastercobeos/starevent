@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
-import { verifyReservationToken, getClientIp, checkRateLimit } from '@/lib/security';
+import { verifyReservationToken, getClientIp, checkRateLimit, isValidUUID, getAccessToken } from '@/lib/security';
 import { injectInitials } from '@/lib/contract-template';
 
 export async function POST(request, { params }) {
@@ -11,10 +11,12 @@ export async function POST(request, { params }) {
     }
 
     const { id } = await params;
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid reservation ID' }, { status: 400 });
+    }
 
     // SECURITY: Verify reservation access token
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
+    const token = getAccessToken(request);
     if (!verifyReservationToken(id, token)) {
       return NextResponse.json({ error: 'Invalid or missing access token' }, { status: 403 });
     }
@@ -29,8 +31,8 @@ export async function POST(request, { params }) {
     const body = await request.json();
     const { initials, contract_hash } = body;
 
-    if (!initials?.trim() || initials.trim().length < 2) {
-      return NextResponse.json({ error: 'Initials are required (at least 2 characters)' }, { status: 400 });
+    if (!initials?.trim() || initials.trim().length < 2 || initials.trim().length > 10) {
+      return NextResponse.json({ error: 'Initials must be 2-10 characters' }, { status: 400 });
     }
     if (!contract_hash) {
       return NextResponse.json({ error: 'Contract hash is required' }, { status: 400 });
@@ -50,7 +52,7 @@ export async function POST(request, { params }) {
     // Validate state transition
     if (!canTransition(reservation.status, STATUS.CONTRACT_SIGNED)) {
       return NextResponse.json(
-        { error: `Cannot sign contract in status "${reservation.status}"` },
+        { error: 'Contract cannot be signed at this time' },
         { status: 409 }
       );
     }
