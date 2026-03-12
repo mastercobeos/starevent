@@ -106,7 +106,7 @@ export const ReviewsSection = memo(function ReviewsSection({ t }) {
                       {reviews.slice(pageIdx * visibleReviews, pageIdx * visibleReviews + visibleReviews).map((review, i) => (
                         <div
                           key={i}
-                          className="flex-1 min-w-0 rounded-xl p-3 sm:p-4 border border-white/15 backdrop-blur-md"
+                          className={`flex-1 min-w-0 h-[160px] sm:h-[170px] flex flex-col rounded-xl p-3 sm:p-4 border border-white/15 backdrop-blur-md ${visibleReviews > 1 ? 'max-w-[calc(50%-6px)]' : ''}`}
                           style={{
                             background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
                             backdropFilter: 'blur(12px) saturate(150%)',
@@ -123,10 +123,10 @@ export const ReviewsSection = memo(function ReviewsSection({ t }) {
                               <span className="text-white/40 text-[10px]">{review.time}</span>
                             )}
                           </div>
-                          <p className="text-white/85 text-[11px] sm:text-xs italic leading-relaxed mb-2 line-clamp-4">
+                          <p className="text-white/85 text-[11px] sm:text-xs italic leading-relaxed mb-2 line-clamp-4 flex-1 overflow-hidden">
                             &ldquo;{review.text}&rdquo;
                           </p>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 mt-auto">
                             {review.photo && (
                               <Image
                                 src={review.photo}
