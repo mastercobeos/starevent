@@ -112,13 +112,13 @@ export const ProductCategoryPage = memo(function ProductCategoryPage({ category,
                 key={item.id}
                 className="rounded-2xl overflow-hidden shadow-xl border-2 border-[#C9A84C] group"
               >
-                <div className="relative h-56 sm:h-64 overflow-hidden">
+                <div className="relative h-36 sm:h-44 md:h-52 overflow-hidden">
                   <Image
                     src={item.image}
                     alt={isEs ? `${item.nameEs || item.name} para renta en Houston TX - Star Event Rental` : `${item.name} for rent in Houston TX - Star Event Rental`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="object-contain transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
                     quality={75}
                   />
