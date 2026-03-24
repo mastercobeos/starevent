@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -15,6 +15,22 @@ export const ProductCategoryPage = memo(function ProductCategoryPage({ category,
   const { addItem } = useCart();
   const t = translations[language].home;
   const isEs = language === 'es';
+  const [selectedAddons, setSelectedAddons] = useState({});
+
+  const toggleAddon = useCallback((itemId, addonId) => {
+    setSelectedAddons(prev => {
+      const key = `${itemId}_${addonId}`;
+      return { ...prev, [key]: !prev[key] };
+    });
+  }, []);
+
+  const getItemPrice = useCallback((item) => {
+    if (!item.addons) return item.price;
+    return item.addons.reduce((total, addon) => {
+      const key = `${item.id}_${addon.id}`;
+      return total + (selectedAddons[key] ? addon.price : 0);
+    }, item.price);
+  }, [selectedAddons]);
 
   const prefix = isEs ? '/es' : '';
   const categoryName = isEs ? category.nameEs : category.name;
@@ -133,14 +149,32 @@ export const ProductCategoryPage = memo(function ProductCategoryPage({ category,
                     {isEs ? (item.nameEs || item.name) : item.name}
                   </h3>
                   <p className="text-primary font-semibold text-base mt-1">
-                    ${item.price?.toFixed(2)}
+                    ${getItemPrice(item).toFixed(2)}
                     {item.price < 100 ? (isEs ? ' / unidad' : ' / each') : ''}
                   </p>
                   <p className="text-white/70 text-sm mt-2 leading-relaxed">
                     {isEs ? (item.descEs || item.desc) : item.desc}
                   </p>
+                  {item.addons && item.addons.map(addon => (
+                    <button
+                      key={addon.id}
+                      type="button"
+                      onClick={() => toggleAddon(item.id, addon.id)}
+                      className={`flex items-center gap-2 w-full text-left rounded-lg px-3 py-2 mt-2 transition-all text-xs sm:text-sm border ${selectedAddons[`${item.id}_${addon.id}`] ? 'border-primary bg-primary/15 text-white' : 'border-white/20 bg-white/5 text-white/70 hover:border-white/40'}`}
+                    >
+                      <span className={`flex items-center justify-center w-4 h-4 rounded border transition-all shrink-0 ${selectedAddons[`${item.id}_${addon.id}`] ? 'bg-primary border-primary text-black' : 'border-white/40'}`}>
+                        {selectedAddons[`${item.id}_${addon.id}`] && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                      </span>
+                      <span className="flex-1">{isEs ? addon.nameEs : addon.name}</span>
+                      <span className="font-semibold text-primary">+${addon.price.toFixed(2)}</span>
+                    </button>
+                  ))}
                   <button
-                    onClick={() => addItem(item)}
+                    onClick={() => {
+                      const addonNames = item.addons ? item.addons.filter(a => selectedAddons[`${item.id}_${a.id}`]).map(a => isEs ? a.nameEs : a.name) : [];
+                      const finalPrice = getItemPrice(item);
+                      addItem({ ...item, id: item.id + (addonNames.length ? '-with-addons' : ''), name: addonNames.length ? `${item.name} + ${addonNames.join(', ')}` : item.name, nameEs: addonNames.length ? `${item.nameEs} + ${addonNames.join(', ')}` : item.nameEs, price: finalPrice });
+                    }}
                     className="mt-3 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
                   >
                     {isEs ? 'Agregar al Carrito' : 'Add to Cart'}
