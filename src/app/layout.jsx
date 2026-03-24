@@ -24,7 +24,8 @@ export const metadata = {
     images: ['/og-image.webp'],
   },
   icons: {
-    icon: '/logo.png',
+    icon: '/favicon.png',
+    apple: '/favicon.png',
   },
   manifest: '/manifest.json',
   other: {
