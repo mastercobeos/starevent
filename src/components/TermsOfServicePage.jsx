@@ -64,6 +64,8 @@ const content = {
           'For assistance, reply HELP or contact us at 281-636-0615.',
           'Your consent to receive text messages is not required as a condition to purchase goods or services.',
           'We will not share your phone number with third parties for marketing purposes.',
+          'Carriers are not liable for delayed or undelivered messages.',
+          'You must be 18 years of age or older to subscribe to our SMS messages. By opting in, you confirm that you are at least 18 years old.',
         ],
       },
       {
@@ -160,6 +162,8 @@ const content = {
           'Para obtener asistencia, responda HELP o contáctenos al 281-636-0615.',
           'Su consentimiento para recibir mensajes de texto no es un requisito para comprar bienes o servicios.',
           'No compartiremos su número de teléfono con terceros con fines de marketing.',
+          'Los operadores no son responsables por mensajes retrasados o no entregados.',
+          'Debe tener 18 años de edad o más para suscribirse a nuestros mensajes SMS. Al optar por recibirlos, confirma que tiene al menos 18 años.',
         ],
       },
       {

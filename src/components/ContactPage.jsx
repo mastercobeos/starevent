@@ -28,11 +28,6 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.consent1) {
-      toast(t.consentRequired, 'warning');
-      return;
-    }
-
     setSending(true);
     try {
       const res = await fetch('/api/contact', {
@@ -181,7 +176,6 @@ export default function Contact() {
                     name="consent1"
                     checked={formData.consent1}
                     onChange={handleChange}
-                    required
                     className="mt-1 accent-[#C9A84C]"
                   />
                   <span>{t.consent1}</span>
