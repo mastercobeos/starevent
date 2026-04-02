@@ -250,6 +250,8 @@ export const translations = {
       email: 'Email',
       signUp: 'Sign Up',
       allRightsReserved: 'All rights reserved.',
+      privacyPolicy: 'Privacy Policy',
+      termsOfService: 'Terms of Service',
     },
   },
   es: {
@@ -503,6 +505,8 @@ export const translations = {
       email: 'Correo',
       signUp: 'Suscribirse',
       allRightsReserved: 'Todos los derechos reservados.',
+      privacyPolicy: 'Política de Privacidad',
+      termsOfService: 'Términos de Servicio',
     },
   },
 };

@@ -50,6 +50,30 @@ export default function sitemap() {
         },
       },
     },
+    {
+      url: `${baseUrl}/privacy-policy`,
+      lastModified,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+      alternates: {
+        languages: {
+          en: `${baseUrl}/privacy-policy`,
+          es: `${baseUrl}/es/privacy-policy`,
+        },
+      },
+    },
+    {
+      url: `${baseUrl}/terms-of-service`,
+      lastModified,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+      alternates: {
+        languages: {
+          en: `${baseUrl}/terms-of-service`,
+          es: `${baseUrl}/es/terms-of-service`,
+        },
+      },
+    },
     ...servicePages.map((slug) => ({
       url: `${baseUrl}/services/${slug}`,
       lastModified,

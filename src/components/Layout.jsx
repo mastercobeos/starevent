@@ -505,8 +505,13 @@ export default function Layout({ children }) {
               </ul>
             </div>
           </div>
-          <div className="text-center text-sm">
+          <div className="text-center text-sm space-y-2">
             <p>&copy; {new Date().getFullYear()} Star Event Rental. {translations[language].footer.allRightsReserved}</p>
+            <p>
+              <Link href={`${prefix}/privacy-policy`} className="hover:text-primary transition-colors">{translations[language].footer.privacyPolicy}</Link>
+              {' | '}
+              <Link href={`${prefix}/terms-of-service`} className="hover:text-primary transition-colors">{translations[language].footer.termsOfService}</Link>
+            </p>
           </div>
         </div>
       </footer>
