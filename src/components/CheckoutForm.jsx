@@ -526,69 +526,6 @@ export default function CheckoutForm({ onBack }) {
         <h2 className="text-lg font-bold text-white">{tc.checkoutTitle}</h2>
       </div>
 
-      {/* Order Summary */}
-      <div className="mb-5 p-3 rounded-lg bg-white/5 border border-white/10">
-        <h3 className="text-white/80 text-sm font-semibold mb-2">{tc.orderSummary}</h3>
-        {items.map((item) => (
-          <div key={item.id} className="flex justify-between text-sm py-1">
-            <span className="text-white/60">
-              {language === 'en' ? item.name : (item.nameEs || item.name)} x{item.quantity}
-            </span>
-            <span className="text-white/80">${(item.price * item.quantity).toFixed(2)}</span>
-          </div>
-        ))}
-        <div className="flex justify-between text-sm pt-2 mt-2 border-t border-white/10">
-          <span className="text-white/70">{tc.subtotal}</span>
-          <span className="text-white/80">${getTotal().toFixed(2)}</span>
-        </div>
-        {getRentalDays() > 1 && (
-          <div className="flex justify-between text-sm py-1">
-            <span className="text-white/70">× {getRentalDays()} {getRentalDays() === 1 ? tc.day : tc.days}</span>
-            <span className="text-white/80">${getAdjustedSubtotal().toFixed(2)}</span>
-          </div>
-        )}
-        <div className="flex justify-between text-sm py-1">
-          <span className="text-white/70">{tc.salesTax}</span>
-          <span className="text-white/80">${getTaxAmount().toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between text-sm py-1">
-          <span className="text-white/70 flex items-center gap-1">
-            <MapPin className="w-3.5 h-3.5" /> {tc.deliveryFee}
-            {deliveryMiles != null && <span className="text-white/40">({deliveryMiles} {tc.miles})</span>}
-          </span>
-          <span className="text-white/80">
-            {calculatingDelivery ? (
-              <span className="flex items-center gap-1 text-white/50"><Loader2 className="w-3 h-3 animate-spin" /> {tc.calculatingDistance}</span>
-            ) : deliveryMiles != null && deliveryMiles > MAX_DELIVERY_MILES ? (
-              <span className="text-amber-400 text-xs">{tc.deliveryOutOfRange}</span>
-            ) : deliveryFee != null ? `$${deliveryFee.toFixed(2)}` : <span className="text-white/40">&mdash;</span>}
-          </span>
-        </div>
-        {form.sameDayPickup && (
-          <div className="flex justify-between text-sm py-1">
-            <span className="text-white/70">{tc.sameDayPickupFee}</span>
-            <span className="text-white/80">${SAME_DAY_PICKUP_FEE.toFixed(2)}</span>
-          </div>
-        )}
-        <div className="flex justify-between text-sm font-bold pt-2 mt-1 border-t border-white/10">
-          <span className="text-white">{tc.total}</span>
-          <span className="text-primary">${getGrandTotal().toFixed(2)}</span>
-        </div>
-        {/* Deposit / Balance preview */}
-        {getGrandTotal() > 0 && (
-          <div className="mt-2 pt-2 border-t border-white/10 space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="text-white/50">{tr.deposit40}</span>
-              <span className="text-white/60">${calculateSplit(getGrandTotal()).deposit.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-white/50">{tr.balance60DueEventDay}</span>
-              <span className="text-white/60">${calculateSplit(getGrandTotal()).balance.toFixed(2)}</span>
-            </div>
-          </div>
-        )}
-      </div>
-
       {step === 'error' && errorMessage && (
         <div className="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/30 flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
@@ -777,6 +714,71 @@ export default function CheckoutForm({ onBack }) {
         <div>
           <label className={labelClass}>{tr.specialNotes}</label>
           <textarea name="specialNotes" value={form.specialNotes} onChange={handleChange} rows={2} className={`${inputClass} resize-none`} />
+        </div>
+
+        {/* Order Summary — shown after all form fields */}
+        <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+          <h3 className="text-white/80 text-sm font-semibold mb-2">{tc.orderSummary}</h3>
+          {items.map((item) => (
+            <div key={item.id} className="flex justify-between text-sm py-1">
+              <span className="text-white/60">
+                {language === 'en' ? item.name : (item.nameEs || item.name)} x{item.quantity}
+              </span>
+              <span className="text-white/80">${(item.price * item.quantity).toFixed(2)}</span>
+            </div>
+          ))}
+          <div className="flex justify-between text-sm pt-2 mt-2 border-t border-white/10">
+            <span className="text-white/70">{tc.subtotal}</span>
+            <span className="text-white/80">${getTotal().toFixed(2)}</span>
+          </div>
+          {getRentalDays() > 1 && (
+            <div className="flex justify-between text-sm py-1">
+              <span className="text-white/70">× {getRentalDays()} {getRentalDays() === 1 ? tc.day : tc.days}</span>
+              <span className="text-white/80">${getAdjustedSubtotal().toFixed(2)}</span>
+            </div>
+          )}
+          {deliveryFee != null && (
+            <>
+              <div className="flex justify-between text-sm py-1">
+                <span className="text-white/70">{tc.salesTax}</span>
+                <span className="text-white/80">${getTaxAmount().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm py-1">
+                <span className="text-white/70 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5" /> {tc.deliveryFee}
+                  {deliveryMiles != null && <span className="text-white/40">({deliveryMiles} {tc.miles})</span>}
+                </span>
+                <span className="text-white/80">${deliveryFee.toFixed(2)}</span>
+              </div>
+              {form.sameDayPickup && (
+                <div className="flex justify-between text-sm py-1">
+                  <span className="text-white/70">{tc.sameDayPickupFee}</span>
+                  <span className="text-white/80">${SAME_DAY_PICKUP_FEE.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm font-bold pt-2 mt-1 border-t border-white/10">
+                <span className="text-white">{tc.total}</span>
+                <span className="text-primary">${getGrandTotal().toFixed(2)}</span>
+              </div>
+              <div className="mt-2 pt-2 border-t border-white/10 space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-white/50">{tr.deposit40}</span>
+                  <span className="text-white/60">${calculateSplit(getGrandTotal()).deposit.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-white/50">{tr.balance60DueEventDay}</span>
+                  <span className="text-white/60">${calculateSplit(getGrandTotal()).balance.toFixed(2)}</span>
+                </div>
+              </div>
+            </>
+          )}
+          {deliveryFee == null && (
+            <p className="text-white/40 text-xs mt-2 pt-2 border-t border-white/10 text-center">
+              {language === 'en'
+                ? 'Enter your event address above to see the full total'
+                : 'Ingresa la dirección del evento para ver el total completo'}
+            </p>
+          )}
         </div>
 
         {/* Submit */}

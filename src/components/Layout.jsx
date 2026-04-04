@@ -255,9 +255,9 @@ export default function Layout({ children }) {
           <div
             className="absolute right-0 top-0 h-full w-full max-w-md shadow-2xl overflow-y-auto border-l border-white/10"
             style={{
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(20, 30, 55, 0.78) 50%, rgba(15, 23, 42, 0.85) 100%)',
-              backdropFilter: 'blur(10px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(20, 30, 55, 0.68) 50%, rgba(15, 23, 42, 0.75) 100%)',
+              backdropFilter: 'blur(16px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
             }}
             onClick={(e) => e.stopPropagation()}
           >

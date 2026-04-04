@@ -161,7 +161,7 @@ export const translations = {
       endTime: 'End Time',
       specialNotes: 'Special Notes',
       // Payment split
-      deposit40: 'Deposit (40%)',
+      deposit40: 'Deposit (40%) — required to reserve',
       balance60: 'Balance (60%)',
       balance60DueEventDay: 'Balance (60%) — due event day',
       depositDueNow: 'Due now after signing',
@@ -415,7 +415,7 @@ export const translations = {
       endTime: 'Hora Fin',
       specialNotes: 'Notas Especiales',
       // Payment split
-      deposit40: 'Anticipo (40%)',
+      deposit40: 'Anticipo (40%) — necesario para reservar',
       balance60: 'Saldo (60%)',
       balance60DueEventDay: 'Saldo (60%) — día del evento',
       depositDueNow: 'A pagar tras firmar',
