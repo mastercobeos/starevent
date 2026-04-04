@@ -630,21 +630,27 @@ export default function CheckoutForm({ onBack }) {
         </div>
 
         {/* Installation */}
-        <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              name="installationRequired"
-              checked={form.installationRequired}
-              onChange={handleChange}
-              className="w-4 h-4 rounded border-white/30 bg-white/10 text-primary focus:ring-primary/50"
-            />
-            <span className="text-white/80 text-sm flex items-center gap-1">
-              <Wrench className="w-3.5 h-3.5" />
-              {tr.installationRequired}
-            </span>
-          </label>
-        </div>
+        <label htmlFor="installationRequired" className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 cursor-pointer">
+          <input
+            type="checkbox"
+            id="installationRequired"
+            name="installationRequired"
+            checked={form.installationRequired}
+            onChange={handleChange}
+            className="sr-only"
+          />
+          <span className={`w-4 h-4 shrink-0 rounded border transition-colors flex items-center justify-center ${form.installationRequired ? 'bg-primary border-primary' : 'border-white/30 bg-white/10'}`}>
+            {form.installationRequired && (
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+          </span>
+          <span className="text-white/80 text-sm flex items-center gap-1">
+            <Wrench className="w-3.5 h-3.5" />
+            {tr.installationRequired}
+          </span>
+        </label>
         {form.installationRequired && (
           <div>
             <label className={labelClass}>{tr.installationDetails}</label>
@@ -679,18 +685,25 @@ export default function CheckoutForm({ onBack }) {
         </div>
 
         {/* Same-day pickup */}
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+        <label htmlFor="sameDayPickup" className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 cursor-pointer">
           <input
             type="checkbox"
             id="sameDayPickup"
             checked={form.sameDayPickup}
             onChange={(e) => setForm((prev) => ({ ...prev, sameDayPickup: e.target.checked }))}
-            className="w-4 h-4 accent-primary"
+            className="sr-only"
           />
-          <label htmlFor="sameDayPickup" className="text-sm text-white/80 cursor-pointer">
+          <span className={`w-4 h-4 shrink-0 rounded border transition-colors flex items-center justify-center ${form.sameDayPickup ? 'bg-primary border-primary' : 'border-white/30 bg-white/10'}`}>
+            {form.sameDayPickup && (
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+          </span>
+          <span className="text-sm text-white/80">
             {tc.sameDayPickupQuestion} <span className="text-primary font-semibold">(+${SAME_DAY_PICKUP_FEE})</span>
-          </label>
-        </div>
+          </span>
+        </label>
 
         {/* Surface Type (conditional) */}
         {needsSurface && (
@@ -713,7 +726,7 @@ export default function CheckoutForm({ onBack }) {
         {/* Special Notes */}
         <div>
           <label className={labelClass}>{tr.specialNotes}</label>
-          <textarea name="specialNotes" value={form.specialNotes} onChange={handleChange} rows={2} className={`${inputClass} resize-none`} />
+          <textarea name="specialNotes" value={form.specialNotes} onChange={handleChange} rows={2} className={`${inputClass} resize-none !bg-white/[0.02] !border-white/[0.06]`} />
         </div>
 
         {/* Order Summary — shown after all form fields */}
@@ -782,19 +795,21 @@ export default function CheckoutForm({ onBack }) {
         </div>
 
         {/* Submit */}
-        <Button
-          type="submit"
-          disabled={step === 'submitting'}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-base shadow-lg disabled:opacity-50"
-        >
-          {step === 'submitting' ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" /> {tc.submitting}
-            </span>
-          ) : (
-            tc.confirmReservation
-          )}
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            type="submit"
+            disabled={step === 'submitting'}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-base shadow-lg disabled:opacity-50"
+          >
+            {step === 'submitting' ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" /> {tc.submitting}
+              </span>
+            ) : (
+              tc.confirmReservation
+            )}
+          </Button>
+        </div>
       </form>
     </div>
   );

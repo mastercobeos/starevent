@@ -251,13 +251,13 @@ export default function Layout({ children }) {
       {/* Cart Panel */}
       {isCartOpen && (
         <div className="fixed inset-0 z-[80]" onClick={() => { setIsCartOpen(false); setShowCheckout(false); }}>
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
           <div
-            className="absolute right-0 top-0 h-full w-full max-w-md shadow-2xl overflow-y-auto border-l border-white/10"
+            className="absolute right-0 top-0 h-full w-full max-w-md shadow-2xl overflow-y-auto border-l border-white/15"
             style={{
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(20, 30, 55, 0.68) 50%, rgba(15, 23, 42, 0.75) 100%)',
-              backdropFilter: 'blur(16px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.45) 0%, rgba(20, 30, 55, 0.40) 50%, rgba(15, 23, 42, 0.45) 100%)',
+              backdropFilter: 'blur(24px) saturate(200%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(200%)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -347,16 +347,16 @@ export default function Layout({ children }) {
                       </p>
 
                       {/* Actions */}
-                      <div className="space-y-2">
+                      <div className="flex flex-col items-center gap-2">
                         <Button
-                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-base shadow-lg"
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-base shadow-lg"
                           onClick={() => setShowCheckout(true)}
                         >
                           {tc.checkout}
                         </Button>
                         <Button
                           variant="outline"
-                          className="w-full border-[#C9A84C]/50 text-white hover:bg-white/10"
+                          className="border-[#C9A84C]/50 text-white hover:bg-white/10"
                           onClick={clearCart}
                         >
                           {tc.clearCart}
