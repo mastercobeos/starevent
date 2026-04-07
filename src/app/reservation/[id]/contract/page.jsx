@@ -22,6 +22,7 @@ export default function ContractPage() {
   const [signed, setSigned] = useState(false);
   const [invoiceUrl, setInvoiceUrl] = useState('');
   const [depositAmount, setDepositAmount] = useState(0);
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -181,6 +182,19 @@ export default function ContractPage() {
           </div>
         )}
 
+        {/* Agreement checkbox */}
+        <label className="flex items-start gap-3 mb-5 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="mt-1 w-5 h-5 shrink-0 rounded border-white/30 bg-white/10 text-primary focus:ring-primary/50 cursor-pointer accent-[#C9A84C]"
+          />
+          <span className="text-white/80 text-sm leading-relaxed group-hover:text-white transition-colors">
+            {tr.agreeTerms}
+          </span>
+        </label>
+
         {/* Initials input */}
         <div className="mb-5">
           <label className="block text-white/80 text-sm font-medium mb-1">
@@ -199,7 +213,7 @@ export default function ContractPage() {
 
         <Button
           onClick={handleSign}
-          disabled={signing || !initials.trim()}
+          disabled={signing || !initials.trim() || !agreed}
           className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-base shadow-lg disabled:opacity-50"
         >
           {signing ? (

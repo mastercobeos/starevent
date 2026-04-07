@@ -139,8 +139,8 @@ export function ProductModal({ productModal, setProductModal, language, addItem,
                           WebkitBackdropFilter: 'blur(8px) saturate(180%)',
                         }}
                       >
-                        <div className={`relative w-full ${item.id === 'tent-clear-20x40' ? 'h-44 sm:h-52 md:h-60' : 'h-36 sm:h-44 md:h-52'}`}>
-                          <Image src={item.image} alt={language === 'en' ? item.name : item.nameEs} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className={item.id === 'tent-clear-20x40' ? 'object-cover' : 'object-contain'} loading="lazy" quality={75} />
+                        <div className="relative w-full h-36 sm:h-44 md:h-52">
+                          <Image src={item.image} alt={language === 'en' ? item.name : item.nameEs} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-contain object-top" loading="lazy" quality={75} />
                         </div>
                         <div className="p-2 sm:p-4 md:p-5 flex flex-col flex-grow">
                           <h4 className="text-sm sm:text-base md:text-lg font-bold text-white mb-0.5">
