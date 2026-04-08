@@ -6,6 +6,7 @@ import { CartProvider } from '../contexts/CartContext';
 import { ToastProvider } from './ui/Toast';
 import { ConfirmProvider } from './ui/ConfirmModal';
 import Layout from './Layout';
+import GHLChatWidget from './GHLChatWidget';
 
 export function ClientProviders({ children, initialLocale }) {
   return (
@@ -14,6 +15,7 @@ export function ClientProviders({ children, initialLocale }) {
         <ToastProvider>
           <ConfirmProvider>
             <Layout>{children}</Layout>
+            <GHLChatWidget />
           </ConfirmProvider>
         </ToastProvider>
       </CartProvider>
