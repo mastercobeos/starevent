@@ -20,6 +20,8 @@ export async function POST(request) {
     const pkg = sanitizeField(body.package, 100);
     const message = sanitizeField(body.message, 5000);
     const trafficSource = sanitizeField(body.trafficSource, 200) || 'Direct';
+    const smsConsentTransactional = body.consent1 === true;
+    const smsConsentMarketing = body.consent2 === true;
 
     if (!fullName || !phone || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -73,6 +75,13 @@ export async function POST(request) {
             <tr>
               <td style="padding: 8px 12px; font-weight: bold; color: #333;">📍 Traffic Source:</td>
               <td style="padding: 8px 12px; color: #C9A84C; font-weight: bold;">${safeSource}</td>
+            </tr>
+            <tr style="background-color: #f9f9f9;">
+              <td style="padding: 8px 12px; font-weight: bold; color: #333;">SMS Consent:</td>
+              <td style="padding: 8px 12px; color: #555;">
+                Transactional: ${smsConsentTransactional ? '✅ Yes' : '❌ No'} |
+                Marketing: ${smsConsentMarketing ? '✅ Yes' : '❌ No'}
+              </td>
             </tr>
           </table>
           ${safeMessage ? `
