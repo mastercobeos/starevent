@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { Button } from '../components/ui/button';
 import { BackgroundSection } from '../components/ui/BackgroundSection';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -22,8 +21,6 @@ export default function Contact() {
     email: '',
     package: '',
     message: '',
-    consent1: false,
-    consent2: false
   });
   const [sending, setSending] = useState(false);
 
@@ -40,8 +37,6 @@ export default function Contact() {
           email: formData.email,
           package: formData.package,
           message: formData.message,
-          consent1: formData.consent1,
-          consent2: formData.consent2,
         }),
       });
 
@@ -54,8 +49,6 @@ export default function Contact() {
         email: '',
         package: '',
         message: '',
-        consent1: false,
-        consent2: false
       });
     } catch {
       toast(
@@ -71,10 +64,10 @@ export default function Contact() {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
@@ -171,41 +164,7 @@ export default function Contact() {
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-white/20 bg-white/10 rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-[#C9A84C] text-white placeholder:text-white/50 transition-colors"
               />
-              <div className="mb-4">
-                <label className="flex gap-2 text-sm text-white/80">
-                  <input
-                    type="checkbox"
-                    name="consent1"
-                    checked={formData.consent1}
-                    onChange={handleChange}
-                    className="mt-1 accent-[#C9A84C]"
-                  />
-                  <span>{t.consent1}</span>
-                </label>
-              </div>
-              <div className="mb-4">
-                <label className="flex gap-2 text-sm text-white/80">
-                  <input
-                    type="checkbox"
-                    name="consent2"
-                    checked={formData.consent2}
-                    onChange={handleChange}
-                    className="mt-1 accent-[#C9A84C]"
-                  />
-                  <span>{t.consent2}</span>
-                </label>
-              </div>
-              <p className="text-xs text-white/50 mb-6">
-                {language === 'en' ? 'View our ' : 'Consulta nuestra '}
-                <Link href={`/${language}/privacy-policy`} className="underline hover:text-primary transition-colors">
-                  {language === 'en' ? 'Privacy Policy' : 'Política de Privacidad'}
-                </Link>
-                {language === 'en' ? ' and ' : ' y '}
-                <Link href={`/${language}/terms-of-service`} className="underline hover:text-primary transition-colors">
-                  {language === 'en' ? 'Terms of Service' : 'Términos de Servicio'}
-                </Link>.
-              </p>
-              <Button type="submit" disabled={sending} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-base shadow-lg hover:shadow-xl transition-[box-shadow] border-2 border-[#C9A84C] rounded-xl disabled:opacity-60 disabled:cursor-not-allowed">
+              <Button type="submit" disabled={sending} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-base shadow-lg hover:shadow-xl transition-[box-shadow] border-2 border-[#C9A84C] rounded-xl disabled:opacity-60 disabled:cursor-not-allowed mt-2">
                 {sending
                   ? (language === 'en' ? 'Sending...' : 'Enviando...')
                   : t.bookNow

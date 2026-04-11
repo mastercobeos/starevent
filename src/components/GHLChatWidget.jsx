@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
-// Pages that have forms collecting phone numbers or SMS consent
-const EXCLUDED_PATHS = ['/contact', '/admin'];
+// Admin pages should not show the public chat widget
+const EXCLUDED_PATHS = ['/admin'];
 
 export default function GHLChatWidget() {
   const pathname = usePathname();
