@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import {
   ArrowLeft, CheckCircle, AlertCircle, Loader2, Clock,
   CreditCard, MapPin, FileText, PenLine, ExternalLink,
@@ -44,7 +43,6 @@ export default function CheckoutForm({ onBack }) {
     specialNotes: '',
     surfaceType: '',
     sameDayPickup: false,
-    smsConsent: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -200,7 +198,6 @@ export default function CheckoutForm({ onBack }) {
           same_day_pickup_fee: getSameDayPickupFee(),
           tax_amount: getTaxAmount(),
           total: grandTotal,
-          sms_consent: form.smsConsent,
         }),
       });
 
@@ -729,30 +726,6 @@ export default function CheckoutForm({ onBack }) {
         <div>
           <label className={labelClass}>{tr.specialNotes}</label>
           <textarea name="specialNotes" value={form.specialNotes} onChange={handleChange} rows={2} className={`${inputClass} resize-none !bg-white/[0.02] !border-white/[0.06]`} />
-        </div>
-
-        {/* SMS Consent */}
-        <div>
-          <label className="flex gap-2 p-3 rounded-lg bg-white/5 border border-white/10 cursor-pointer">
-            <input
-              type="checkbox"
-              name="smsConsent"
-              checked={form.smsConsent}
-              onChange={handleChange}
-              className="mt-1 accent-[#C9A84C] shrink-0"
-            />
-            <span className="text-xs text-white/70">{tr.smsConsent}</span>
-          </label>
-          <p className="text-xs text-white/40 mt-1 ml-1">
-            {language === 'en' ? 'View our ' : 'Consulta nuestra '}
-            <Link href={`/${language}/privacy-policy`} className="underline hover:text-primary transition-colors">
-              {language === 'en' ? 'Privacy Policy' : 'Política de Privacidad'}
-            </Link>
-            {language === 'en' ? ' and ' : ' y '}
-            <Link href={`/${language}/terms-of-service`} className="underline hover:text-primary transition-colors">
-              {language === 'en' ? 'Terms of Service' : 'Términos de Servicio'}
-            </Link>.
-          </p>
         </div>
 
         {/* Order Summary — shown after all form fields */}

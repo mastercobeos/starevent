@@ -158,7 +158,6 @@ export const translations = {
       startTime: 'Start Time',
       endTime: 'End Time',
       specialNotes: 'Special Notes',
-      smsConsent: 'By submitting this form, you agree to receive text messages from Star Event Rental (e.g., booking confirmations, delivery updates, payment reminders). Message frequency varies, up to 10 msgs/month. Msg & Data rates may apply. Reply STOP to opt out. Reply HELP for help. Consent is not required to purchase goods or services.',
       // Payment split
       deposit40: 'Deposit (40%) — required to reserve',
       balance60: 'Balance (60%)',
@@ -412,7 +411,6 @@ export const translations = {
       startTime: 'Hora Inicio',
       endTime: 'Hora Fin',
       specialNotes: 'Notas Especiales',
-      smsConsent: 'Al enviar este formulario, aceptas recibir mensajes de texto de Star Event Rental (ej: confirmaciones de reserva, actualizaciones de entrega, recordatorios de pago). La frecuencia varía, hasta 10 msgs/mes. Pueden aplicarse tarifas de mensajes y datos. Responde STOP para cancelar. Responde HELP para ayuda. El consentimiento no es requisito para comprar bienes o servicios.',
       // Payment split
       deposit40: 'Anticipo (40%) — necesario para reservar',
       balance60: 'Saldo (60%)',
