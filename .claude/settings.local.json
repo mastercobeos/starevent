@@ -9,6 +9,9 @@
       "Bash(wc:*)",
       "Bash(npx next build)",
       "Bash(node -e:*)"
+    ],
+    "additionalDirectories": [
+      "d:\\Proyectos web\\stareventrentaltx\\src\\app\\[locale]"
     ]
   }
 }

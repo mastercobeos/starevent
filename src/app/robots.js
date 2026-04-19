@@ -4,7 +4,7 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/api/', '/reservation/'],
+        disallow: ['/admin/', '/api/', '/reservation/', '/designer', '/es/designer'],
       },
     ],
     sitemap: 'https://stareventrentaltx.com/sitemap.xml',

@@ -73,6 +73,7 @@ export default function Layout({ children }) {
 
   const prefix = language === 'es' ? '/es' : '';
   const isHomePage = pathname === '/' || pathname === '/es' || pathname === '/en';
+  const isDesignerPage = pathname === '/designer' || pathname === '/es/designer' || pathname === '/en/designer';
   const totalItems = getTotalItems();
 
   return (
@@ -372,6 +373,7 @@ export default function Layout({ children }) {
       )}
 
       {/* Social Media Buttons - Responsive: same position, proportional sizes */}
+      {!isDesignerPage && (
       <div
         className={`flex fixed right-3 sm:right-4 md:right-6 top-[3.8rem] sm:top-[4.5rem] md:top-[5.5rem] z-[9999] flex-col gap-2 sm:gap-3 md:gap-4 transition-[opacity,transform] duration-500 ease-in-out ${
           isNavbarVisible && !isCartOpen && !isMobileMenuOpen && !isAnyModalOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 pointer-events-none'
@@ -440,6 +442,7 @@ export default function Layout({ children }) {
           </svg>
         </a>
       </div>
+      )}
 
       {/* Main Content */}
       <main className="pt-[3.2rem] sm:pt-16 md:pt-[4.8rem]">{children}</main>
