@@ -16,6 +16,8 @@ const CART_STORAGE_KEY = 'star-event-cart';
 
 export const CartProvider = ({ children }) => {
   const [items, setItems] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [addPulse, setAddPulse] = useState(0);
 
   // Load cart from localStorage after mount (avoids SSR hydration mismatch)
   useEffect(() => {
@@ -41,7 +43,11 @@ export const CartProvider = ({ children }) => {
       }
       return [...prev, { ...item, quantity: qty }];
     });
+    setAddPulse((n) => n + 1);
   };
+
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
 
   const removeItem = (id) => {
     setItems((prev) => prev.filter((i) => i.id !== id));
@@ -71,7 +77,7 @@ export const CartProvider = ({ children }) => {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, getTotal, getTotalItems }}
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, getTotal, getTotalItems, isCartOpen, openCart, closeCart, addPulse }}
     >
       {children}
     </CartContext.Provider>

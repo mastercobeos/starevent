@@ -27,15 +27,24 @@ const getNavLinks = (language) => {
 export default function Layout({ children }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const lastScrollYRef = useRef(0);
   const rafRef = useRef(null);
   const { language, toggleLanguage } = useLanguage();
-  const { items, removeItem, updateQuantity, clearCart, getTotal, getTotalItems } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, getTotal, getTotalItems, isCartOpen, openCart, closeCart, addPulse } = useCart();
   const pathname = usePathname();
   const tc = translations[language].cart;
+  const [cartFlash, setCartFlash] = useState(false);
+
+  // When an item is added, force the navbar to show and flash the cart button
+  useEffect(() => {
+    if (addPulse === 0) return;
+    setIsNavbarVisible(true);
+    setCartFlash(true);
+    const timer = setTimeout(() => setCartFlash(false), 1900);
+    return () => clearTimeout(timer);
+  }, [addPulse]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,7 +89,7 @@ export default function Layout({ children }) {
     <div className="min-h-screen bg-background">
       {/* Navigation */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-[opacity,transform] duration-500 ease-in-out backdrop-blur-sm ${
+        className={`fixed top-0 left-0 right-0 z-[60] transition-[opacity,transform] duration-500 ease-in-out backdrop-blur-sm ${
           isNavbarVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
         }`}
         style={{
@@ -134,8 +143,8 @@ export default function Layout({ children }) {
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 md:hidden ml-auto">
               {/* Mobile Cart Button */}
               <button
-                onClick={() => setIsCartOpen(true)}
-                className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary/50 hover:bg-secondary/70 border-2 border-[#C9A84C] transition-[background-color,transform] duration-200 hover:scale-110"
+                onClick={openCart}
+                className={`relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-secondary/50 hover:bg-secondary/70 border-2 border-[#C9A84C] transition-[background-color,transform] duration-200 hover:scale-110 ${cartFlash ? 'cart-attention' : ''}`}
                 aria-label="Cart"
               >
                 <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
@@ -208,10 +217,10 @@ export default function Layout({ children }) {
         </div>
 
         {/* Desktop: Cart + Language Toggle */}
-        <div className="hidden md:flex items-center gap-8 fixed z-50" style={{ top: '18px', right: '32px' }}>
+        <div className="hidden md:flex items-center gap-8 fixed z-[60]" style={{ top: '18px', right: '32px' }}>
           <button
-            onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center justify-center rounded-full bg-secondary/50 hover:bg-secondary/70 border-2 border-[#C9A84C] transition-[background-color,transform] duration-200 hover:scale-110"
+            onClick={openCart}
+            className={`relative flex items-center justify-center rounded-full bg-secondary/50 hover:bg-secondary/70 border-2 border-[#C9A84C] transition-[background-color,transform] duration-200 hover:scale-110 ${cartFlash ? 'cart-attention' : ''}`}
             style={{ width: '2.35rem', height: '2.35rem' }}
             aria-label="Cart"
           >
@@ -251,7 +260,7 @@ export default function Layout({ children }) {
 
       {/* Cart Panel */}
       {isCartOpen && (
-        <div className="fixed inset-0 z-[80]" onClick={() => { setIsCartOpen(false); setShowCheckout(false); }}>
+        <div className="fixed inset-0 z-[80]" onClick={() => { closeCart(); setShowCheckout(false); }}>
           <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
           <div
             className="absolute right-0 top-0 h-full w-full max-w-md shadow-2xl overflow-y-auto border-l border-white/15"
@@ -276,7 +285,7 @@ export default function Layout({ children }) {
                       {tc.cartTitle}
                     </h2>
                     <button
-                      onClick={() => { setIsCartOpen(false); setShowCheckout(false); }}
+                      onClick={() => { closeCart(); setShowCheckout(false); }}
                       className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
                     >
                       <X className="w-5 h-5" />

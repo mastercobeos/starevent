@@ -1,5 +1,8 @@
+'use client';
+
 import { memo } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { BackgroundSection } from '../ui/BackgroundSection';
 
 const BG_IMAGE = 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70';
@@ -9,7 +12,10 @@ const previewCards = [
   { badge: 'Basic', image: '/basic1.webp' },
 ];
 
-export const PackagesPreview = memo(function PackagesPreview({ t, onSelectPackage }) {
+export const PackagesPreview = memo(function PackagesPreview({ t, onSelectPackage, language }) {
+  const isEs = language === 'es';
+  const prefix = isEs ? '/es' : '';
+
   return (
     <BackgroundSection imageSrc={BG_IMAGE} id="packages" className="py-16 sm:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -36,6 +42,19 @@ export const PackagesPreview = memo(function PackagesPreview({ t, onSelectPackag
                 </div>
               </div>
             ))}
+          </div>
+          <div className="mt-10 sm:mt-12 flex justify-center">
+            <Link
+              href={`${prefix}/customize`}
+              className="inline-flex items-center justify-center px-8 py-3 rounded-full backdrop-blur-sm border-2 border-[#C9A84C] text-foreground font-bold text-base sm:text-lg transition-[transform,box-shadow] duration-300 hover:scale-110 hover:shadow-lg"
+              style={{
+                background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)',
+                backdropFilter: 'blur(8px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(8px) saturate(180%)',
+              }}
+            >
+              {isEs ? 'Personalizar' : 'Customize'}
+            </Link>
           </div>
         </div>
       </div>

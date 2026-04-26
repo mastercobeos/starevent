@@ -1,3 +1,5 @@
+import { productCards } from '../data/homeData';
+
 export default function sitemap() {
   const baseUrl = 'https://stareventrentaltx.com';
   const lastModified = '2026-03-11';
@@ -51,6 +53,18 @@ export default function sitemap() {
       },
     },
     {
+      url: `${baseUrl}/customize`,
+      lastModified,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: {
+        languages: {
+          en: `${baseUrl}/customize`,
+          es: `${baseUrl}/es/customize`,
+        },
+      },
+    },
+    {
       url: `${baseUrl}/privacy-policy`,
       lastModified,
       changeFrequency: 'yearly',
@@ -98,5 +112,19 @@ export default function sitemap() {
         },
       },
     })),
+    ...productCards.flatMap((cat) =>
+      cat.items.map((item) => ({
+        url: `${baseUrl}/products/${cat.slug}/${item.id}`,
+        lastModified,
+        changeFrequency: 'monthly',
+        priority: 0.7,
+        alternates: {
+          languages: {
+            en: `${baseUrl}/products/${cat.slug}/${item.id}`,
+            es: `${baseUrl}/es/products/${cat.slug}/${item.id}`,
+          },
+        },
+      }))
+    ),
   ];
 }

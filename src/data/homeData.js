@@ -39,6 +39,7 @@ export const productCards = [
     slug: 'tents',
     image: '/tentsportada.webp',
     items: [
+      { id: 'tent-popup-10x20', name: 'Pop Up Tent 10x20', nameEs: 'Carpa Pop Up 10x20', price: 180.00, desc: 'Compact 10x20 pop-up tent — quick setup, perfect for small backyard gatherings, vendor booths, and intimate events.', descEs: 'Carpa pop-up 10x20 compacta — montaje rápido, perfecta para reuniones pequeñas en patio, stands y celebraciones íntimas.', image: '/popuptent10x20.webp', checkoutLink: '#' },
       { id: 'tent-20x20', name: 'Tent 20x20', nameEs: 'Carpa 20x20', price: 250.00, desc: 'Perfect for intimate gatherings of up to 30 guests. Includes garden lights and walls.', descEs: 'Perfecta para reuniones íntimas de hasta 30 invitados. Incluye luces de jardín y paredes.', image: '/tent20x2040.webp', checkoutLink: '#' },
       { id: 'tent-hp-20x20', name: 'High Peak 20x20', nameEs: 'High Peak 20x20', price: 550.00, desc: 'High peak premium heavy duty tent 20x20 for a stunning visual impact.', descEs: 'Carpa high peak premium heavy duty 20x20 para un impacto visual impresionante.', image: '/tent20x20.webp', checkoutLink: '#' },
       { id: 'tent-20x32', name: 'Tent 20x32', nameEs: 'Carpa 20x32', price: 350.00, desc: '70 people seated in chairs, 50 seated at tables. Fire proof. Includes garden lights and walls.', descEs: '70 personas sentadas en sillas, 50 personas en mesas. A prueba de fuego. Incluye luces de jardín y paredes.', image: '/tent20x32.webp', checkoutLink: '#' },

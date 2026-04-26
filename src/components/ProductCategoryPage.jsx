@@ -155,6 +155,12 @@ export const ProductCategoryPage = memo(function ProductCategoryPage({ category,
                   <p className="text-white/70 text-sm mt-2 leading-relaxed">
                     {isEs ? (item.descEs || item.desc) : item.desc}
                   </p>
+                  <Link
+                    href={`${prefix}/products/${category.slug}/${item.id}`}
+                    className="text-primary text-xs sm:text-sm font-semibold hover:underline mt-2 inline-block"
+                  >
+                    {isEs ? 'Ver detalles →' : 'See details →'}
+                  </Link>
                   {item.addons && item.addons.map(addon => (
                     <button
                       key={addon.id}

@@ -128,7 +128,7 @@ export default function Home() {
     <div>
       <HeroSection t={t} />
       <FeaturesSection t={t} />
-      <PackagesPreview t={t} onSelectPackage={handleSelectPackage} />
+      <PackagesPreview t={t} onSelectPackage={handleSelectPackage} language={language} />
       <ProductsSection language={language} onSelectProduct={handleSelectProduct} />
       <AboutSection language={language} />
       <ReviewsSection t={t} />
