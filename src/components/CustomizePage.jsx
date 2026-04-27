@@ -105,7 +105,7 @@ export const CustomizePage = memo(function CustomizePage() {
               <span className="mx-1">/</span>
             </li>
             <li>
-              <span className="text-white/85">{isEs ? 'Personalizar' : 'Customize'}</span>
+              <span className="text-white/85">{isEs ? 'Arma tu Propio Paquete' : 'Build your own Package'}</span>
             </li>
           </ol>
         </nav>

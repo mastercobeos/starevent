@@ -85,7 +85,7 @@ export default async function Page({ params }) {
         {
           '@type': 'ListItem',
           position: 2,
-          name: isEs ? 'Personalizar' : 'Customize',
+          name: isEs ? 'Arma tu Propio Paquete' : 'Build your own Package',
           item: isEs ? `${baseUrl}/es/customize` : `${baseUrl}/customize`,
         },
       ],

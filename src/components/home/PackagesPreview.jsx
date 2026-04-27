@@ -53,7 +53,7 @@ export const PackagesPreview = memo(function PackagesPreview({ t, onSelectPackag
                 WebkitBackdropFilter: 'blur(8px) saturate(180%)',
               }}
             >
-              {isEs ? 'Personalizar' : 'Customize'}
+              {isEs ? 'Arma tu Propio Paquete' : 'Build your own Package'}
             </Link>
           </div>
         </div>
