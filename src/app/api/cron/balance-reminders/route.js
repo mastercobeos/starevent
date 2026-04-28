@@ -6,8 +6,17 @@ import { Resend } from 'resend';
 const BUSINESS_EMAIL = 'info@stareventrentaltx.com';
 const CRON_SECRET = process.env.CRON_SECRET;
 
-// Vercel Cron: runs every 15 minutes to send balance reminders on event day
+// Vercel Cron: runs every 15 minutes to send balance reminders.
+// Policy: balance (60%) is due at least 48 hours before the event.
+// Reminder #1 fires at 9 AM Houston on T-2 (48 hours before event).
+// Reminder #2 fires at 9 AM Houston on T-1 (24 hours before event, final warning).
 // Timezone: America/Chicago (Houston, TX)
+
+function addDaysISO(isoDate, days) {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().split('T')[0];
+}
 
 export async function GET(request) {
   try {
@@ -44,7 +53,10 @@ export async function GET(request) {
     const chicagoHour = parseInt(parts.find(p => p.type === 'hour').value);
     const chicagoMinute = parseInt(parts.find(p => p.type === 'minute').value);
 
-    // Find reservations with balance_due status and event_date = today
+    // Target dates: T-2 (48hrs before) and T-1 (24hrs before, final warning)
+    const eventDateT2 = addDaysISO(chicagoDate, 2);
+    const eventDateT1 = addDaysISO(chicagoDate, 1);
+
     const { data: reservations, error } = await supabaseAdmin
       .from('reservations')
       .select(`
@@ -53,7 +65,7 @@ export async function GET(request) {
         payments (id, type, status, square_invoice_url)
       `)
       .eq('status', 'balance_due')
-      .eq('event_date', chicagoDate);
+      .in('event_date', [eventDateT2, eventDateT1]);
 
     if (error) {
       console.error('Error fetching reminders:', error);
@@ -85,9 +97,12 @@ export async function GET(request) {
 
       const sentTypes = (sentNotifications || []).map(n => n.type);
       const clientName = `${res.first_name} ${res.last_name}`.trim();
+      const isT2 = res.event_date === eventDateT2;
+      const isT1 = res.event_date === eventDateT1;
 
-      // Reminder #1: at 9:00 AM Houston time (window: 9:00–9:14)
-      if (chicagoHour === 9 && chicagoMinute < 15 && !sentTypes.includes('balance_reminder_1')) {
+      // Reminder #1 — fires at 9 AM Houston on T-2 (48 hours before event)
+      if (isT2 && chicagoHour === 9 && chicagoMinute < 15 && !sentTypes.includes('balance_reminder_1')) {
+        const subject = `Recordatorio: saldo (60%) vence en 48 horas — Evento ${res.event_date}`;
         const html = buildReminderHtml({
           clientName,
           eventDate: res.event_date,
@@ -96,13 +111,8 @@ export async function GET(request) {
           reminderType: 'first',
         });
 
-        const emailResult = await sendReminderEmail(resend, {
-          to: res.client_email,
-          subject: `Recordatorio de pago (60%) — Evento hoy ${res.event_date}`,
-          html,
-        });
+        const emailResult = await sendReminderEmail(resend, { to: res.client_email, subject, html });
 
-        // Log notification
         await logNotification(supabaseAdmin, {
           reservationId: res.id,
           type: 'balance_reminder_1',
@@ -110,21 +120,16 @@ export async function GET(request) {
           recipient: res.client_email,
           success: emailResult.success,
           error: emailResult.error,
-          subject: `Recordatorio de pago (60%) — Evento hoy ${res.event_date}`,
+          subject,
         });
 
         if (emailResult.success) sentCount++;
         results.push({ reservation: res.id, reminder: 1, ...emailResult });
       }
 
-      // Reminder #2: 2 hours before event_start_time, or 12:00 PM if no start time
-      let reminder2Hour = 12;
-      if (res.event_start_time) {
-        const startHour = parseInt(res.event_start_time.split(':')[0]);
-        reminder2Hour = Math.max(startHour - 2, 10); // At least 10 AM
-      }
-
-      if (chicagoHour === reminder2Hour && chicagoMinute < 15 && !sentTypes.includes('balance_reminder_2')) {
+      // Reminder #2 — fires at 9 AM Houston on T-1 (24 hours before, final warning)
+      if (isT1 && chicagoHour === 9 && chicagoMinute < 15 && !sentTypes.includes('balance_reminder_2')) {
+        const subject = `URGENTE: saldo (60%) vence hoy — Evento mañana ${res.event_date}`;
         const html = buildReminderHtml({
           clientName,
           eventDate: res.event_date,
@@ -133,11 +138,7 @@ export async function GET(request) {
           reminderType: 'final',
         });
 
-        const emailResult = await sendReminderEmail(resend, {
-          to: res.client_email,
-          subject: 'Recordatorio final — Pago 60% antes del set-up',
-          html,
-        });
+        const emailResult = await sendReminderEmail(resend, { to: res.client_email, subject, html });
 
         await logNotification(supabaseAdmin, {
           reservationId: res.id,
@@ -146,7 +147,7 @@ export async function GET(request) {
           recipient: res.client_email,
           success: emailResult.success,
           error: emailResult.error,
-          subject: 'Recordatorio final — Pago 60% antes del set-up',
+          subject,
         });
 
         if (emailResult.success) sentCount++;
@@ -210,16 +211,15 @@ function buildReminderHtml({ clientName, eventDate, balanceAmount, invoiceUrl, r
   const safeClientName = escapeHtml(clientName);
 
   const headerText = isFirst
-    ? 'Recordatorio de Pago — Balance Pendiente (60%)'
-    : 'Recordatorio Final — Pago antes del Set-Up';
+    ? 'Recordatorio — Saldo (60%) vence en 48 horas'
+    : 'URGENTE — Saldo (60%) vence hoy (24 horas antes del evento)';
 
   const headerColor = isFirst ? '#e67e22' : '#e74c3c';
 
   const bodyText = isFirst
-    ? `Tu evento es hoy <strong>(${escapeHtml(eventDate)})</strong>. El pago del 60% restante se debe realizar
-       <strong>al momento de la entrega del mobiliario</strong>, antes de iniciar el set-up.`
-    : `Este es un recordatorio final. Necesitamos recibir el pago del 60% restante
-       <strong>antes de iniciar el set-up</strong> de tu evento hoy.`;
+    ? `Tu evento está programado para <strong>${escapeHtml(eventDate)}</strong>. El pago del 60% restante debe realizarse
+       <strong>al menos 48 horas antes del evento</strong>. Por favor completa el pago a la brevedad.`
+    : `<strong>Recordatorio final.</strong> El plazo para el pago del 60% restante vence <strong>hoy</strong> (24 horas antes del evento programado para ${escapeHtml(eventDate)}). De no recibirse el pago, la reservación podría cancelarse.`;
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff;">
@@ -251,7 +251,7 @@ function buildReminderHtml({ clientName, eventDate, balanceAmount, invoiceUrl, r
 
       <div style="background:#fffbe6;border:1px solid #f0e68c;border-radius:8px;padding:12px;margin-bottom:16px;">
         <p style="color:#856404;font-size:13px;margin:0;line-height:1.5;">
-          <strong>Importante:</strong> El pago debe completarse al momento de la entrega del mobiliario para poder iniciar el set-up de su evento.
+          <strong>Importante:</strong> El pago del saldo (60%) debe completarse al menos 48 horas antes del evento. De no recibirse a tiempo, la reservación podría cancelarse.
         </p>
       </div>
 

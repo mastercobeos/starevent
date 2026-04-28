@@ -162,7 +162,7 @@ export const translations = {
       // Payment split
       deposit40: 'Deposit (40%) — required to reserve',
       balance60: 'Balance (60%)',
-      balance60DueEventDay: 'Balance (60%) — due event day',
+      balance60DueEventDay: 'Balance (60%) — due 48 hours before the event',
       depositDueNow: 'Due now after signing',
       // Contract
       reviewSignContract: 'Review & Sign Contract',
@@ -177,7 +177,7 @@ export const translations = {
       depositReady: (amount) => `Your deposit of $${amount} (40%) is ready. Complete your payment via Square to receive your invoice.`,
       payDeposit: 'Pay Deposit',
       invoiceWillBeSent: 'Invoice will be sent to your email shortly.',
-      balanceRemaining: (amount) => `The remaining balance of $${amount} (60%) is due on the event date before setup.`,
+      balanceRemaining: (amount) => `The remaining balance of $${amount} (60%) is due at least 48 hours before the event.`,
       orderUnderReview: 'Order Under Review',
       orderUnderReviewDesc: 'Excellent! We are reviewing your order. Our team will contact you to confirm your reservation.',
       somethingWentWrong: 'Something went wrong',
@@ -230,7 +230,7 @@ export const translations = {
       paidInFull: 'Paid in Full',
       balancePaidThankYou: 'Your balance has been paid. Thank you!',
       balancePaymentDue: 'Balance Payment Due',
-      balanceMustBePaid: 'The balance must be paid before setup begins on the event date.',
+      balanceMustBePaid: 'The balance must be paid at least 48 hours before the event.',
       payNow: 'Pay Now',
       contactToPay: 'Contact Star Event Rental at (281) 636-0615 to complete your payment.',
       event: 'Event',
@@ -496,7 +496,7 @@ export const translations = {
       // Payment split
       deposit40: 'Anticipo (40%) — necesario para reservar',
       balance60: 'Saldo (60%)',
-      balance60DueEventDay: 'Saldo (60%) — día del evento',
+      balance60DueEventDay: 'Saldo (60%) — 48 horas antes del evento',
       depositDueNow: 'A pagar tras firmar',
       // Contract
       reviewSignContract: 'Revisar y Firmar Contrato',
@@ -511,7 +511,7 @@ export const translations = {
       depositReady: (amount) => `Tu anticipo de $${amount} (40%) está listo. Completa tu pago a través de Square para recibir tu factura.`,
       payDeposit: 'Pagar Anticipo',
       invoiceWillBeSent: 'La factura será enviada a tu correo en breve.',
-      balanceRemaining: (amount) => `El saldo restante de $${amount} (60%) se paga el día del evento antes del montaje.`,
+      balanceRemaining: (amount) => `El saldo restante de $${amount} (60%) debe pagarse al menos 48 horas antes del evento.`,
       orderUnderReview: 'Orden en Revisión',
       orderUnderReviewDesc: 'Excelente, estamos revisando la orden. Nuestro equipo se pondrá en contacto contigo para confirmar tu reserva.',
       somethingWentWrong: 'Algo salió mal',
@@ -564,7 +564,7 @@ export const translations = {
       paidInFull: 'Pagado al 100%',
       balancePaidThankYou: '¡Tu saldo ha sido pagado. Gracias!',
       balancePaymentDue: 'Pago de Saldo Pendiente',
-      balanceMustBePaid: 'El saldo debe pagarse antes de que inicie el montaje el día del evento.',
+      balanceMustBePaid: 'El saldo debe pagarse al menos 48 horas antes del evento.',
       payNow: 'Pagar Ahora',
       contactToPay: 'Contacta a Star Event Rental al (281) 636-0615 para completar tu pago.',
       event: 'Evento',

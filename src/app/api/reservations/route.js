@@ -24,6 +24,13 @@ function computeDeliveryFee(miles) {
   return 0;
 }
 
+// Subtracts N days from a YYYY-MM-DD string, returns YYYY-MM-DD.
+function subtractDaysISO(isoDate, days) {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - days);
+  return d.toISOString().split('T')[0];
+}
+
 export async function POST(request) {
   try {
     if (!supabaseAdmin) {
@@ -162,7 +169,7 @@ export async function POST(request) {
         total: computedTotal,
         deposit_amount: deposit,
         balance_amount: balance,
-        balance_due_date: event_date,
+        balance_due_date: subtractDaysISO(event_date, 2), // 48 hours before the event
 
         status: 'pending', // Temporary — will update after stock check
       })

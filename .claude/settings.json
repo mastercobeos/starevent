@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nslookup okjqvsdghoelddfgwuls.supabase.co)",
+      "Bash(npx --no-install next lint --file src/app/api/cron/balance-reminders/route.js --file src/lib/create-balance-invoice.js --file src/app/api/reservations/route.js)"
+    ]
+  }
+}

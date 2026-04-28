@@ -11,6 +11,16 @@ import { Button } from './ui/button';
 
 const FIXED_BG = '/fondo1.webp';
 
+const WALL_PRODUCT = {
+  id: 'tent-wall',
+  name: 'Tent Wall',
+  nameEs: 'Pared para Carpa',
+  price: 2.00,
+  desc: 'Tent wall panel add-on.',
+  descEs: 'Panel de pared para carpa.',
+  image: '/tent10x20.webp',
+};
+
 export const CustomizePage = memo(function CustomizePage() {
   const { language } = useLanguage();
   const { addItem } = useCart();
@@ -19,6 +29,7 @@ export const CustomizePage = memo(function CustomizePage() {
   const prefix = isEs ? '/es' : '';
 
   const [quantities, setQuantities] = useState({});
+  const [walls, setWalls] = useState({});
   const [adding, setAdding] = useState(null);
 
   const handleQtyChange = useCallback((id, value) => {
@@ -31,16 +42,32 @@ export const CustomizePage = memo(function CustomizePage() {
     setQuantities((prev) => ({ ...prev, [id]: num }));
   }, []);
 
+  const handleWallsChange = useCallback((id, value) => {
+    if (value === '') {
+      setWalls((prev) => ({ ...prev, [id]: '' }));
+      return;
+    }
+    const num = parseInt(value, 10);
+    if (Number.isNaN(num) || num < 0) return;
+    setWalls((prev) => ({ ...prev, [id]: num }));
+  }, []);
+
   const handleAdd = useCallback(
-    (item) => {
+    (item, isTent = false) => {
       const raw = quantities[item.id];
       const parsed = parseInt(raw, 10);
       const safeQty = Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
       addItem(item, safeQty);
+      if (isTent) {
+        const wRaw = walls[item.id];
+        const wParsed = parseInt(wRaw, 10);
+        const wQty = Number.isNaN(wParsed) || wParsed < 1 ? 0 : wParsed;
+        if (wQty > 0) addItem(WALL_PRODUCT, wQty);
+      }
       setAdding(item.id);
       setTimeout(() => setAdding((curr) => (curr === item.id ? null : curr)), 1500);
     },
-    [addItem, quantities]
+    [addItem, quantities, walls]
   );
 
   return (
@@ -144,6 +171,8 @@ export const CustomizePage = memo(function CustomizePage() {
                   {category.items.map((item) => {
                     const isAdded = adding === item.id;
                     const qtyVal = quantities[item.id] ?? 1;
+                    const isTent = category.slug === 'tents';
+                    const wallVal = walls[item.id] ?? 0;
                     return (
                       <div
                         key={item.id}
@@ -199,9 +228,29 @@ export const CustomizePage = memo(function CustomizePage() {
                               className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary"
                             />
                           </div>
+                          {isTent && (
+                            <div className="mt-3">
+                              <label
+                                htmlFor={`walls-${item.id}`}
+                                className="block text-white/80 text-xs font-medium mb-1"
+                              >
+                                {isEs ? 'Paredes (+$2.00 c/u)' : 'Walls (+$2.00 each)'}
+                              </label>
+                              <input
+                                id={`walls-${item.id}`}
+                                type="number"
+                                min="0"
+                                inputMode="numeric"
+                                value={wallVal}
+                                onChange={(e) => handleWallsChange(item.id, e.target.value)}
+                                placeholder="0"
+                                className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary"
+                              />
+                            </div>
+                          )}
                           <button
                             type="button"
-                            onClick={() => handleAdd(item)}
+                            onClick={() => handleAdd(item, isTent)}
                             disabled={isAdded}
                             className={`mt-3 w-full font-semibold py-2 px-4 rounded-lg transition-colors text-sm ${
                               isAdded

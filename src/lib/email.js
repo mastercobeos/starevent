@@ -123,7 +123,7 @@ function confirmationEmailHtml(reservation, items, { forBusiness = false } = {})
 
       <div style="background:#fffbe6;border:1px solid #f0e68c;border-radius:8px;padding:12px;margin-bottom:16px;">
         <p style="color:#856404;font-size:13px;margin:0;line-height:1.5;">
-          <strong>Reminder:</strong> The remaining balance of ${formatCurrency(reservation.balance_amount)} is due on the event date before setup.
+          <strong>Reminder:</strong> The remaining balance of ${formatCurrency(reservation.balance_amount)} is due at least 48 hours before the event. Failure to pay 48 hours prior may result in cancellation.
         </p>
       </div>
 

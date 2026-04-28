@@ -778,8 +778,8 @@ export default function CheckoutForm({ onBack }) {
                   <span className="text-white/60">${calculateSplit(getGrandTotal()).deposit.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-white/50">{tr.balance60DueEventDay}</span>
-                  <span className="text-white/60">${calculateSplit(getGrandTotal()).balance.toFixed(2)}</span>
+                  <span className="text-red-400 font-semibold">{tr.balance60DueEventDay}</span>
+                  <span className="text-red-400 font-semibold">${calculateSplit(getGrandTotal()).balance.toFixed(2)}</span>
                 </div>
               </div>
             </>

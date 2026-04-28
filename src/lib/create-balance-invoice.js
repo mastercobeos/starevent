@@ -2,6 +2,12 @@ import { supabaseAdmin } from '@/lib/supabase-server';
 import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { squareIdempotencyKey } from '@/lib/idempotency';
 
+function subtractDaysISO(isoDate, days) {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - days);
+  return d.toISOString().split('T')[0];
+}
+
 /**
  * Creates a Square balance invoice for a reservation.
  * Shared by the pay-balance API route and the Square webhook handler.
@@ -91,7 +97,7 @@ export async function createBalanceInvoice(reservationId) {
         customerEmail: reservation.client_email,
         customerName: `${reservation.first_name} ${reservation.last_name}`,
         description: `Balance (60%) — Reservation #${reservationId.slice(0, 8)}`,
-        dueDate: reservation.event_date,
+        dueDate: subtractDaysISO(reservation.event_date, 2), // 48 hours before event
         idempotencyKey: idempKey,
       }),
     }

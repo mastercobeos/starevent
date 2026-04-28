@@ -115,7 +115,8 @@ Deno.serve(async (req) => {
             automatic_payment_source: "NONE",
             reminders: type === "balance"
               ? [
-                  { relative_scheduled_days: 0, message: "Payment is due today before setup begins." },
+                  { relative_scheduled_days: -3, message: "Reminder: balance (60%) is due at least 48 hours before your event." },
+                  { relative_scheduled_days: 0, message: "Final reminder: balance (60%) is due today (48 hours before the event)." },
                 ]
               : [
                   { relative_scheduled_days: -1, message: "Your deposit payment is due tomorrow." },
