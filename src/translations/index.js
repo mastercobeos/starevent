@@ -172,6 +172,7 @@ export const translations = {
       signContract: 'Sign Contract',
       signing: 'Signing...',
       enterInitials: 'Please enter your initials (2 characters)',
+      contractNotReady: 'Your contract is being prepared. Please contact Star Event Rental at (281) 636-0615 if this message persists.',
       // Steps after submit
       contractSigned: 'Contract Signed!',
       depositReady: (amount) => `Your deposit of $${amount} (40%) is ready. Complete your payment via Square to receive your invoice.`,
@@ -506,6 +507,7 @@ export const translations = {
       signContract: 'Firmar Contrato',
       signing: 'Firmando...',
       enterInitials: 'Ingresa tus iniciales (2 caracteres)',
+      contractNotReady: 'Tu contrato se está preparando. Si este mensaje continúa, comunícate con Star Event Rental al (281) 636-0615.',
       // Steps after submit
       contractSigned: '¡Contrato Firmado!',
       depositReady: (amount) => `Tu anticipo de $${amount} (40%) está listo. Completa tu pago a través de Square para recibir tu factura.`,

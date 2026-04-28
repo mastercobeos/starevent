@@ -101,7 +101,7 @@ export function renderContract(reservation, items, language = 'en') {
         <ul style="font-size:13px;color:#444;padding-left:20px;margin-bottom:16px;">
           <li style="margin-bottom:6px;">The total rental price is <strong>${formatCurrency(total)}</strong>.</li>
           <li style="margin-bottom:6px;">To guarantee the reservation, the CLIENT must pay a <strong>${Math.round(DEPOSIT_PERCENTAGE * 100)}% deposit (${formatCurrency(deposit_amount)})</strong> upon signing.</li>
-          <li style="margin-bottom:6px;color:#c0392b;font-weight:bold;">The remaining balance of <strong>${formatCurrency(balance_amount)}</strong> must be paid <strong>at least 48 hours before the event date</strong>. Failure to complete this payment 48 hours prior may result in cancellation of the reservation.</li>
+          <li style="margin-bottom:6px;color:#c0392b;font-weight:bold;">The full remaining balance of <strong>${formatCurrency(balance_amount)}</strong> is due <strong>48 hours before the event date</strong>. If payment is not received by this deadline, Star Event Rental reserves the right to cancel the reservation, retain the deposit, and make the reserved inventory available to other clients without further notice.</li>
           <li style="margin-bottom:6px;">Payments can be made in cash, Zelle, or by card. All totals will be automatically subject to <strong>8.25% sales tax</strong>, as provided by Texas state law. The only exception is non-profit organizations with a state-issued exemption letter.</li>
         </ul>
 

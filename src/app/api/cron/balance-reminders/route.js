@@ -217,9 +217,10 @@ function buildReminderHtml({ clientName, eventDate, balanceAmount, invoiceUrl, r
   const headerColor = isFirst ? '#e67e22' : '#e74c3c';
 
   const bodyText = isFirst
-    ? `Tu evento está programado para <strong>${escapeHtml(eventDate)}</strong>. El pago del 60% restante debe realizarse
-       <strong>al menos 48 horas antes del evento</strong>. Por favor completa el pago a la brevedad.`
-    : `<strong>Recordatorio final.</strong> El plazo para el pago del 60% restante vence <strong>hoy</strong> (24 horas antes del evento programado para ${escapeHtml(eventDate)}). De no recibirse el pago, la reservación podría cancelarse.`;
+    ? `Tu evento está programado para <strong>${escapeHtml(eventDate)}</strong>. El saldo total restante <strong>vence 48 horas antes de la fecha del evento</strong>.
+       Si el pago no se recibe antes de este plazo, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes sin previo aviso.`
+    : `<strong>Recordatorio final.</strong> El plazo para pagar el saldo total restante venció (48 horas antes del evento programado para ${escapeHtml(eventDate)}).
+       Si el pago no se recibe de inmediato, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes sin previo aviso.`;
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff;">
@@ -251,7 +252,7 @@ function buildReminderHtml({ clientName, eventDate, balanceAmount, invoiceUrl, r
 
       <div style="background:#fffbe6;border:1px solid #f0e68c;border-radius:8px;padding:12px;margin-bottom:16px;">
         <p style="color:#856404;font-size:13px;margin:0;line-height:1.5;">
-          <strong>Importante:</strong> El pago del saldo (60%) debe completarse al menos 48 horas antes del evento. De no recibirse a tiempo, la reservación podría cancelarse.
+          <strong>Importante:</strong> El saldo total restante vence 48 horas antes de la fecha del evento. Si el pago no se recibe antes de este plazo, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes sin previo aviso.
         </p>
       </div>
 

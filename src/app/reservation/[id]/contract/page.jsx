@@ -113,6 +113,23 @@ export default function ContractPage() {
 
   const contract = reservation?.contracts?.[0];
 
+  // Reservation loaded but contract record missing → block signing
+  if (reservation && !contract) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+        <div className="max-w-md text-center">
+          <AlertCircle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-white mb-2">
+            {tr.reviewSignContract}
+          </h2>
+          <p className="text-white/70 text-sm leading-relaxed">
+            {tr.contractNotReady}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Already signed → show success + payment link
   if (signed) {
     return (

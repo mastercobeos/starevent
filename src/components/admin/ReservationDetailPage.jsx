@@ -147,6 +147,17 @@ export default function ReservationDetailPage({ id }) {
           </>
         )}
 
+        {r.status === STATUS.APPROVED_WAITING_CONTRACT && !contract && (
+          <Button
+            onClick={() => handleAction('approve')}
+            disabled={actionLoading}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold"
+          >
+            {actionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileText className="w-4 h-4 mr-2" />}
+            Generate Contract & Resend Email
+          </Button>
+        )}
+
         {!isTerminal && r.status !== STATUS.PENDING_OUT_OF_STOCK && r.status !== 'pending' && (
           <Button
             onClick={async () => { if (await confirm('Cancel this reservation?', { title: 'Cancel Reservation', destructive: true, confirmText: 'Cancel Reservation' })) handleAction('cancel'); }}

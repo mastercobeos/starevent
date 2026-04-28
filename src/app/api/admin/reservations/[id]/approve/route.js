@@ -33,15 +33,19 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Reservation not found' }, { status: 404 });
     }
 
-    // Validate transition
-    if (!canTransition(reservation.status, STATUS.APPROVED_WAITING_CONTRACT)) {
+    // Allow either: a normal approval transition, OR a re-approval to regenerate
+    // the contract when the reservation is already approved_waiting_contract but
+    // the contract record is missing/lost.
+    const isRegeneration = reservation.status === STATUS.APPROVED_WAITING_CONTRACT;
+    if (!isRegeneration && !canTransition(reservation.status, STATUS.APPROVED_WAITING_CONTRACT)) {
       return NextResponse.json(
         { error: `Cannot approve reservation in status "${reservation.status}"` },
         { status: 409 }
       );
     }
 
-    // Create stock holds (admin override — bypasses availability check)
+    // Create stock holds (admin override — bypasses availability check).
+    // Skip on regeneration since holds were already created on the original approval.
     const { data: items } = await supabaseAdmin
       .from('reservation_items')
       .select('product_id, quantity, unit_price, products(name, name_es)')
@@ -92,8 +96,10 @@ export async function PUT(request, { params }) {
       }
     }
 
-    for (const hold of Object.values(aggregated)) {
-      await supabaseAdmin.from('stock_holds').insert(hold);
+    if (!isRegeneration) {
+      for (const hold of Object.values(aggregated)) {
+        await supabaseAdmin.from('stock_holds').insert(hold);
+      }
     }
 
     // Generate contract
@@ -132,11 +138,13 @@ export async function PUT(request, { params }) {
       });
     }
 
-    // Update reservation status
-    await supabaseAdmin
-      .from('reservations')
-      .update({ status: STATUS.APPROVED_WAITING_CONTRACT })
-      .eq('id', id);
+    // Update reservation status (skip if already approved_waiting_contract)
+    if (!isRegeneration) {
+      await supabaseAdmin
+        .from('reservations')
+        .update({ status: STATUS.APPROVED_WAITING_CONTRACT })
+        .eq('id', id);
+    }
 
     // Send approval email with contract link
     const token = generateReservationToken(id);
