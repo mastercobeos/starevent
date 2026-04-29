@@ -7,10 +7,12 @@ const BUSINESS_EMAIL = 'info@stareventrentaltx.com';
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // Vercel Cron: runs every 15 minutes to send balance reminders.
-// Policy: balance (60%) is due at least 48 hours before the event.
-// Reminder #1 fires at 9 AM Houston on T-2 (48 hours before event).
-// Reminder #2 fires at 9 AM Houston on T-1 (24 hours before event, final warning).
-// Timezone: America/Chicago (Houston, TX)
+// Policy: 40% deposit on booking, 60% balance must be paid before the event.
+// Three reminders, all fire at 9 AM Houston (America/Chicago):
+//   T-7  (1 week before)  — balance_reminder_1: friendly heads-up
+//   T-3  (72 hours before) — balance_reminder_2: please complete the transfer
+//   T-2  (48 hours before) — balance_reminder_3: final notice
+// Language is read from reservations.language (en | es).
 
 function addDaysISO(isoDate, days) {
   const d = new Date(`${isoDate}T00:00:00Z`);
@@ -18,9 +20,14 @@ function addDaysISO(isoDate, days) {
   return d.toISOString().split('T')[0];
 }
 
+const REMINDER_SCHEDULE = [
+  { offsetDays: 7, type: 'balance_reminder_1', tone: 'friendly' },
+  { offsetDays: 3, type: 'balance_reminder_2', tone: 'urgent' },
+  { offsetDays: 2, type: 'balance_reminder_3', tone: 'final' },
+];
+
 export async function GET(request) {
   try {
-    // Verify cron secret to prevent unauthorized calls
     const authHeader = request.headers.get('authorization');
     if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -36,7 +43,6 @@ export async function GET(request) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // Get current date/time in Houston timezone
     const now = new Date();
     const chicagoFormatter = new Intl.DateTimeFormat('en-US', {
       timeZone: 'America/Chicago',
@@ -53,19 +59,31 @@ export async function GET(request) {
     const chicagoHour = parseInt(parts.find(p => p.type === 'hour').value);
     const chicagoMinute = parseInt(parts.find(p => p.type === 'minute').value);
 
-    // Target dates: T-2 (48hrs before) and T-1 (24hrs before, final warning)
-    const eventDateT2 = addDaysISO(chicagoDate, 2);
-    const eventDateT1 = addDaysISO(chicagoDate, 1);
+    // 9 AM window — only fire reminders during the 9:00–9:14 cron tick
+    const inSendWindow = chicagoHour === 9 && chicagoMinute < 15;
+    if (!inSendWindow) {
+      return NextResponse.json({
+        sent: 0,
+        skipped: true,
+        reason: 'outside-9am-window',
+        time: `${chicagoHour}:${String(chicagoMinute).padStart(2, '0')}`,
+      });
+    }
+
+    const targetDates = REMINDER_SCHEDULE.map(r => ({
+      ...r,
+      eventDate: addDaysISO(chicagoDate, r.offsetDays),
+    }));
 
     const { data: reservations, error } = await supabaseAdmin
       .from('reservations')
       .select(`
-        id, first_name, last_name, client_email, phone_1, event_date,
+        id, first_name, last_name, client_email, phone_1, event_date, language,
         event_start_time, balance_amount,
         payments (id, type, status, square_invoice_url)
       `)
       .eq('status', 'balance_due')
-      .in('event_date', [eventDateT2, eventDateT1]);
+      .in('event_date', targetDates.map(t => t.eventDate));
 
     if (error) {
       console.error('Error fetching reminders:', error);
@@ -80,79 +98,50 @@ export async function GET(request) {
     const results = [];
 
     for (const res of reservations) {
-      // Get the balance invoice URL
+      const reminder = targetDates.find(t => t.eventDate === res.event_date);
+      if (!reminder) continue;
+
       const balancePayment = (res.payments || []).find(
         p => p.type === 'balance' && p.status === 'pending'
       );
       const invoiceUrl = balancePayment?.square_invoice_url || '';
 
-      // Check if we already sent reminders today
-      const { data: sentNotifications } = await supabaseAdmin
+      // Anti-duplicate: did we already send this reminder type for this reservation?
+      const { data: alreadySent } = await supabaseAdmin
         .from('notifications')
-        .select('id, type')
+        .select('id')
         .eq('reservation_id', res.id)
-        .in('type', ['balance_reminder_1', 'balance_reminder_2'])
+        .eq('type', reminder.type)
         .eq('status', 'sent')
-        .gte('sent_at', `${chicagoDate}T00:00:00`);
+        .limit(1);
 
-      const sentTypes = (sentNotifications || []).map(n => n.type);
+      if (alreadySent && alreadySent.length > 0) continue;
+
+      const lang = res.language === 'es' ? 'es' : 'en';
       const clientName = `${res.first_name} ${res.last_name}`.trim();
-      const isT2 = res.event_date === eventDateT2;
-      const isT1 = res.event_date === eventDateT1;
+      const { subject, html } = buildReminderEmail({
+        lang,
+        tone: reminder.tone,
+        clientName,
+        eventDate: res.event_date,
+        balanceAmount: res.balance_amount,
+        invoiceUrl,
+      });
 
-      // Reminder #1 — fires at 9 AM Houston on T-2 (48 hours before event)
-      if (isT2 && chicagoHour === 9 && chicagoMinute < 15 && !sentTypes.includes('balance_reminder_1')) {
-        const subject = `Recordatorio: saldo (60%) vence en 48 horas — Evento ${res.event_date}`;
-        const html = buildReminderHtml({
-          clientName,
-          eventDate: res.event_date,
-          balanceAmount: res.balance_amount,
-          invoiceUrl,
-          reminderType: 'first',
-        });
+      const emailResult = await sendReminderEmail(resend, { to: res.client_email, subject, html });
 
-        const emailResult = await sendReminderEmail(resend, { to: res.client_email, subject, html });
+      await logNotification(supabaseAdmin, {
+        reservationId: res.id,
+        type: reminder.type,
+        channel: 'email',
+        recipient: res.client_email,
+        success: emailResult.success,
+        error: emailResult.error,
+        subject,
+      });
 
-        await logNotification(supabaseAdmin, {
-          reservationId: res.id,
-          type: 'balance_reminder_1',
-          channel: 'email',
-          recipient: res.client_email,
-          success: emailResult.success,
-          error: emailResult.error,
-          subject,
-        });
-
-        if (emailResult.success) sentCount++;
-        results.push({ reservation: res.id, reminder: 1, ...emailResult });
-      }
-
-      // Reminder #2 — fires at 9 AM Houston on T-1 (24 hours before, final warning)
-      if (isT1 && chicagoHour === 9 && chicagoMinute < 15 && !sentTypes.includes('balance_reminder_2')) {
-        const subject = `URGENTE: saldo (60%) vence hoy — Evento mañana ${res.event_date}`;
-        const html = buildReminderHtml({
-          clientName,
-          eventDate: res.event_date,
-          balanceAmount: res.balance_amount,
-          invoiceUrl,
-          reminderType: 'final',
-        });
-
-        const emailResult = await sendReminderEmail(resend, { to: res.client_email, subject, html });
-
-        await logNotification(supabaseAdmin, {
-          reservationId: res.id,
-          type: 'balance_reminder_2',
-          channel: 'email',
-          recipient: res.client_email,
-          success: emailResult.success,
-          error: emailResult.error,
-          subject,
-        });
-
-        if (emailResult.success) sentCount++;
-        results.push({ reservation: res.id, reminder: 2, ...emailResult });
-      }
+      if (emailResult.success) sentCount++;
+      results.push({ reservation: res.id, type: reminder.type, lang, ...emailResult });
     }
 
     return NextResponse.json({
@@ -206,39 +195,103 @@ async function logNotification(supabase, { reservationId, type, channel, recipie
   }
 }
 
-function buildReminderHtml({ clientName, eventDate, balanceAmount, invoiceUrl, reminderType }) {
-  const isFirst = reminderType === 'first';
-  const safeClientName = escapeHtml(clientName);
+const COPY = {
+  en: {
+    friendly: {
+      subject: (date) => `Friendly reminder: 60% balance due before your event (${date})`,
+      header: 'Your event is approaching',
+      headerColor: '#3498db',
+      greeting: (name) => `Hi <strong>${name}</strong>,`,
+      body: (date) => `Your event is scheduled for <strong>${date}</strong>. Just a friendly reminder that the remaining <strong>60% balance</strong> is due 48 hours before the event. You can pay any time using the link below — paying early avoids last-minute issues.`,
+      balanceLabel: 'Balance pending (60%):',
+      cta: 'Pay now',
+      footerNote: 'The remaining 60% balance is due 48 hours before the event date. If payment is not received in time, Star Event Rental reserves the right to cancel the reservation, retain the deposit, and release the reserved inventory to other clients without further notice.',
+      footerNoteLabel: 'Important:',
+    },
+    urgent: {
+      subject: (date) => `Reminder: please complete the remaining transfer to finalize your reservation — Event ${date}`,
+      header: 'Please complete the remaining transfer',
+      headerColor: '#e67e22',
+      greeting: (name) => `Hi <strong>${name}</strong>,`,
+      body: (date) => `Your event is scheduled for <strong>${date}</strong>, in 72 hours. <strong>Please complete the remaining transfer to finalize your reservation.</strong> The 60% balance is due 48 hours before the event.`,
+      balanceLabel: 'Balance pending (60%):',
+      cta: 'Pay now',
+      footerNote: 'If payment is not received before the deadline, Star Event Rental reserves the right to cancel the reservation, retain the deposit, and release the reserved inventory to other clients without further notice.',
+      footerNoteLabel: 'Important:',
+    },
+    final: {
+      subject: (date) => `FINAL NOTICE: please complete the transfer so we can validate your reservation — Event ${date}`,
+      header: 'FINAL NOTICE — last message',
+      headerColor: '#e74c3c',
+      greeting: (name) => `Hi <strong>${name}</strong>,`,
+      body: (date) => `<strong>This is the last message.</strong> Your event is on <strong>${date}</strong>, in 48 hours. Please complete the transfer so we can validate your reservation. If payment is not received immediately, Star Event Rental reserves the right to cancel the reservation, retain the deposit, and release the reserved inventory.`,
+      balanceLabel: 'Balance pending (60%):',
+      cta: 'Pay now',
+      footerNote: 'If payment is not received immediately, Star Event Rental reserves the right to cancel the reservation, retain the deposit, and release the reserved inventory to other clients without further notice.',
+      footerNoteLabel: 'Important:',
+    },
+  },
+  es: {
+    friendly: {
+      subject: (date) => `Recordatorio: saldo (60%) pendiente antes de tu evento (${date})`,
+      header: 'Tu evento se acerca',
+      headerColor: '#3498db',
+      greeting: (name) => `Hola <strong>${name}</strong>,`,
+      body: (date) => `Tu evento está programado para <strong>${date}</strong>. Te recordamos amablemente que el <strong>saldo restante (60%)</strong> vence 48 horas antes del evento. Puedes pagar en cualquier momento usando el enlace abajo — adelantar el pago evita contratiempos de última hora.`,
+      balanceLabel: 'Balance pendiente (60%):',
+      cta: 'Pagar ahora',
+      footerNote: 'El saldo restante (60%) vence 48 horas antes de la fecha del evento. Si el pago no se recibe a tiempo, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes sin previo aviso.',
+      footerNoteLabel: 'Importante:',
+    },
+    urgent: {
+      subject: (date) => `Recordatorio: por favor realiza la transferencia restante para finalizar la reserva — Evento ${date}`,
+      header: 'Por favor realiza la transferencia restante',
+      headerColor: '#e67e22',
+      greeting: (name) => `Hola <strong>${name}</strong>,`,
+      body: (date) => `Tu evento está programado para <strong>${date}</strong>, en 72 horas. <strong>Por favor realiza la transferencia restante para finalizar la reserva.</strong> El saldo (60%) vence 48 horas antes del evento.`,
+      balanceLabel: 'Balance pendiente (60%):',
+      cta: 'Pagar ahora',
+      footerNote: 'Si el pago no se recibe antes del plazo, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes sin previo aviso.',
+      footerNoteLabel: 'Importante:',
+    },
+    final: {
+      subject: (date) => `ÚLTIMO AVISO: por favor realiza la transferencia para validar tu reserva — Evento ${date}`,
+      header: 'ÚLTIMO AVISO — último mensaje',
+      headerColor: '#e74c3c',
+      greeting: (name) => `Hola <strong>${name}</strong>,`,
+      body: (date) => `<strong>Este es el último mensaje.</strong> Tu evento es el <strong>${date}</strong>, en 48 horas. Por favor realiza la transferencia para que podamos validar tu reserva. Si el pago no se recibe de inmediato, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes.`,
+      balanceLabel: 'Balance pendiente (60%):',
+      cta: 'Pagar ahora',
+      footerNote: 'Si el pago no se recibe de inmediato, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes sin previo aviso.',
+      footerNoteLabel: 'Importante:',
+    },
+  },
+};
 
-  const headerText = isFirst
-    ? 'Recordatorio — Saldo (60%) vence en 48 horas'
-    : 'URGENTE — Saldo (60%) vence hoy (24 horas antes del evento)';
+function buildReminderEmail({ lang, tone, clientName, eventDate, balanceAmount, invoiceUrl }) {
+  const t = COPY[lang][tone];
+  const safeName = escapeHtml(clientName);
+  const safeDate = escapeHtml(eventDate);
 
-  const headerColor = isFirst ? '#e67e22' : '#e74c3c';
+  const subject = t.subject(eventDate);
 
-  const bodyText = isFirst
-    ? `Tu evento está programado para <strong>${escapeHtml(eventDate)}</strong>. El saldo total restante <strong>vence 48 horas antes de la fecha del evento</strong>.
-       Si el pago no se recibe antes de este plazo, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes sin previo aviso.`
-    : `<strong>Recordatorio final.</strong> El plazo para pagar el saldo total restante venció (48 horas antes del evento programado para ${escapeHtml(eventDate)}).
-       Si el pago no se recibe de inmediato, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes sin previo aviso.`;
-
-  return `
+  const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#fff;">
       <div style="text-align:center;padding:20px 0;border-bottom:3px solid #C9A84C;">
         <h1 style="color:#1a1a1a;margin:0;font-size:22px;">Star Event Rental TX</h1>
-        <p style="color:${headerColor};margin:4px 0 0;font-size:14px;">${headerText}</p>
+        <p style="color:${t.headerColor};margin:4px 0 0;font-size:14px;">${t.header}</p>
       </div>
 
       <div style="padding:20px 0;">
-        <p style="color:#333;font-size:15px;">Hola <strong>${safeClientName}</strong>,</p>
-        <p style="color:#555;font-size:14px;line-height:1.6;">${bodyText}</p>
+        <p style="color:#333;font-size:15px;">${t.greeting(safeName)}</p>
+        <p style="color:#555;font-size:14px;line-height:1.6;">${t.body(safeDate)}</p>
       </div>
 
       <div style="background:#fff3e0;border:1px solid #ffcc02;border-radius:8px;padding:16px;margin-bottom:16px;">
         <table style="width:100%;font-size:14px;">
           <tr>
-            <td style="padding:4px 0;color:${headerColor};font-weight:bold;">Balance pendiente (60%):</td>
-            <td style="padding:4px 0;color:${headerColor};font-weight:bold;text-align:right;font-size:18px;">${formatCurrency(balanceAmount)}</td>
+            <td style="padding:4px 0;color:${t.headerColor};font-weight:bold;">${t.balanceLabel}</td>
+            <td style="padding:4px 0;color:${t.headerColor};font-weight:bold;text-align:right;font-size:18px;">${formatCurrency(balanceAmount)}</td>
           </tr>
         </table>
       </div>
@@ -246,13 +299,13 @@ function buildReminderHtml({ clientName, eventDate, balanceAmount, invoiceUrl, r
       ${invoiceUrl ? `
       <div style="text-align:center;margin:20px 0;">
         <a href="${escapeHtml(invoiceUrl)}" style="display:inline-block;background:#C9A84C;color:#fff;font-weight:bold;padding:14px 28px;border-radius:8px;text-decoration:none;font-size:15px;">
-          Pagar ahora
+          ${t.cta}
         </a>
       </div>` : ''}
 
       <div style="background:#fffbe6;border:1px solid #f0e68c;border-radius:8px;padding:12px;margin-bottom:16px;">
         <p style="color:#856404;font-size:13px;margin:0;line-height:1.5;">
-          <strong>Importante:</strong> El saldo total restante vence 48 horas antes de la fecha del evento. Si el pago no se recibe antes de este plazo, Star Event Rental se reserva el derecho de cancelar la reservación, retener el anticipo y poner el inventario reservado a disposición de otros clientes sin previo aviso.
+          <strong>${t.footerNoteLabel}</strong> ${t.footerNote}
         </p>
       </div>
 
@@ -262,4 +315,6 @@ function buildReminderHtml({ clientName, eventDate, balanceAmount, invoiceUrl, r
       </p>
     </div>
   `;
+
+  return { subject, html };
 }

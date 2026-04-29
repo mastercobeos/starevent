@@ -10,6 +10,7 @@ import { Menu, ShoppingCart, Plus, Minus, Trash2, X, Loader2 } from 'lucide-reac
 import { useLanguage } from '../contexts/LanguageContext';
 import { useCart } from '../contexts/CartContext';
 import { translations } from '../translations';
+import { trackWhatsAppClick, trackPhoneClick } from '../lib/gtm';
 
 const CheckoutForm = lazy(() => import('./CheckoutForm'));
 
@@ -424,6 +425,7 @@ export default function Layout({ children }) {
           href="https://wa.me/12816360615"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackWhatsAppClick({ location: 'floating_button' })}
           className="w-7 h-7 sm:w-9 sm:h-9 md:w-[2.77rem] md:h-[2.77rem] rounded-full flex items-center justify-center backdrop-blur-sm border-[1.5px] sm:border-2 border-[#C9A84C] transition-[transform,box-shadow] duration-300 hover:scale-110 hover:shadow-lg"
           style={{
             background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)',
@@ -438,6 +440,7 @@ export default function Layout({ children }) {
         </a>
         <a
           href="tel:+12816360615"
+          onClick={() => trackPhoneClick({ location: 'floating_button' })}
           className="w-7 h-7 sm:w-9 sm:h-9 md:w-[2.77rem] md:h-[2.77rem] rounded-full flex items-center justify-center backdrop-blur-sm border-[1.5px] sm:border-2 border-[#C9A84C] transition-[transform,box-shadow] duration-300 hover:scale-110 hover:shadow-lg"
           style={{
             background: 'linear-gradient(135deg, hsl(var(--navbar) / 0.12) 0%, hsl(var(--navbar) / 0.18) 50%, hsl(var(--navbar) / 0.12) 100%)',
@@ -512,7 +515,7 @@ export default function Layout({ children }) {
               <h4 className="text-foreground font-semibold mb-3">{translations[language].footer.getInTouch}</h4>
               <ul className="space-y-2 text-sm">
                 <li>📍 3730 Redwood Falls Dr, Houston, TX 77082</li>
-                <li>📞 <a href="tel:2816360615" className="hover:text-primary transition-colors">281-636-0615</a></li>
+                <li>📞 <a href="tel:2816360615" onClick={() => trackPhoneClick({ location: 'footer' })} className="hover:text-primary transition-colors">281-636-0615</a></li>
                 <li>✉️ <a href="mailto:info@stareventrentaltx.com" className="hover:text-primary transition-colors">info@stareventrentaltx.com</a></li>
               </ul>
             </div>

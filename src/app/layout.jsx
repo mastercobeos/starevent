@@ -1,8 +1,10 @@
 import Script from 'next/script';
 import { headers } from 'next/headers';
+import GoogleTagManager, { GoogleTagManagerNoScript } from '../components/GoogleTagManager';
 import './globals.css';
 
 const GA_ID = 'G-GCJZGJCNW8';
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 export const metadata = {
   metadataBase: new URL('https://stareventrentaltx.com'),
@@ -47,6 +49,8 @@ export default async function RootLayout({ children }) {
         <link rel="dns-prefetch" href="https://maps.googleapis.com" />
       </head>
       <body>
+        <GoogleTagManager gtmId={GTM_ID} />
+        <GoogleTagManagerNoScript gtmId={GTM_ID} />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           strategy="afterInteractive"

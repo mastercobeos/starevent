@@ -6,6 +6,7 @@ import { BackgroundSection } from '../components/ui/BackgroundSection';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useToast } from '../components/ui/Toast';
 import { translations } from '../translations';
+import { trackFormSubmit, trackPhoneClick } from '../lib/gtm';
 
 
 const BG_IMAGE = 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70';
@@ -42,6 +43,7 @@ export default function Contact() {
 
       if (!res.ok) throw new Error('Failed to send');
 
+      trackFormSubmit({ form_location: 'contact_page', package: formData.package });
       toast(t.thankYou(formData.fullName, formData.phone), 'success', 6000);
       setFormData({
         fullName: '',
@@ -84,7 +86,7 @@ export default function Contact() {
               </p>
               <ul className="space-y-4 mb-8 text-white/90">
                 <li><strong>📍 {t.location}</strong> 3730 Redwood Falls Dr, Houston, TX 77082</li>
-                <li><strong>📞 {t.phone}</strong> <a href="tel:2816360615" className="underline hover:text-primary transition-colors">281-636-0615</a></li>
+                <li><strong>📞 {t.phone}</strong> <a href="tel:2816360615" onClick={() => trackPhoneClick({ location: 'contact_page' })} className="underline hover:text-primary transition-colors">281-636-0615</a></li>
                 <li><strong>✉️ {t.email}</strong> <a href="mailto:info@stareventrentaltx.com" className="underline hover:text-primary transition-colors">info@stareventrentaltx.com</a></li>
                 <li><strong>🌎 {t.serviceAreas}</strong> {t.serviceAreasDesc}</li>
               </ul>
