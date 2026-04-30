@@ -8,6 +8,9 @@ import { useCart } from '../contexts/CartContext';
 import { translations } from '../translations';
 import { BackgroundSection } from './ui/BackgroundSection';
 import { Button } from './ui/button';
+import { AddonCheckbox } from './ui/AddonCheckbox';
+import { WallsInput } from './ui/WallsInput';
+import { useAddonCart, WALL_PRODUCT } from '../hooks/useAddonCart';
 
 const RELATED_BG = 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=70';
 
@@ -19,16 +22,18 @@ export const ProductDetailPage = memo(function ProductDetailPage({ category, ite
   const prefix = isEs ? '/es' : '';
 
   const [quantity, setQuantity] = useState(1);
-  const [selectedAddons, setSelectedAddons] = useState({});
   const [added, setAdded] = useState(false);
 
-  const toggleAddon = useCallback((addonId) => {
-    setSelectedAddons((prev) => ({ ...prev, [addonId]: !prev[addonId] }));
-  }, []);
-
-  const finalPrice = item.addons
-    ? item.addons.reduce((total, addon) => total + (selectedAddons[addon.id] ? addon.price : 0), item.price)
-    : item.price;
+  const {
+    isAddonSelected,
+    toggleAddon,
+    getItemPrice,
+    getWallsQty,
+    setWallsQty,
+    buildCartPayload,
+  } = useAddonCart();
+  const isTent = category.slug === 'tents';
+  const finalPrice = getItemPrice(item);
 
   const handleQtyChange = (value) => {
     if (value === '') return setQuantity('');
@@ -40,16 +45,12 @@ export const ProductDetailPage = memo(function ProductDetailPage({ category, ite
   const handleAdd = useCallback(() => {
     const parsed = parseInt(quantity, 10);
     const safeQty = Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
-    const addonNames = item.addons
-      ? item.addons.filter((a) => selectedAddons[a.id]).map((a) => (isEs ? a.nameEs : a.name))
-      : [];
-    const itemId = item.id + (addonNames.length ? '-with-addons' : '');
-    const itemName = addonNames.length ? `${item.name} + ${addonNames.join(', ')}` : item.name;
-    const itemNameEs = addonNames.length ? `${item.nameEs} + ${addonNames.join(', ')}` : item.nameEs;
-    addItem({ ...item, id: itemId, name: itemName, nameEs: itemNameEs, price: finalPrice }, safeQty);
+    const { item: cartItem, walls: wallsQty } = buildCartPayload(item, { isEs });
+    addItem(cartItem, safeQty);
+    if (wallsQty > 0) addItem(WALL_PRODUCT, wallsQty);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
-  }, [addItem, finalPrice, isEs, item, quantity, selectedAddons]);
+  }, [addItem, buildCartPayload, isEs, item, quantity]);
 
   const itemName = isEs ? item.nameEs || item.name : item.name;
   const itemDesc = isEs ? item.descEs || item.desc : item.desc;
@@ -146,31 +147,27 @@ export const ProductDetailPage = memo(function ProductDetailPage({ category, ite
                     {isEs ? 'Extras opcionales:' : 'Optional add-ons:'}
                   </p>
                   {item.addons.map((addon) => (
-                    <button
+                    <AddonCheckbox
                       key={addon.id}
-                      type="button"
-                      onClick={() => toggleAddon(addon.id)}
-                      className={`flex items-center gap-2 w-full text-left rounded-lg px-3 py-2 transition-all text-sm border ${
-                        selectedAddons[addon.id]
-                          ? 'border-primary bg-primary/15 text-white'
-                          : 'border-white/20 bg-white/5 text-white/70 hover:border-white/40'
-                      }`}
-                    >
-                      <span
-                        className={`flex items-center justify-center w-4 h-4 rounded border transition-all shrink-0 ${
-                          selectedAddons[addon.id] ? 'bg-primary border-primary text-black' : 'border-white/40'
-                        }`}
-                      >
-                        {selectedAddons[addon.id] && (
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </span>
-                      <span className="flex-1">{isEs ? addon.nameEs : addon.name}</span>
-                      <span className="font-semibold text-primary">+${addon.price.toFixed(2)}</span>
-                    </button>
+                      addon={addon}
+                      label={isEs ? addon.nameEs : addon.name}
+                      checked={isAddonSelected(item.id, addon.id)}
+                      onToggle={() => toggleAddon(item.id, addon.id)}
+                      variant="compact"
+                    />
                   ))}
+                </div>
+              )}
+
+              {/* Walls (tents only) */}
+              {isTent && (
+                <div className="mb-6">
+                  <WallsInput
+                    itemId={item.id}
+                    value={getWallsQty(item.id)}
+                    onChange={(v) => setWallsQty(item.id, v)}
+                    isEs={isEs}
+                  />
                 </div>
               )}
 

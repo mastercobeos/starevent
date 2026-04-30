@@ -8,18 +8,11 @@ import { useCart } from '../contexts/CartContext';
 import { productCards } from '../data/homeData';
 import { translations } from '../translations';
 import { Button } from './ui/button';
+import { AddonCheckbox } from './ui/AddonCheckbox';
+import { WallsInput } from './ui/WallsInput';
+import { useAddonCart, WALL_PRODUCT } from '../hooks/useAddonCart';
 
 const FIXED_BG = '/fondo1.webp';
-
-const WALL_PRODUCT = {
-  id: 'tent-wall',
-  name: 'Tent Wall',
-  nameEs: 'Pared para Carpa',
-  price: 2.00,
-  desc: 'Tent wall panel add-on.',
-  descEs: 'Panel de pared para carpa.',
-  image: '/tent10x20.webp',
-};
 
 export const CustomizePage = memo(function CustomizePage() {
   const { language } = useLanguage();
@@ -29,8 +22,16 @@ export const CustomizePage = memo(function CustomizePage() {
   const prefix = isEs ? '/es' : '';
 
   const [quantities, setQuantities] = useState({});
-  const [walls, setWalls] = useState({});
   const [adding, setAdding] = useState(null);
+
+  const {
+    isAddonSelected,
+    toggleAddon,
+    getItemPrice,
+    getWallsQty,
+    setWallsQty,
+    buildCartPayload,
+  } = useAddonCart();
 
   const handleQtyChange = useCallback((id, value) => {
     if (value === '') {
@@ -42,32 +43,20 @@ export const CustomizePage = memo(function CustomizePage() {
     setQuantities((prev) => ({ ...prev, [id]: num }));
   }, []);
 
-  const handleWallsChange = useCallback((id, value) => {
-    if (value === '') {
-      setWalls((prev) => ({ ...prev, [id]: '' }));
-      return;
-    }
-    const num = parseInt(value, 10);
-    if (Number.isNaN(num) || num < 0) return;
-    setWalls((prev) => ({ ...prev, [id]: num }));
-  }, []);
-
   const handleAdd = useCallback(
-    (item, isTent = false) => {
+    (item) => {
       const raw = quantities[item.id];
       const parsed = parseInt(raw, 10);
       const safeQty = Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
-      addItem(item, safeQty);
-      if (isTent) {
-        const wRaw = walls[item.id];
-        const wParsed = parseInt(wRaw, 10);
-        const wQty = Number.isNaN(wParsed) || wParsed < 1 ? 0 : wParsed;
-        if (wQty > 0) addItem(WALL_PRODUCT, wQty);
-      }
+
+      const { item: cartItem, walls: wallsQty } = buildCartPayload(item, { isEs });
+      addItem(cartItem, safeQty);
+      if (wallsQty > 0) addItem(WALL_PRODUCT, wallsQty);
+
       setAdding(item.id);
       setTimeout(() => setAdding((curr) => (curr === item.id ? null : curr)), 1500);
     },
-    [addItem, quantities, walls]
+    [addItem, quantities, buildCartPayload, isEs]
   );
 
   return (
@@ -172,7 +161,7 @@ export const CustomizePage = memo(function CustomizePage() {
                     const isAdded = adding === item.id;
                     const qtyVal = quantities[item.id] ?? 1;
                     const isTent = category.slug === 'tents';
-                    const wallVal = walls[item.id] ?? 0;
+                    const displayPrice = getItemPrice(item);
                     return (
                       <div
                         key={item.id}
@@ -204,7 +193,7 @@ export const CustomizePage = memo(function CustomizePage() {
                             {isEs ? item.nameEs || item.name : item.name}
                           </h3>
                           <p className="text-primary font-semibold text-base mt-1">
-                            ${item.price.toFixed(2)}
+                            ${displayPrice.toFixed(2)}
                             {item.price < 100 ? (isEs ? ' / unidad' : ' / each') : ''}
                           </p>
                           <p className="text-white/70 text-sm mt-2 leading-relaxed flex-1">
@@ -229,28 +218,30 @@ export const CustomizePage = memo(function CustomizePage() {
                             />
                           </div>
                           {isTent && (
-                            <div className="mt-3">
-                              <label
-                                htmlFor={`walls-${item.id}`}
-                                className="block text-white/80 text-xs font-medium mb-1"
-                              >
-                                {isEs ? 'Paredes (+$2.00 c/u)' : 'Walls (+$2.00 each)'}
-                              </label>
-                              <input
-                                id={`walls-${item.id}`}
-                                type="number"
-                                min="0"
-                                inputMode="numeric"
-                                value={wallVal}
-                                onChange={(e) => handleWallsChange(item.id, e.target.value)}
-                                placeholder="0"
-                                className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary"
-                              />
+                            <WallsInput
+                              itemId={item.id}
+                              value={getWallsQty(item.id)}
+                              onChange={(v) => setWallsQty(item.id, v)}
+                              isEs={isEs}
+                            />
+                          )}
+                          {item.addons && item.addons.length > 0 && (
+                            <div className="mt-3 space-y-1.5">
+                              {item.addons.map((addon) => (
+                                <AddonCheckbox
+                                  key={addon.id}
+                                  addon={addon}
+                                  label={isEs ? addon.nameEs : addon.name}
+                                  checked={isAddonSelected(item.id, addon.id)}
+                                  onToggle={() => toggleAddon(item.id, addon.id)}
+                                  variant="compact"
+                                />
+                              ))}
                             </div>
                           )}
                           <button
                             type="button"
-                            onClick={() => handleAdd(item, isTent)}
+                            onClick={() => handleAdd(item)}
                             disabled={isAdded}
                             className={`mt-3 w-full font-semibold py-2 px-4 rounded-lg transition-colors text-sm ${
                               isAdded

@@ -121,7 +121,7 @@ export async function PUT(request, { params }) {
       .single();
 
     if (existingContract) {
-      await supabaseAdmin
+      const { error: updateError } = await supabaseAdmin
         .from('contracts')
         .update({
           contract_html: contractHtml,
@@ -129,13 +129,29 @@ export async function PUT(request, { params }) {
           status: 'pending',
         })
         .eq('id', existingContract.id);
+
+      if (updateError) {
+        console.error('Contract update failed:', updateError);
+        return NextResponse.json(
+          { error: `Failed to regenerate contract: ${updateError.message}` },
+          { status: 500 }
+        );
+      }
     } else {
-      await supabaseAdmin.from('contracts').insert({
+      const { error: insertError } = await supabaseAdmin.from('contracts').insert({
         reservation_id: id,
         contract_html: contractHtml,
         contract_hash: contractHash,
         status: 'pending',
       });
+
+      if (insertError) {
+        console.error('Contract insert failed:', insertError);
+        return NextResponse.json(
+          { error: `Failed to create contract: ${insertError.message}` },
+          { status: 500 }
+        );
+      }
     }
 
     // Update reservation status (skip if already approved_waiting_contract)

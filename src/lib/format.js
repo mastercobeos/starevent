@@ -15,8 +15,10 @@ export function escapeHtml(str) {
 }
 
 /**
- * Format a date string for display.
- * Appends T00:00:00 to avoid UTC midnight timezone shift.
+ * Format a YYYY-MM-DD calendar date for display.
+ * Treats the input as a pure calendar date (no time-of-day, no timezone),
+ * so the displayed day is identical to what the user typed in the form
+ * regardless of where the server runs (UTC on Vercel, local on dev).
  *
  * @param {string} dateStr - ISO date string (YYYY-MM-DD)
  * @param {object} [opts] - Intl.DateTimeFormat options override
@@ -24,13 +26,13 @@ export function escapeHtml(str) {
  */
 export function formatDate(dateStr, opts) {
   if (!dateStr) return '—';
-  const d = new Date(dateStr + 'T00:00:00');
+  const d = new Date(dateStr + 'T00:00:00Z');
   return d.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-    timeZone: 'America/Chicago',
+    timeZone: 'UTC',
     ...opts,
   });
 }

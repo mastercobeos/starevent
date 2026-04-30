@@ -4,33 +4,30 @@ import { Button } from '../ui/button';
 import { CarouselArrow } from '../ui/CarouselArrow';
 import { PaginationDots } from '../ui/PaginationDots';
 import { QuantityControl } from '../ui/QuantityControl';
+import { AddonCheckbox } from '../ui/AddonCheckbox';
+import { WallsInput } from '../ui/WallsInput';
 import { useResponsiveCount } from '../../hooks/useResponsiveCount';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { useSwipe } from '../../hooks/useSwipe';
+import { useAddonCart, WALL_PRODUCT } from '../../hooks/useAddonCart';
 import { translations } from '../../translations';
 import { productCards } from '../../data/homeData';
 
 export function ProductModal({ productModal, setProductModal, language, addItem, tc, quantities, getQty, setQty, addedFeedback, setAddedFeedback, initialItemId, onItemVisible }) {
   const [selectedItemIdx, setSelectedItemIdx] = useState(0);
-  const [selectedAddons, setSelectedAddons] = useState({});
   const modalRef = useRef(null);
   const initializedRef = useRef(false);
   const tCommon = translations[language].common;
+  const isEs = language === 'es';
 
-  const toggleAddon = useCallback((itemId, addonId) => {
-    setSelectedAddons(prev => {
-      const key = `${itemId}_${addonId}`;
-      return { ...prev, [key]: !prev[key] };
-    });
-  }, []);
-
-  const getItemPrice = useCallback((item) => {
-    if (!item.addons) return item.price;
-    return item.addons.reduce((total, addon) => {
-      const key = `${item.id}_${addon.id}`;
-      return total + (selectedAddons[key] ? addon.price : 0);
-    }, item.price);
-  }, [selectedAddons]);
+  const {
+    isAddonSelected,
+    toggleAddon,
+    getItemPrice,
+    getWallsQty,
+    setWallsQty,
+    buildCartPayload,
+  } = useAddonCart();
 
   // Focus trap
   useEffect(() => {
@@ -151,20 +148,25 @@ export function ProductModal({ productModal, setProductModal, language, addItem,
                             {language === 'en' ? item.desc : item.descEs}
                           </p>
                           {item.addons && item.addons.map(addon => (
-                            <button
+                            <AddonCheckbox
                               key={addon.id}
-                              type="button"
-                              onClick={() => toggleAddon(item.id, addon.id)}
-                              className={`flex items-center gap-2 w-full text-left rounded-lg px-2 py-1.5 mb-1.5 transition-all text-[11px] sm:text-xs border ${selectedAddons[`${item.id}_${addon.id}`] ? 'border-primary bg-primary/15 text-white' : 'border-white/20 bg-white/5 text-white/70 hover:border-white/40'}`}
-                            >
-                              <span className={`flex items-center justify-center w-4 h-4 rounded border transition-all shrink-0 ${selectedAddons[`${item.id}_${addon.id}`] ? 'bg-primary border-primary text-black' : 'border-white/40'}`}>
-                                {selectedAddons[`${item.id}_${addon.id}`] && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-                              </span>
-                              <span className="flex-1">{language === 'en' ? addon.name : addon.nameEs}</span>
-                              <span className="font-semibold text-primary">+${addon.price.toFixed(2)}</span>
-                            </button>
+                              addon={addon}
+                              label={isEs ? addon.nameEs : addon.name}
+                              checked={isAddonSelected(item.id, addon.id)}
+                              onToggle={() => toggleAddon(item.id, addon.id)}
+                              variant="modal"
+                            />
                           ))}
-                          <div className="text-lg sm:text-xl md:text-2xl font-bold text-primary mb-0">${getItemPrice(item).toFixed(2)}</div>
+                          {productCards[productModal]?.slug === 'tents' && (
+                            <WallsInput
+                              itemId={item.id}
+                              value={getWallsQty(item.id)}
+                              onChange={(v) => setWallsQty(item.id, v)}
+                              isEs={isEs}
+                              variant="modal"
+                            />
+                          )}
+                          <div className="text-lg sm:text-xl md:text-2xl font-bold text-primary mb-0 mt-2">${getItemPrice(item).toFixed(2)}</div>
                           <p className="text-white/50 text-[9px] sm:text-xs mb-2">{tCommon.taxAndDelivery}</p>
                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2">
                             <QuantityControl
@@ -176,9 +178,9 @@ export function ProductModal({ productModal, setProductModal, language, addItem,
                               className="flex-1 font-semibold py-1.5 sm:py-2 px-2 sm:px-3 text-[10px] sm:text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl"
                               onClick={() => {
                                 const qty = getQty(item.id);
-                                const addonNames = item.addons ? item.addons.filter(a => selectedAddons[`${item.id}_${a.id}`]).map(a => language === 'en' ? a.name : a.nameEs) : [];
-                                const finalPrice = getItemPrice(item);
-                                addItem({ id: item.id + (addonNames.length ? '-with-addons' : ''), name: addonNames.length ? `${item.name} + ${addonNames.join(', ')}` : item.name, nameEs: addonNames.length ? `${item.nameEs} + ${addonNames.join(', ')}` : item.nameEs, price: finalPrice, image: item.image, type: 'product', checkoutLink: item.checkoutLink }, qty);
+                                const { item: cartItem, walls: wallsQty } = buildCartPayload(item, { isEs });
+                                addItem({ ...cartItem, type: 'product' }, qty);
+                                if (wallsQty > 0) addItem(WALL_PRODUCT, wallsQty);
                                 setAddedFeedback(item.id);
                                 setTimeout(() => setAddedFeedback(null), 1500);
                                 setQty(item.id, 1);

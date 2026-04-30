@@ -4,6 +4,7 @@ import { STATUS, calculateSplit } from '@/lib/reservation-state-machine';
 import { renderContract, hashContract } from '@/lib/contract-template';
 import { checkIdempotencyKey, createIdempotencyKey, completeIdempotencyKey, failIdempotencyKey } from '@/lib/idempotency';
 import { generateReservationToken, checkRateLimit, getClientIp, isValidEmail, isValidPhone } from '@/lib/security';
+import { sendPendingReservationEmail, sendNewReservationAdminEmail } from '@/lib/email';
 
 // --- Server-side pricing constants (source of truth) ---
 const TAX_RATE = 0.0825;
@@ -238,16 +239,64 @@ export async function POST(request) {
 
       if (idempotency_key) await completeIdempotencyKey(idempotency_key, response);
 
-      // TODO: Trigger notification to admin (WhatsApp/SMS)
+      // Notify admin by email — reservation is on hold pending manual review
+      try {
+        const { data: itemsWithNames } = await supabaseAdmin
+          .from('reservation_items')
+          .select('product_id, quantity, unit_price, products(name, name_es)')
+          .eq('reservation_id', reservation.id);
+
+        const productNameById = {};
+        const emailItems = (itemsWithNames || []).map((ri) => {
+          const name = ri.products?.name || ri.product_id;
+          productNameById[ri.product_id] = name;
+          return {
+            product_id: ri.product_id,
+            name,
+            quantity: ri.quantity,
+            unit_price: ri.unit_price,
+          };
+        });
+
+        const unavailableWithNames = unavailableItems.map((u) => ({
+          ...u,
+          product_name: productNameById[u.product_id] || u.product_id,
+        }));
+
+        const reservationForEmail = {
+          id: reservation.id,
+          first_name: first_name.trim(),
+          last_name: last_name.trim(),
+          client_email: client_email.trim(),
+          phone_1: phone_1.trim(),
+          phone_2: phone_2?.trim() || null,
+          event_date,
+          return_date,
+          event_start_time,
+          event_end_time,
+          event_address: address.trim(),
+          special_notes,
+          language: language || 'en',
+          subtotal: computedSubtotal,
+          delivery_fee: computedDeliveryFee,
+          tax_amount: computedTaxAmount,
+          total: computedTotal,
+        };
+
+        sendPendingReservationEmail(reservationForEmail, emailItems, unavailableWithNames).catch((err) =>
+          console.error('Pending reservation email failed (non-blocking):', err.message)
+        );
+      } catch (emailErr) {
+        console.error('Failed to prepare pending reservation email (non-blocking):', emailErr.message);
+      }
 
       return NextResponse.json(response);
     }
 
     // --- STOCK AVAILABLE → generate contract ---
-    await supabaseAdmin
-      .from('reservations')
-      .update({ status: STATUS.APPROVED_WAITING_CONTRACT })
-      .eq('id', reservation.id);
+    // Note: status update to APPROVED_WAITING_CONTRACT happens AFTER the
+    // contract insert succeeds, so that a failed insert leaves the reservation
+    // in 'pending' instead of 'approved_waiting_contract' with no contract.
 
     // Fetch items with product names for contract
     const { data: itemsWithNames } = await supabaseAdmin
@@ -299,9 +348,19 @@ export async function POST(request) {
       });
 
     if (contractError) {
+      console.error('Contract insert failed during reservation creation:', contractError);
       if (idempotency_key) await failIdempotencyKey(idempotency_key);
-      throw contractError;
+      return NextResponse.json(
+        { error: `Failed to create contract: ${contractError.message}` },
+        { status: 500 }
+      );
     }
+
+    // Contract created successfully → mark reservation as approved_waiting_contract
+    await supabaseAdmin
+      .from('reservations')
+      .update({ status: STATUS.APPROVED_WAITING_CONTRACT })
+      .eq('id', reservation.id);
 
     const response = {
       reservation_id: reservation.id,
@@ -315,6 +374,44 @@ export async function POST(request) {
     };
 
     if (idempotency_key) await completeIdempotencyKey(idempotency_key, response);
+
+    // Notify admin by email — new reservation came in with stock available
+    try {
+      const emailItems = contractItems.map((ci) => ({
+        product_id: ci.product_id,
+        name: ci.product_name,
+        quantity: ci.quantity,
+        unit_price: ci.unit_price,
+      }));
+
+      const reservationForEmail = {
+        id: reservation.id,
+        first_name: first_name.trim(),
+        last_name: last_name.trim(),
+        client_email: client_email.trim(),
+        phone_1: phone_1.trim(),
+        phone_2: phone_2?.trim() || null,
+        event_date,
+        return_date,
+        event_start_time,
+        event_end_time,
+        event_address: address.trim(),
+        special_notes,
+        language: language || 'en',
+        subtotal: computedSubtotal,
+        delivery_fee: computedDeliveryFee,
+        tax_amount: computedTaxAmount,
+        total: computedTotal,
+        deposit_amount: deposit,
+        balance_amount: balance,
+      };
+
+      sendNewReservationAdminEmail(reservationForEmail, emailItems).catch((err) =>
+        console.error('New reservation admin email failed (non-blocking):', err.message)
+      );
+    } catch (emailErr) {
+      console.error('Failed to prepare new reservation admin email (non-blocking):', emailErr.message);
+    }
 
     return NextResponse.json(response);
   } catch (error) {
