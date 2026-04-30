@@ -40,8 +40,12 @@ export default async function RootLayout({ children }) {
   const locale = headersList.get('x-locale') || 'en';
 
   return (
-    <html lang={locale} className="scroll-smooth">
+    <html lang={locale} className="scroll-smooth notranslate" translate="no">
       <head>
+        {/* Block Google Translate / browser auto-translate. The site is already
+            bilingual (/es/ + /en/) and Google Translate's DOM rewrites trigger
+            React "insertBefore" hydration errors → "Algo salió mal" page. */}
+        <meta name="google" content="notranslate" />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://flagcdn.com" />
