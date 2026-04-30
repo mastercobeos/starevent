@@ -44,6 +44,53 @@ export async function GET(request, { params }) {
       );
     }
 
+    // For pending reservations, compute which items are currently out of stock
+    // for the requested dates so the admin can see at a glance why approval is
+    // blocked. Excludes this reservation's own holds from the conflict count.
+    if (
+      reservation.status === 'pending_out_of_stock' ||
+      reservation.status === 'pending'
+    ) {
+      const unavailable = [];
+      const items = reservation.reservation_items || [];
+
+      for (const it of items) {
+        const { data: product } = await supabaseAdmin
+          .from('products')
+          .select('total_stock')
+          .eq('id', it.product_id)
+          .single();
+
+        const totalStock = Number(product?.total_stock ?? 0);
+
+        const { data: holds } = await supabaseAdmin
+          .from('stock_holds')
+          .select('quantity')
+          .eq('product_id', it.product_id)
+          .in('status', ['active', 'confirmed'])
+          .neq('reservation_id', id)
+          .lte('event_date', reservation.return_date)
+          .gte('return_date', reservation.event_date);
+
+        const reserved = (holds || []).reduce(
+          (sum, h) => sum + Number(h.quantity || 0),
+          0
+        );
+        const available = Math.max(0, totalStock - reserved);
+
+        if (available < Number(it.quantity)) {
+          unavailable.push({
+            product_id: it.product_id,
+            product_name: it.products?.name || it.product_id,
+            requested_qty: Number(it.quantity),
+            available_qty: available,
+          });
+        }
+      }
+
+      reservation.unavailable_items = unavailable;
+    }
+
     return NextResponse.json(reservation);
   } catch (error) {
     console.error('Admin get reservation error:', error);

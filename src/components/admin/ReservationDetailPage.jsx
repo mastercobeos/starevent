@@ -107,6 +107,10 @@ export default function ReservationDetailPage({ id }) {
   const balancePayment = payments.find((p) => p.type === 'balance');
   const statusLog = r.reservation_status_log || [];
   const isTerminal = TERMINAL_STATES.includes(r.status);
+  const unavailableItems = r.unavailable_items || [];
+  const unavailableByProductId = {};
+  unavailableItems.forEach((u) => { unavailableByProductId[u.product_id] = u; });
+  const isPending = r.status === STATUS.PENDING_OUT_OF_STOCK || r.status === 'pending';
 
   return (
     <div>
@@ -123,6 +127,39 @@ export default function ReservationDetailPage({ id }) {
         </div>
         <StatusBadge status={r.status} />
       </div>
+
+      {/* Out-of-stock banner — explains why reservation is pending */}
+      {isPending && unavailableItems.length > 0 && (
+        <div className="mb-6 rounded-xl border border-red-500/40 bg-red-500/10 p-4">
+          <h2 className="text-red-400 font-semibold mb-2 flex items-center gap-2">
+            <X className="w-4 h-4" /> Pending — items out of stock for these dates
+          </h2>
+          <p className="text-white/70 text-xs mb-3">
+            The reservation cannot auto-approve because the following items are not fully available for the requested dates. Approving manually will override the stock check.
+          </p>
+          <ul className="space-y-1.5">
+            {unavailableItems.map((u) => (
+              <li
+                key={u.product_id}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/90"
+              >
+                <span className="font-semibold">{u.product_name}</span>
+                <span className="text-red-300">
+                  Requested: <strong>{u.requested_qty}</strong>
+                </span>
+                <span className="text-yellow-300">
+                  Available: <strong>{u.available_qty}</strong>
+                </span>
+                <span className="text-white/50 text-xs">
+                  ({u.available_qty === 0
+                    ? 'Out of stock'
+                    : `Only ${u.available_qty} of ${u.requested_qty} available`})
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3 mb-6">
@@ -362,17 +399,37 @@ export default function ReservationDetailPage({ id }) {
               </tr>
             </thead>
             <tbody>
-              {r.reservation_items?.map((item, idx) => (
-                <tr key={idx} className="border-b border-white/5">
-                  <td className="py-3 text-white text-sm">
-                    {item.products?.name || item.product_id}
-                    {item.products?.category && <span className="text-white/40 text-xs ml-2">({item.products.category})</span>}
-                  </td>
-                  <td className="py-3 text-white/80 text-sm text-center">{item.quantity}</td>
-                  <td className="py-3 text-white/80 text-sm text-right">${item.unit_price?.toFixed(2)}</td>
-                  <td className="py-3 text-white text-sm text-right font-medium">${(item.subtotal || item.unit_price * item.quantity).toFixed(2)}</td>
-                </tr>
-              ))}
+              {r.reservation_items?.map((item, idx) => {
+                const conflict = unavailableByProductId[item.product_id];
+                return (
+                  <tr
+                    key={idx}
+                    className={`border-b ${conflict ? 'border-red-500/20 bg-red-500/5' : 'border-white/5'}`}
+                  >
+                    <td className="py-3 text-white text-sm">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span>{item.products?.name || item.product_id}</span>
+                        {item.products?.category && (
+                          <span className="text-white/40 text-xs">({item.products.category})</span>
+                        )}
+                        {conflict && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 text-[10px] font-bold uppercase tracking-wider">
+                            <X className="w-3 h-3" />
+                            {conflict.available_qty === 0
+                              ? 'Out of stock'
+                              : `Only ${conflict.available_qty} avail.`}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className={`py-3 text-sm text-center ${conflict ? 'text-red-300 font-bold' : 'text-white/80'}`}>
+                      {item.quantity}
+                    </td>
+                    <td className="py-3 text-white/80 text-sm text-right">${item.unit_price?.toFixed(2)}</td>
+                    <td className="py-3 text-white text-sm text-right font-medium">${(item.subtotal || item.unit_price * item.quantity).toFixed(2)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
             <tfoot>
               {r.delivery_fee > 0 && (
