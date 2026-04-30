@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchAdminReservation, adminAction, archiveReservation, unarchiveReservation, deleteReservation } from '../../lib/admin-api';
+import { fetchAdminReservation, adminAction, archiveReservation, unarchiveReservation, deleteReservation, createBalanceInvoice } from '../../lib/admin-api';
 import StatusBadge from './StatusBadge';
 import { STATUS, TERMINAL_STATES, STATUS_LABELS } from '../../lib/reservation-state-machine';
 import { Button } from '../ui/button';
@@ -194,6 +194,40 @@ export default function ReservationDetailPage({ id }) {
             Generate Contract & Resend Email
           </Button>
         )}
+
+        {(r.status === STATUS.DEPOSIT_PAID || r.status === STATUS.BALANCE_DUE) &&
+          !payments.some((p) => p.type === 'balance' && p.status === 'completed') && (() => {
+            const pendingBalance = payments.find((p) => p.type === 'balance' && p.status === 'pending');
+            const hasInvoice = !!pendingBalance?.square_invoice_url;
+            return (
+              <Button
+                onClick={async () => {
+                  setActionLoading(true);
+                  try {
+                    const data = await createBalanceInvoice(id);
+                    if (data?.invoice_url) {
+                      toast(hasInvoice ? 'Balance invoice resent to client' : 'Balance invoice created and sent to client', 'success');
+                    } else {
+                      toast(data?.message || 'Balance invoice operation succeeded', 'success');
+                    }
+                    await load();
+                  } catch (err) {
+                    toast(err.message || 'Failed to create balance invoice', 'error');
+                  }
+                  setActionLoading(false);
+                }}
+                disabled={actionLoading}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+              >
+                {actionLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : (
+                  <CreditCard className="w-4 h-4 mr-2" />
+                )}
+                {hasInvoice ? 'Resend Balance Invoice (60%)' : 'Create Balance Invoice (60%)'}
+              </Button>
+            );
+          })()}
 
         {!isTerminal && r.status !== STATUS.PENDING_OUT_OF_STOCK && r.status !== 'pending' && (
           <Button

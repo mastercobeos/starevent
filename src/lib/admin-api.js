@@ -56,6 +56,18 @@ export async function adminAction(id, action, body = {}) {
   return data;
 }
 
+// Create or resend the balance (60%) invoice in Square for a reservation.
+// Used to recover reservations whose deposit was paid but the balance invoice
+// was never generated, or to resend the invoice when the client lost the email.
+export async function createBalanceInvoice(id) {
+  const res = await adminFetch(`/api/admin/reservations/${id}/create-balance-invoice`, {
+    method: 'POST',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to create balance invoice');
+  return data;
+}
+
 // Archive a reservation (soft-delete)
 export async function archiveReservation(id) {
   const res = await adminFetch(`/api/admin/reservations/${id}/archive`, {

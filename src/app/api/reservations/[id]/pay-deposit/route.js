@@ -5,6 +5,7 @@ import { STATUS, canTransition } from '@/lib/reservation-state-machine';
 import { squareIdempotencyKey } from '@/lib/idempotency';
 import { checkRateLimit, getClientIp, verifyReservationToken, isValidUUID, getAccessToken } from '@/lib/security';
 import { sendReservationConfirmation } from '@/lib/email';
+import { createBalanceInvoice } from '@/lib/create-balance-invoice';
 
 const squareClient = new SquareClient({
   token: process.env.SQUARE_ACCESS_TOKEN,
@@ -122,8 +123,27 @@ export async function POST(request, { params }) {
         .update({ status: STATUS.DEPOSIT_PAID })
         .eq('id', id);
 
+      // Immediately transition to balance_due so the balance invoice can be created
+      await supabaseAdmin
+        .from('reservations')
+        .update({ status: STATUS.BALANCE_DUE })
+        .eq('id', id);
+
       // Confirm stock holds so inventory reflects the reservation
       await supabaseAdmin.rpc('confirm_holds', { p_reservation_id: id });
+
+      // Auto-create the balance (60%) invoice in Square so the client receives
+      // an email with a payment link. Without this the client would never be
+      // billed for the remaining 60% — direct deposit charges don't trigger the
+      // Square invoice.paid webhook, so this is the only place to create it.
+      try {
+        const invoiceResult = await createBalanceInvoice(id);
+        if (!invoiceResult.ok) {
+          console.error('Failed to auto-create balance invoice (deposit route):', invoiceResult.data?.error);
+        }
+      } catch (e) {
+        console.error('Auto-create balance invoice error (deposit route):', e);
+      }
 
       // Send confirmation emails (awaited so Vercel doesn't kill the function)
       try {
