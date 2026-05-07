@@ -4,7 +4,7 @@ import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LogOut, LayoutDashboard, Package } from 'lucide-react';
+import { LogOut, LayoutDashboard, Package, Receipt } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
   const { signOut } = useAuth();
@@ -45,6 +45,13 @@ export default function AdminLayout({ children }) {
             >
               <Package className="w-4 h-4" />
               <span className="hidden sm:inline">Inventory</span>
+            </Link>
+            <Link
+              href="/admin/tax-report"
+              className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors px-2 sm:px-3 py-2 rounded-lg hover:bg-white/10 text-sm"
+            >
+              <Receipt className="w-4 h-4" />
+              <span className="hidden sm:inline">Tax Report</span>
             </Link>
             <button
               onClick={handleSignOut}

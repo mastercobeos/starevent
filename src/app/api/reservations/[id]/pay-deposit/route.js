@@ -67,21 +67,24 @@ export async function POST(request, { params }) {
       );
     }
 
-    // Check if deposit already paid (idempotency)
+    // Idempotency: if a deposit payment exists in any non-failed state, do not
+    // re-attempt the charge. Square's idempotency key prevents the actual
+    // double-charge, but we still want to short-circuit before hitting Square
+    // so the reservation state machine doesn't transition twice.
     const { data: existingPayment } = await supabaseAdmin
       .from('payments')
-      .select('*')
+      .select('id, status')
       .eq('reservation_id', id)
       .eq('type', 'deposit')
-      .eq('status', 'completed')
-      .single();
+      .in('status', ['completed', 'pending', 'processing'])
+      .maybeSingle();
 
     if (existingPayment) {
       return NextResponse.json({
         reservation_id: id,
-        status: STATUS.DEPOSIT_PAID,
+        status: existingPayment.status === 'completed' ? STATUS.DEPOSIT_PAID : 'payment_pending',
         payment_id: existingPayment.id,
-        message: 'Deposit already paid',
+        message: existingPayment.status === 'completed' ? 'Deposit already paid' : 'Deposit payment already in progress',
       });
     }
 

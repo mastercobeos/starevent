@@ -99,6 +99,17 @@ export async function fetchAdminInventory(date) {
   return res.json();
 }
 
+// Fetch tax report aggregated over a date range
+export async function fetchTaxReport({ from, to, groupBy = 'event_date' }) {
+  const params = new URLSearchParams({ from, to, groupBy });
+  const res = await adminFetch(`/api/admin/tax-report?${params}`);
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || 'Failed to fetch tax report');
+  }
+  return res.json();
+}
+
 // Permanently delete an archived reservation
 export async function deleteReservation(id) {
   const res = await adminFetch(`/api/admin/reservations/${id}`, {

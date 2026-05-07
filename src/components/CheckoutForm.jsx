@@ -124,9 +124,10 @@ export default function CheckoutForm({ onBack }) {
     return days > 0 ? days : 1;
   };
   const getAdjustedSubtotal = () => getTotal() * getRentalDays();
-  const getTaxAmount = () => Math.round(getAdjustedSubtotal() * TAX_RATE * 100) / 100;
   const getSameDayPickupFee = () => form.sameDayPickup ? SAME_DAY_PICKUP_FEE : 0;
-  const getGrandTotal = () => getAdjustedSubtotal() + getTaxAmount() + (deliveryFee || 0) + getSameDayPickupFee();
+  const getTaxableBase = () => getAdjustedSubtotal() + (deliveryFee || 0) + getSameDayPickupFee();
+  const getTaxAmount = () => Math.round(getTaxableBase() * TAX_RATE * 100) / 100;
+  const getGrandTotal = () => Math.round((getTaxableBase() + getTaxAmount()) * 100) / 100;
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -752,10 +753,6 @@ export default function CheckoutForm({ onBack }) {
           {deliveryFee != null && (
             <>
               <div className="flex justify-between text-sm py-1">
-                <span className="text-white/70">{tc.salesTax}</span>
-                <span className="text-white/80">${getTaxAmount().toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm py-1">
                 <span className="text-white/70 flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5" /> {tc.deliveryFee}
                   {deliveryMiles != null && <span className="text-white/40">({deliveryMiles} {tc.miles})</span>}
@@ -768,6 +765,10 @@ export default function CheckoutForm({ onBack }) {
                   <span className="text-white/80">${SAME_DAY_PICKUP_FEE.toFixed(2)}</span>
                 </div>
               )}
+              <div className="flex justify-between text-sm py-1">
+                <span className="text-white/70">{tc.salesTax}</span>
+                <span className="text-white/80">${getTaxAmount().toFixed(2)}</span>
+              </div>
               <div className="flex justify-between text-sm font-bold pt-2 mt-1 border-t border-white/10">
                 <span className="text-white">{tc.total}</span>
                 <span className="text-primary">${getGrandTotal().toFixed(2)}</span>

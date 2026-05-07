@@ -8,6 +8,25 @@ function subtractDaysISO(isoDate, days) {
   return d.toISOString().split('T')[0];
 }
 
+function todayISO() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function addDaysISO(isoDate, days) {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+// Returns the balance invoice due date, clamped so it's never in the past.
+// Default rule: 48h before the event. If that's already past, give the client
+// at least 1 day to pay from today.
+function balanceDueDate(eventDate) {
+  const ideal = subtractDaysISO(eventDate, 2);
+  const minimum = addDaysISO(todayISO(), 1);
+  return ideal > minimum ? ideal : minimum;
+}
+
 /**
  * Creates a Square balance invoice for a reservation.
  * Shared by the pay-balance API route and the Square webhook handler.
@@ -15,10 +34,16 @@ function subtractDaysISO(isoDate, days) {
  * Returns { ok, data } where data contains the result or error info.
  */
 export async function createBalanceInvoice(reservationId) {
-  // Fetch reservation
+  // Fetch reservation with items for itemized invoice
   const { data: reservation, error: resError } = await supabaseAdmin
     .from('reservations')
-    .select('id, status, client_email, first_name, last_name, balance_amount, total, event_date')
+    .select(`
+      id, status, client_email, first_name, last_name,
+      balance_amount, deposit_amount, total, event_date,
+      subtotal, delivery_fee, delivery_miles, same_day_pickup_fee, same_day_pickup,
+      tax_amount, rental_days,
+      reservation_items (product_id, quantity, unit_price, products(name))
+    `)
     .eq('id', reservationId)
     .single();
 
@@ -81,6 +106,15 @@ export async function createBalanceInvoice(reservationId) {
   // Create Square Invoice for balance via Edge Function
   const idempKey = squareIdempotencyKey(reservationId, 'invoice_balance');
   const balanceCents = Math.round(reservation.balance_amount * 100);
+  const depositCents = Math.round(reservation.deposit_amount * 100);
+  const rentalDays = Number(reservation.rental_days) || 1;
+
+  const lineItems = (reservation.reservation_items || []).map((ri) => ({
+    name: ri.products?.name || ri.product_id,
+    quantity: ri.quantity,
+    unitPriceCents: Math.round(Number(ri.unit_price) * 100),
+    rentalDays,
+  }));
 
   const invoiceResponse = await fetch(
     `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/create-square-invoice`,
@@ -97,8 +131,15 @@ export async function createBalanceInvoice(reservationId) {
         customerEmail: reservation.client_email,
         customerName: `${reservation.first_name} ${reservation.last_name}`,
         description: `Balance (60%) — Reservation #${reservationId.slice(0, 8)}`,
-        dueDate: subtractDaysISO(reservation.event_date, 2), // 48 hours before event
+        dueDate: balanceDueDate(reservation.event_date),
         idempotencyKey: idempKey,
+        lineItems,
+        deliveryFeeCents: Math.round(Number(reservation.delivery_fee || 0) * 100),
+        deliveryMiles: reservation.delivery_miles || null,
+        sameDayPickupFeeCents: Math.round(Number(reservation.same_day_pickup_fee || 0) * 100),
+        taxAmountCents: Math.round(Number(reservation.tax_amount || 0) * 100),
+        depositPaidCents: depositCents,
+        rentalDays,
       }),
     }
   );

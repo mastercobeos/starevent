@@ -95,10 +95,6 @@ function confirmationEmailHtml(reservation, items, { forBusiness = false } = {})
             <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.subtotal)}</td>
           </tr>
           <tr>
-            <td style="padding:4px 0;color:#777;">Tax:</td>
-            <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.tax_amount)}</td>
-          </tr>
-          <tr>
             <td style="padding:4px 0;color:#777;">Delivery Fee:</td>
             <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.delivery_fee)}</td>
           </tr>
@@ -106,6 +102,10 @@ function confirmationEmailHtml(reservation, items, { forBusiness = false } = {})
             <td style="padding:4px 0;color:#777;">Same-Day Pickup Fee:</td>
             <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.same_day_pickup_fee)}</td>
           </tr>` : ''}
+          <tr>
+            <td style="padding:4px 0;color:#777;">Tax (8.25%):</td>
+            <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.tax_amount)}</td>
+          </tr>
           <tr style="border-top:2px solid #C9A84C;">
             <td style="padding:8px 0;color:#1a1a1a;font-weight:bold;font-size:15px;">Total:</td>
             <td style="padding:8px 0;color:#1a1a1a;font-weight:bold;font-size:15px;text-align:right;">${formatCurrency(reservation.total)}</td>
@@ -479,12 +479,12 @@ function pendingReservationEmailHtml(reservation, items, unavailableItems, admin
             <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.subtotal)}</td>
           </tr>
           <tr>
-            <td style="padding:4px 0;color:#777;">Tax:</td>
-            <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.tax_amount)}</td>
-          </tr>
-          <tr>
             <td style="padding:4px 0;color:#777;">Delivery Fee:</td>
             <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.delivery_fee)}</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;color:#777;">Tax (8.25%):</td>
+            <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.tax_amount)}</td>
           </tr>
           <tr style="border-top:2px solid #C9A84C;">
             <td style="padding:8px 0;color:#1a1a1a;font-weight:bold;font-size:15px;">Total:</td>
@@ -604,12 +604,12 @@ function newReservationAdminEmailHtml(reservation, items, adminUrl) {
             <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.subtotal)}</td>
           </tr>
           <tr>
-            <td style="padding:4px 0;color:#777;">Tax:</td>
-            <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.tax_amount)}</td>
-          </tr>
-          <tr>
             <td style="padding:4px 0;color:#777;">Delivery Fee:</td>
             <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.delivery_fee)}</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 0;color:#777;">Tax (8.25%):</td>
+            <td style="padding:4px 0;color:#333;text-align:right;">${formatCurrency(reservation.tax_amount)}</td>
           </tr>
           <tr style="border-top:2px solid #C9A84C;">
             <td style="padding:8px 0;color:#1a1a1a;font-weight:bold;font-size:15px;">Total:</td>

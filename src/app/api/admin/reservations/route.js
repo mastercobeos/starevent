@@ -32,9 +32,6 @@ export async function GET(request) {
       query = query.is('archived_at', null);
     }
 
-    // Hide reservations where contract was signed but deposit not yet paid via Square
-    query = query.neq('status', 'contract_signed');
-
     const { data, error } = await query;
 
     if (error) throw error;

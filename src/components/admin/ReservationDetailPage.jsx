@@ -8,7 +8,7 @@ import { STATUS, TERMINAL_STATES, STATUS_LABELS } from '../../lib/reservation-st
 import { Button } from '../ui/button';
 import {
   ArrowLeft, Loader2, User, MapPin, Calendar, Phone, Mail,
-  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2, Package,
+  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2, Package, AlertCircle,
 } from 'lucide-react';
 import { formatDate } from '../../lib/format';
 import { useToast } from '../ui/Toast';
@@ -38,7 +38,13 @@ export default function ReservationDetailPage({ id }) {
   const handleAction = async (action) => {
     setActionLoading(true);
     try {
-      await adminAction(id, action);
+      const result = await adminAction(id, action);
+      if (result?.refund_required) {
+        toast(
+          `Refund required: $${Number(result.refund_total || 0).toFixed(2)} was already paid via Square. Issue refund manually from Square Dashboard.`,
+          'error'
+        );
+      }
       await load();
     } catch (err) {
       console.error('Action error:', err);
@@ -385,6 +391,19 @@ export default function ReservationDetailPage({ id }) {
             )}
           </div>
         )}
+        {/* Failed payment alerts — surface invoice creation errors that would otherwise be silent */}
+        {payments.filter((p) => p.status === 'failed').map((p) => (
+          <div key={p.id} className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <p className="text-red-300 font-semibold capitalize">{p.type} payment failed</p>
+                {p.error_message && <p className="text-red-300/70 text-xs mt-1">{p.error_message}</p>}
+                <p className="text-red-300/50 text-xs mt-1">Use the button above to retry creating the invoice.</p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Contract Card */}
@@ -466,12 +485,32 @@ export default function ReservationDetailPage({ id }) {
               })}
             </tbody>
             <tfoot>
-              {r.delivery_fee > 0 && (
+              {r.subtotal != null && (
                 <tr className="border-t border-white/10">
+                  <td colSpan={3} className="py-2 text-white/60 text-sm text-right">
+                    Subtotal{r.rental_days > 1 ? ` (× ${r.rental_days} days)` : ''}
+                  </td>
+                  <td className="py-2 text-white/80 text-sm text-right">${Number(r.subtotal).toFixed(2)}</td>
+                </tr>
+              )}
+              {r.delivery_fee > 0 && (
+                <tr>
                   <td colSpan={3} className="py-2 text-white/60 text-sm text-right">
                     Delivery ({r.delivery_miles} mi)
                   </td>
                   <td className="py-2 text-white/80 text-sm text-right">${Number(r.delivery_fee).toFixed(2)}</td>
+                </tr>
+              )}
+              {r.same_day_pickup_fee > 0 && (
+                <tr>
+                  <td colSpan={3} className="py-2 text-white/60 text-sm text-right">Same-Day Pickup Fee</td>
+                  <td className="py-2 text-white/80 text-sm text-right">${Number(r.same_day_pickup_fee).toFixed(2)}</td>
+                </tr>
+              )}
+              {r.tax_amount != null && (
+                <tr>
+                  <td colSpan={3} className="py-2 text-white/60 text-sm text-right">Sales Tax (8.25%)</td>
+                  <td className="py-2 text-white/80 text-sm text-right">${Number(r.tax_amount).toFixed(2)}</td>
                 </tr>
               )}
               <tr className="border-t border-white/10">

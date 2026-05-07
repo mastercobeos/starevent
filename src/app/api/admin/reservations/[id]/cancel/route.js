@@ -40,6 +40,14 @@ export async function PUT(request, { params }) {
       );
     }
 
+    // Detect any completed payments BEFORE cancelling so admin can be told to
+    // process a refund. Both deposit and balance are surfaced.
+    const { data: completedPayments } = await supabaseAdmin
+      .from('payments')
+      .select('id, type, amount, square_payment_id, square_invoice_id')
+      .eq('reservation_id', id)
+      .eq('status', 'completed');
+
     // Release stock holds
     await supabaseAdmin.rpc('release_holds', { p_reservation_id: id });
 
@@ -57,13 +65,18 @@ export async function PUT(request, { params }) {
 
     if (error) throw error;
 
-    // TODO: Send cancellation notification to client
-    // TODO: If deposit was paid, flag for refund review
+    const refundRequired = (completedPayments?.length || 0) > 0;
+    const refundTotal = (completedPayments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     return NextResponse.json({
       reservation_id: id,
       status: STATUS.CANCELLED,
-      message: 'Reservation cancelled',
+      message: refundRequired
+        ? `Reservation cancelled — REFUND REQUIRED ($${refundTotal.toFixed(2)} already paid)`
+        : 'Reservation cancelled',
+      refund_required: refundRequired,
+      refund_total: refundTotal,
+      payments: completedPayments || [],
     });
   } catch (error) {
     console.error('Admin cancel error:', error);

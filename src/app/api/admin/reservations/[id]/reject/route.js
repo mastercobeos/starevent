@@ -41,6 +41,13 @@ export async function PUT(request, { params }) {
       });
     }
 
+    // Detect any completed payments so admin knows to refund
+    const { data: completedPayments } = await supabaseAdmin
+      .from('payments')
+      .select('id, type, amount, square_payment_id, square_invoice_id')
+      .eq('reservation_id', id)
+      .eq('status', 'completed');
+
     // Release any stock holds
     await supabaseAdmin.rpc('release_holds', { p_reservation_id: id });
 
@@ -58,12 +65,18 @@ export async function PUT(request, { params }) {
 
     if (error) throw error;
 
-    // TODO: Send notification to client about rejection
+    const refundRequired = (completedPayments?.length || 0) > 0;
+    const refundTotal = (completedPayments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     return NextResponse.json({
       reservation_id: id,
       status: STATUS.CANCELLED,
-      message: 'Reservation rejected',
+      message: refundRequired
+        ? `Reservation rejected — REFUND REQUIRED ($${refundTotal.toFixed(2)} already paid)`
+        : 'Reservation rejected',
+      refund_required: refundRequired,
+      refund_total: refundTotal,
+      payments: completedPayments || [],
     });
   } catch (error) {
     console.error('Admin reject error:', error);

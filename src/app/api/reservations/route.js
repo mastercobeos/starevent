@@ -118,12 +118,14 @@ export async function POST(request) {
     );
 
     // Compute fees and tax
+    // Texas Admin Code §3.303(b): delivery charges on taxable rentals are part
+    // of the sales price and are subject to sales tax. Same-day pickup is also
+    // a service tied to the taxable rental, so it's included in the tax base.
     const computedDeliveryFee = computeDeliveryFee(delivery_miles);
     const computedSameDayPickupFee = same_day_pickup ? SAME_DAY_PICKUP_FEE : 0;
-    const computedTaxAmount = Math.round(computedSubtotal * TAX_RATE * 100) / 100;
-    const computedTotal = Math.round(
-      (computedSubtotal + computedTaxAmount + computedDeliveryFee + computedSameDayPickupFee) * 100
-    ) / 100;
+    const computedTaxableBase = computedSubtotal + computedDeliveryFee + computedSameDayPickupFee;
+    const computedTaxAmount = Math.round(computedTaxableBase * TAX_RATE * 100) / 100;
+    const computedTotal = Math.round((computedTaxableBase + computedTaxAmount) * 100) / 100;
 
     // --- Idempotency check ---
     if (idempotency_key) {
