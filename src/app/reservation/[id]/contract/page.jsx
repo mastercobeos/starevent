@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import { FileText, PenLine, Loader2, AlertCircle, CheckCircle, CreditCard, ExternalLink } from 'lucide-react';
+import { FileText, PenLine, Loader2, AlertCircle, CheckCircle, CreditCard, ExternalLink, Clock, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getInitials } from '@/lib/contract-template';
 import { translations } from '@/translations';
+import { STATUS } from '@/lib/reservation-state-machine';
 
 export default function ContractPage() {
   const params = useParams();
@@ -113,18 +114,45 @@ export default function ContractPage() {
 
   const contract = reservation?.contracts?.[0];
 
-  // Reservation loaded but contract record missing → block signing
+  // Reservation loaded but contract record missing → show status-specific message
   if (reservation && !contract) {
+    const status = reservation.status;
+    let icon = <AlertCircle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />;
+    let title = tr.reviewSignContract;
+    let message = tr.contractNotReady;
+
+    if (status === STATUS.PENDING_OUT_OF_STOCK) {
+      icon = <Clock className="w-12 h-12 text-blue-400 mx-auto mb-4" />;
+      title = tr.pendingApprovalTitle;
+      message = tr.pendingApprovalMessage;
+    } else if (status === STATUS.CANCELLED) {
+      icon = <XCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />;
+      title = tr.reservationCancelledTitle;
+      message = tr.reservationCancelledMessage;
+    } else if (status === STATUS.HOLD_EXPIRED) {
+      icon = <Clock className="w-12 h-12 text-orange-400 mx-auto mb-4" />;
+      title = tr.reservationExpiredTitle;
+      message = tr.reservationExpiredMessage;
+    } else if ([STATUS.CONTRACT_SIGNED, STATUS.DEPOSIT_PAID, STATUS.BALANCE_DUE, STATUS.PAID_IN_FULL, STATUS.COMPLETED].includes(status)) {
+      icon = <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />;
+      title = tr.alreadySignedTitle;
+      message = tr.alreadySignedMessage;
+    }
+
+    const token = searchParams.get('token') || '';
+
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
         <div className="max-w-md text-center">
-          <AlertCircle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">
-            {tr.reviewSignContract}
-          </h2>
-          <p className="text-white/70 text-sm leading-relaxed">
-            {tr.contractNotReady}
-          </p>
+          {icon}
+          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
+          <p className="text-white/70 text-sm leading-relaxed mb-6">{message}</p>
+          <button
+            onClick={() => router.push(`/reservation/${params.id}?token=${token}&lang=${lang}`)}
+            className="text-primary hover:text-primary/80 text-sm underline"
+          >
+            {tr.viewReservation}
+          </button>
         </div>
       </div>
     );

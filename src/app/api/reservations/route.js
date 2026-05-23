@@ -75,6 +75,42 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Address is required' }, { status: 400 });
     }
 
+    // --- Anti-duplicate check ---
+    // Block if same client_email + event_date already has an active reservation
+    // (created in the last 30 days). Only count states with real customer commitment;
+    // transient 'pending' and terminal states (cancelled/expired/completed) don't block.
+    const BLOCKING_STATES = [
+      'pending_out_of_stock',
+      'approved_waiting_contract',
+      'contract_signed',
+      'deposit_paid',
+      'balance_due',
+      'paid_in_full',
+    ];
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: existingActive } = await supabaseAdmin
+      .from('reservations')
+      .select('id, status')
+      .ilike('client_email', client_email.trim())
+      .eq('event_date', event_date)
+      .in('status', BLOCKING_STATES)
+      .gte('created_at', thirtyDaysAgo)
+      .limit(1);
+
+    if (existingActive && existingActive.length > 0) {
+      const isEs = language === 'es';
+      return NextResponse.json(
+        {
+          error: 'duplicate_reservation',
+          message: isEs
+            ? 'Ya tienes una reserva activa para esta fecha. Si deseas agendar una nueva o modificar tu reserva existente, por favor ponte en contacto con nuestro equipo al (281) 636-0615.'
+            : 'You already have an active reservation for this date. If you\'d like to schedule a new one or modify your existing reservation, please contact our team at (281) 636-0615.',
+        },
+        { status: 409 }
+      );
+    }
+
     // --- Server-side price verification ---
     const productIds = items.map((i) => i.product_id);
     const { data: products, error: productsError } = await supabaseAdmin

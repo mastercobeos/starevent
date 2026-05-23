@@ -56,6 +56,18 @@ export async function adminAction(id, action, body = {}) {
   return data;
 }
 
+// Re-send the approval email with the sign-contract link to the client.
+// Only valid while the reservation is in approved_waiting_contract — the email
+// is irrelevant after signing. Does not regenerate the contract or change state.
+export async function resendApprovalEmail(id) {
+  const res = await adminFetch(`/api/admin/reservations/${id}/resend-approval-email`, {
+    method: 'POST',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to resend approval email');
+  return data;
+}
+
 // Create or resend the balance (60%) invoice in Square for a reservation.
 // Used to recover reservations whose deposit was paid but the balance invoice
 // was never generated, or to resend the invoice when the client lost the email.

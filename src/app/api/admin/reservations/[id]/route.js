@@ -37,6 +37,14 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Reservation not found' }, { status: 404 });
     }
 
+    // PostgREST embeds 1-to-1 relations (contracts has UNIQUE reservation_id)
+    // as a single object. Normalize to array for frontend consistency.
+    if (reservation.contracts && !Array.isArray(reservation.contracts)) {
+      reservation.contracts = [reservation.contracts];
+    } else if (!reservation.contracts) {
+      reservation.contracts = [];
+    }
+
     // Sort status log by created_at
     if (reservation.reservation_status_log) {
       reservation.reservation_status_log.sort((a, b) =>

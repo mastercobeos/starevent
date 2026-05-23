@@ -36,7 +36,15 @@ export async function GET(request) {
 
     if (error) throw error;
 
-    return NextResponse.json(data);
+    // PostgREST embeds 1-to-1 relations (contracts has UNIQUE reservation_id)
+    // as a single object. Normalize to array for frontend consistency.
+    const normalized = (data || []).map((r) => {
+      if (r.contracts && !Array.isArray(r.contracts)) r.contracts = [r.contracts];
+      else if (!r.contracts) r.contracts = [];
+      return r;
+    });
+
+    return NextResponse.json(normalized);
   } catch (error) {
     console.error('Admin list reservations error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

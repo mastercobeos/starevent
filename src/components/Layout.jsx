@@ -521,7 +521,12 @@ export default function Layout({ children }) {
             </div>
           </div>
           <div className="text-center text-sm space-y-2">
-            <p>&copy; {new Date().getFullYear()} Star Event Rental. {translations[language].footer.allRightsReserved}</p>
+            <p>&copy; {new Date().getFullYear()} Star Event Rental, LLC. {translations[language].footer.allRightsReserved}</p>
+            <p className="text-xs text-muted-foreground/70 max-w-2xl mx-auto">
+              {language === 'es'
+                ? 'Todo el contenido de este sitio (textos, fotografías, logotipos, diseños) está protegido por las leyes de derechos de autor de EE.UU. y del Estado de Texas. Su reproducción no autorizada es ilegal.'
+                : 'All content on this site (text, photographs, logos, designs) is protected by U.S. federal and Texas state copyright laws. Unauthorized reproduction is unlawful.'}
+            </p>
             <p>
               <Link href={`${prefix}/privacy-policy`} className="hover:text-primary transition-colors">{translations[language].footer.privacyPolicy}</Link>
               {' | '}

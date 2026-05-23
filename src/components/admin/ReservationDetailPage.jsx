@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchAdminReservation, adminAction, archiveReservation, unarchiveReservation, deleteReservation, createBalanceInvoice } from '../../lib/admin-api';
+import { fetchAdminReservation, adminAction, archiveReservation, unarchiveReservation, deleteReservation, createBalanceInvoice, resendApprovalEmail } from '../../lib/admin-api';
 import StatusBadge from './StatusBadge';
 import { STATUS, TERMINAL_STATES, STATUS_LABELS } from '../../lib/reservation-state-machine';
 import { Button } from '../ui/button';
 import {
   ArrowLeft, Loader2, User, MapPin, Calendar, Phone, Mail,
-  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2, Package, AlertCircle,
+  FileText, CreditCard, Clock, Check, X, Ban, Home, Building2, Wrench, ExternalLink, Archive, ArchiveRestore, Trash2, Package, AlertCircle, Send,
 } from 'lucide-react';
 import { formatDate } from '../../lib/format';
 import { useToast } from '../ui/Toast';
@@ -198,6 +198,31 @@ export default function ReservationDetailPage({ id }) {
           >
             {actionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileText className="w-4 h-4 mr-2" />}
             Generate Contract & Resend Email
+          </Button>
+        )}
+
+        {r.status === STATUS.APPROVED_WAITING_CONTRACT && contract && contract.status !== 'signed' && (
+          <Button
+            onClick={async () => {
+              if (!(await confirm(
+                `Resend the contract sign link to ${r.client_email}?`,
+                { title: 'Resend Contract Email', confirmText: 'Resend' }
+              ))) return;
+              setActionLoading(true);
+              try {
+                const data = await resendApprovalEmail(id);
+                toast(`Email re-sent to ${data.recipient}`, 'success');
+              } catch (err) {
+                toast(err.message || 'Failed to resend email', 'error');
+              }
+              setActionLoading(false);
+            }}
+            disabled={actionLoading}
+            variant="outline"
+            className="border-blue-500/40 text-blue-300 hover:bg-blue-500/10"
+          >
+            {actionLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+            Resend Contract Email
           </Button>
         )}
 

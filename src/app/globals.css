@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Image protection — disuade copia/drag/screenshot casual de las fotos
+   protegidas por copyright. Esto NO impide a un usuario decidido (DevTools,
+   right-click sigue funcional en algunos browsers), pero baja la barrera. */
+@layer base {
+  img {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+}
+
 @layer base {
   :root {
     --background: 222.2 84% 4.9%;

@@ -69,7 +69,7 @@ export async function PUT(request, { params }) {
             event_date: reservation.event_date,
             return_date: reservation.return_date,
             status: 'active',
-            expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+            expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
           });
         }
       } else {
@@ -81,7 +81,7 @@ export async function PUT(request, { params }) {
           event_date: reservation.event_date,
           return_date: reservation.return_date,
           status: 'active',
-          expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+          expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
         });
       }
     }

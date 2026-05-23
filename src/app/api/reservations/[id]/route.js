@@ -44,12 +44,21 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Reservation not found' }, { status: 404 });
     }
 
+    // PostgREST embeds 1-to-1 relations (contracts has UNIQUE reservation_id) as
+    // a single object instead of an array. Frontend code expects an array.
+    // Normalize here so callers can always do `reservation.contracts[0]`.
+    if (reservation.contracts && !Array.isArray(reservation.contracts)) {
+      reservation.contracts = [reservation.contracts];
+    } else if (!reservation.contracts) {
+      reservation.contracts = [];
+    }
+
     // Self-heal: if the reservation is approved but the contract row is missing
     // (silent insert failure on creation/approval), regenerate it on the fly so
     // the client can sign without admin intervention.
     const needsContract =
       reservation.status === STATUS.APPROVED_WAITING_CONTRACT &&
-      (!reservation.contracts || reservation.contracts.length === 0);
+      reservation.contracts.length === 0;
 
     if (needsContract) {
       try {

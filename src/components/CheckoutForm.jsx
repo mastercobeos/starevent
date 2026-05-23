@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft, CheckCircle, AlertCircle, Loader2, Clock,
   CreditCard, MapPin, FileText, PenLine, ExternalLink,
@@ -18,6 +18,60 @@ import { useGoogleMapsAddress } from '../hooks/useGoogleMapsAddress';
 const TAX_RATE = 0.0825;
 const SAME_DAY_PICKUP_FEE = 40;
 
+// Form persistence — guarda el formulario en localStorage para que sobreviva al
+// cierre accidental del carrito. TTL de 7 días para evitar enviar datos viejos.
+const FORM_STORAGE_KEY = 'star-event-checkout-form-v1';
+const FORM_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+const FORM_DEFAULTS = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone1: '',
+  phone2: '',
+  eventAddress: '',
+  propertyType: '',
+  installationRequired: false,
+  installationDetails: '',
+  eventDate: '',
+  returnDate: '',
+  eventStartTime: '',
+  eventEndTime: '',
+  specialNotes: '',
+  surfaceType: '',
+  sameDayPickup: false,
+};
+
+function loadSavedForm() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(FORM_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.savedAt || Date.now() - parsed.savedAt > FORM_TTL_MS) {
+      localStorage.removeItem(FORM_STORAGE_KEY);
+      return null;
+    }
+    return parsed.data || null;
+  } catch {
+    return null;
+  }
+}
+
+function persistForm(data) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify({ data, savedAt: Date.now() }));
+  } catch {}
+}
+
+function clearSavedForm() {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(FORM_STORAGE_KEY);
+  } catch {}
+}
+
 export default function CheckoutForm({ onBack }) {
   const { items, getTotal, clearCart } = useCart();
   const { language } = useLanguage();
@@ -26,24 +80,37 @@ export default function CheckoutForm({ onBack }) {
   const tr = t.reservation;
 
   // --- Form state ---
-  const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone1: '',
-    phone2: '',
-    eventAddress: '',
-    propertyType: '',
-    installationRequired: false,
-    installationDetails: '',
-    eventDate: '',
-    returnDate: '',
-    eventStartTime: '',
-    eventEndTime: '',
-    specialNotes: '',
-    surfaceType: '',
-    sameDayPickup: false,
-  });
+  // Inicializa con defaults (para evitar hydration mismatch en SSR), después
+  // hidratamos desde localStorage en useEffect.
+  const [form, setForm] = useState(FORM_DEFAULTS);
+  const [formHydrated, setFormHydrated] = useState(false);
+  const [restoredFromStorage, setRestoredFromStorage] = useState(false);
+
+  // Cargar formulario guardado al montar
+  useEffect(() => {
+    const saved = loadSavedForm();
+    if (saved) {
+      setForm((prev) => ({ ...prev, ...saved }));
+      setRestoredFromStorage(true);
+    }
+    setFormHydrated(true);
+  }, []);
+
+  const resetForm = () => {
+    setForm(FORM_DEFAULTS);
+    setErrors({});
+    setErrorMessage('');
+    clearSavedForm();
+    setRestoredFromStorage(false);
+    resetAddress();
+  };
+
+  // Persistir cada cambio (solo después de la hidratación inicial)
+  useEffect(() => {
+    if (!formHydrated) return;
+    const hasData = Object.entries(form).some(([, v]) => v !== '' && v !== false);
+    if (hasData) persistForm(form);
+  }, [form, formHydrated]);
 
   const [errors, setErrors] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
@@ -204,11 +271,15 @@ export default function CheckoutForm({ onBack }) {
 
       const data = await response.json();
       if (!response.ok || data.error) {
-        throw new Error(data.error || 'Failed to create reservation');
+        throw new Error(data.message || data.error || 'Failed to create reservation');
       }
 
       setReservationId(data.reservation_id);
       setAccessToken(data.access_token);
+
+      // Reserva creada exitosamente → ya no necesitamos los datos del formulario.
+      // Limpiar para evitar duplicados accidentales y proteger PII en el browser.
+      clearSavedForm();
 
       if (data.status === 'pending_out_of_stock') {
         // NO STOCK → show pending message
@@ -530,6 +601,22 @@ export default function CheckoutForm({ onBack }) {
         <div className="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/30 flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
           <p className="text-red-300 text-sm">{errorMessage}</p>
+        </div>
+      )}
+
+      {restoredFromStorage && step === 'form' && (
+        <div className="mb-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-start gap-2">
+          <CheckCircle className="w-4 h-4 text-blue-300 mt-0.5 shrink-0" />
+          <p className="text-blue-100/90 text-sm flex-1">
+            {tc.formRestored}{' '}
+            <button
+              type="button"
+              onClick={resetForm}
+              className="underline hover:text-white transition-colors"
+            >
+              {tc.startOver}
+            </button>
+          </p>
         </div>
       )}
 

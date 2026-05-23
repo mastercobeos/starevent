@@ -13,6 +13,10 @@ export const metadata = {
     template: '%s | Star Event Rental',
   },
   description: 'Star Event Rental is a family-owned tent, table, chair, and linen rental business in Houston, Texas. We serve Houston, Katy, Cypress, Richmond, Rosenberg, Sugar Land.',
+  authors: [{ name: 'Star Event Rental, LLC', url: 'https://stareventrentaltx.com' }],
+  creator: 'Star Event Rental, LLC',
+  publisher: 'Star Event Rental, LLC',
+  applicationName: 'Star Event Rental',
   openGraph: {
     type: 'website',
     siteName: 'Star Event Rental',
@@ -32,6 +36,8 @@ export const metadata = {
   manifest: '/manifest.json',
   other: {
     'theme-color': '#1a1a2e',
+    'copyright': `© ${new Date().getFullYear()} Star Event Rental, LLC. All rights reserved.`,
+    'rights': 'Copyright © Star Event Rental, LLC. All content protected under U.S. copyright law.',
   },
 };
 
