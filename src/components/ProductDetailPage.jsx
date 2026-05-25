@@ -122,6 +122,11 @@ export const ProductDetailPage = memo(function ProductDetailPage({ category, ite
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
                 {itemName}
               </h2>
+              {item.badge && (
+                <span className="inline-flex self-start items-center gap-1 text-xs sm:text-sm font-semibold text-primary bg-primary/15 border border-primary/40 rounded-full px-3 py-1 mb-4">
+                  ✓ {isEs ? item.badgeEs : item.badge}
+                </span>
+              )}
               <p className="text-white/80 text-base sm:text-lg leading-relaxed mb-6">
                 {itemDesc}
               </p>

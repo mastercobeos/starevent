@@ -257,6 +257,8 @@ export default function CheckoutForm({ onBack }) {
             product_id: item.id,
             quantity: item.quantity,
             unit_price: item.price,
+            name: item.name,
+            name_es: item.nameEs,
           })),
           subtotal: getAdjustedSubtotal(),
           rental_days: getRentalDays(),

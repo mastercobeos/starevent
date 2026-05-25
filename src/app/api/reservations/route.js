@@ -125,17 +125,65 @@ export async function POST(request) {
       priceMap[p.id] = Number(p.price);
     }
 
-    // Validate every item references a real product with correct price
+    // Validate quantities (sanity check only)
     for (const item of items) {
-      if (priceMap[item.product_id] == null) {
-        return NextResponse.json(
-          { error: `Product not found: ${item.product_id}` },
-          { status: 400 }
-        );
-      }
       if (!Number.isInteger(item.quantity) || item.quantity < 1) {
         return NextResponse.json(
           { error: `Invalid quantity for product ${item.product_id}` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Auto-create placeholders for products missing from DB.
+    // Reservation will still be created so the admin can review & approve it.
+    // Total stock = 0 forces the reservation into "pending_out_of_stock" routing,
+    // which is exactly the manual-review path we want.
+    // Product id is sanitized to match expected pattern: lowercase letters,
+    // digits, and dashes only (length 1..120). This prevents adversarial IDs
+    // from polluting the catalog.
+    const PRODUCT_ID_RE = /^[a-z0-9-]{1,120}$/;
+    const missingItems = items.filter(
+      (i) => priceMap[i.product_id] == null && PRODUCT_ID_RE.test(i.product_id || '')
+    );
+
+    if (missingItems.length > 0) {
+      const placeholders = missingItems.map((i) => {
+        const fallbackPrice = Number(i.unit_price);
+        return {
+          id: i.product_id,
+          name: (i.name || i.product_id).slice(0, 200),
+          name_es: (i.name_es || i.nameEs || i.name || i.product_id).slice(0, 200),
+          category: 'others',
+          price: Number.isFinite(fallbackPrice) && fallbackPrice >= 0 ? fallbackPrice : 0,
+          total_stock: 0,
+        };
+      });
+
+      const { error: placeholderError } = await supabaseAdmin
+        .from('products')
+        .upsert(placeholders, { onConflict: 'id', ignoreDuplicates: true });
+
+      if (placeholderError) throw placeholderError;
+
+      // Refresh price map with the newly inserted placeholders
+      const { data: refreshed } = await supabaseAdmin
+        .from('products')
+        .select('id, price')
+        .in('id', missingItems.map((i) => i.product_id));
+
+      for (const p of refreshed || []) {
+        priceMap[p.id] = Number(p.price);
+      }
+    }
+
+    // Any item still without a price means it had an invalid product_id
+    // (failed the regex above). Reject only those — never reject because of
+    // missing inventory or unknown-but-valid IDs.
+    for (const item of items) {
+      if (priceMap[item.product_id] == null) {
+        return NextResponse.json(
+          { error: `Invalid product id: ${item.product_id}` },
           { status: 400 }
         );
       }

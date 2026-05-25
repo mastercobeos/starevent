@@ -29,7 +29,7 @@ INSERT INTO products (id, name, name_es, category, price, total_stock) VALUES
   -- Chairs
   ('chair-resin',        'Resin Garden Chair',       'Silla de Resina de Jardín',      'chairs',      3.00,  200),
   ('chair-wood',         'Wooden Chair',             'Silla de Madera',                'chairs',      4.00,  200),
-  ('chair-chiavari',     'Chiavari Chair',           'Silla Chiavari',                 'chairs',      5.00,  200),
+  ('chair-chiavari',     'Chiavari Chair',           'Silla Chiavari',                 'chairs',      8.00,  200),
   ('chair-kid-chiavari', 'Kid Chiavari Chair',       'Silla Chiavari para Niños',      'chairs',      5.00,  50),
   -- Tables
   ('table-6ft',          '6 FT Rectangular Table',   'Mesa Rectangular de 6 pies',     'tables',      8.00,  50),

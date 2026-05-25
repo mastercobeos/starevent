@@ -8,8 +8,8 @@ const categoryMeta = {
   chairs: {
     title: 'Chair Rental Houston TX - Event Chairs from $3',
     titleEs: 'Renta de Sillas Houston TX - Sillas para Eventos desde $3',
-    description: 'Chair rental Houston TX. Resin garden ($3), wooden ($4) & gold Chiavari ($5) chairs for weddings, quinceañeras & corporate events. Call 281-636-0615 for a free quote!',
-    descriptionEs: 'Renta de sillas Houston TX. Resina ($3), madera ($4) y Chiavari dorada ($5) para bodas, quinceañeras y eventos corporativos. Llama al 281-636-0615 para cotización gratis.',
+    description: 'Chair rental Houston TX. Resin garden ($3), wooden ($4) & gold Chiavari ($8) chairs for weddings, quinceañeras & corporate events. Call 281-636-0615 for a free quote!',
+    descriptionEs: 'Renta de sillas Houston TX. Resina ($3), madera ($4) y Chiavari dorada ($8) para bodas, quinceañeras y eventos corporativos. Llama al 281-636-0615 para cotización gratis.',
     keywords: ['chair rental Houston', 'Chiavari chair rental', 'event chairs Houston', 'wedding chair rental Houston TX', 'renta de sillas Houston', 'sillas para eventos Houston', 'alquiler de sillas para bodas Houston'],
   },
   tables: {
@@ -82,8 +82,8 @@ export async function generateMetadata({ params }) {
 
 const categoryContent = {
   chairs: {
-    intro: 'At Star Event Rental, we offer a curated selection of high-quality event chairs for every occasion in Houston, TX. From resin garden chairs at $3 each to elegant gold Chiavari chairs at $5, our inventory covers weddings, quinceañeras, corporate galas, and backyard celebrations. Contact us at 281-636-0615 for a free quote.',
-    introEs: 'En Star Event Rental ofrecemos una selección de sillas de alta calidad para todo tipo de evento en Houston, TX. Desde sillas de resina de jardín a $3 hasta elegantes sillas Chiavari doradas a $5, nuestro inventario cubre bodas, quinceañeras, eventos corporativos y celebraciones en casa. Llámanos al 281-636-0615 para una cotización gratis.',
+    intro: 'At Star Event Rental, we offer a curated selection of high-quality event chairs for every occasion in Houston, TX. From resin garden chairs at $3 each to elegant gold Chiavari chairs at $8 (cushion included), our inventory covers weddings, quinceañeras, corporate galas, and backyard celebrations. Contact us at 281-636-0615 for a free quote.',
+    introEs: 'En Star Event Rental ofrecemos una selección de sillas de alta calidad para todo tipo de evento en Houston, TX. Desde sillas de resina de jardín a $3 hasta elegantes sillas Chiavari doradas a $8 (cojín incluido), nuestro inventario cubre bodas, quinceañeras, eventos corporativos y celebraciones en casa. Llámanos al 281-636-0615 para una cotización gratis.',
     contentSections: [
       {
         title: 'How to Choose the Right Event Chair',
@@ -99,9 +99,9 @@ const categoryContent = {
       },
     ],
     faq: [
-      { q: 'How much does it cost to rent chairs in Houston?', qEs: '¿Cuánto cuesta rentar sillas en Houston?', a: 'Our chair rentals start at $3 per chair for resin garden chairs, $4 for wooden chairs, and $5 for gold Chiavari chairs. Call 281-636-0615 for a free quote.', aEs: 'Nuestras rentas de sillas comienzan en $3 por silla de resina de jardín, $4 por silla de madera y $5 por silla Chiavari dorada. Llama al 281-636-0615 para una cotización gratis.' },
+      { q: 'How much does it cost to rent chairs in Houston?', qEs: '¿Cuánto cuesta rentar sillas en Houston?', a: 'Our chair rentals start at $3 per chair for resin garden chairs, $4 for wooden chairs, and $8 for gold Chiavari chairs (cushion included). Call 281-636-0615 for a free quote.', aEs: 'Nuestras rentas de sillas comienzan en $3 por silla de resina de jardín, $4 por silla de madera y $8 por silla Chiavari dorada (cojín incluido). Llama al 281-636-0615 para una cotización gratis.' },
       { q: 'What areas do you serve?', qEs: '¿Qué áreas cubren?', a: 'We serve Houston, Katy, Cypress, Sugar Land, Richmond, Rosenberg, Tomball, Spring, The Woodlands, Humble, Baytown, and Pearland.', aEs: 'Servimos a Houston, Katy, Cypress, Sugar Land, Richmond, Rosenberg, Tomball, Spring, The Woodlands, Humble, Baytown y Pearland.' },
-      { q: 'What types of chairs do you offer for weddings?', qEs: '¿Qué tipos de sillas ofrecen para bodas?', a: 'For weddings, our most popular options are gold Chiavari chairs ($5 each) for an elegant look, and white resin garden chairs ($3 each) for outdoor ceremonies.', aEs: 'Para bodas, nuestras opciones más populares son las sillas Chiavari doradas ($5 cada una) para un look elegante, y las sillas de resina blanca ($3 cada una) para ceremonias al aire libre.' },
+      { q: 'What types of chairs do you offer for weddings?', qEs: '¿Qué tipos de sillas ofrecen para bodas?', a: 'For weddings, our most popular options are gold Chiavari chairs ($8 each, cushion included) for an elegant look, and white resin garden chairs ($3 each) for outdoor ceremonies.', aEs: 'Para bodas, nuestras opciones más populares son las sillas Chiavari doradas ($8 cada una, cojín incluido) para un look elegante, y las sillas de resina blanca ($3 cada una) para ceremonias al aire libre.' },
       { q: 'Do you have chairs for children?', qEs: '¿Tienen sillas para niños?', a: 'Yes! We offer kid-sized Chiavari chairs at $5 each, perfect for children ages 2 to 6. They match our adult Chiavari chairs for a cohesive look at weddings and family celebrations.', aEs: '¡Sí! Ofrecemos sillas Chiavari para niños a $5 cada una, perfectas para niños de 2 a 6 años. Combinan con nuestras sillas Chiavari para adultos para un look uniforme en bodas y celebraciones familiares.' },
       { q: 'Can I combine chairs with other rentals?', qEs: '¿Puedo combinar sillas con otras rentas?', a: 'Absolutely! You can rent chairs individually or save with our event packages starting at $399 that include tent, tables, tablecloths, chairs, and garden lights.', aEs: '¡Por supuesto! Puedes rentar sillas individualmente o ahorrar con nuestros paquetes de evento desde $399 que incluyen carpa, mesas, manteles, sillas y luces de jardín.' },
       { q: 'How do I get a quote for my event?', qEs: '¿Cómo obtengo una cotización para mi evento?', a: 'Call us at 281-636-0615, send a WhatsApp message, or fill out the contact form on our website. Let us know your event date, guest count, and what you need — we\'ll send you a personalized quote.', aEs: 'Llámanos al 281-636-0615, envía un mensaje por WhatsApp, o llena el formulario de contacto en nuestro sitio. Dinos la fecha de tu evento, número de invitados y lo que necesitas — te enviaremos una cotización personalizada.' },

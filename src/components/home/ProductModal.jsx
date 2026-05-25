@@ -143,6 +143,11 @@ export function ProductModal({ productModal, setProductModal, language, addItem,
                           <h4 className="text-sm sm:text-base md:text-lg font-bold text-white mb-0.5">
                             {language === 'en' ? item.name : item.nameEs}
                           </h4>
+                          {item.badge && (
+                            <span className="inline-flex self-start items-center gap-1 text-[9px] sm:text-[10px] font-semibold text-primary bg-primary/15 border border-primary/40 rounded-full px-2 py-0.5 mb-1">
+                              ✓ {isEs ? item.badgeEs : item.badge}
+                            </span>
+                          )}
                           <span className="text-[10px] sm:text-xs text-white/60 mb-1.5">{tCommon.duration24h}</span>
                           <p className="text-white/85 text-[11px] sm:text-xs md:text-sm leading-relaxed mb-3 flex-grow line-clamp-3">
                             {language === 'en' ? item.desc : item.descEs}
