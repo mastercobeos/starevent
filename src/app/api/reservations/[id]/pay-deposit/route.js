@@ -6,6 +6,7 @@ import { squareIdempotencyKey } from '@/lib/idempotency';
 import { checkRateLimit, getClientIp, verifyReservationToken, isValidUUID, getAccessToken } from '@/lib/security';
 import { sendReservationConfirmation } from '@/lib/email';
 import { createBalanceInvoice } from '@/lib/create-balance-invoice';
+import { createDepositInvoice } from '@/lib/create-deposit-invoice';
 
 const squareClient = new SquareClient({
   token: process.env.SQUARE_ACCESS_TOKEN,
@@ -42,10 +43,24 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'Invalid or missing access token' }, { status: 403 });
     }
 
-    const { sourceId } = await request.json();
+    // Some callers (e.g. the contract page reached via the approval email)
+    // do not provide a sourceId because they have no inline card form. In that
+    // case we fall back to creating a Square-hosted invoice — the customer
+    // receives a payment link by email. When sourceId IS present, we keep the
+    // direct-charge flow used by the inline checkout.
+    let sourceId = null;
+    try {
+      const body = await request.json();
+      sourceId = body?.sourceId || null;
+    } catch {
+      // Empty body is allowed → triggers invoice fallback
+    }
 
     if (!sourceId) {
-      return NextResponse.json({ error: 'Payment token is required' }, { status: 400 });
+      const invoiceResult = await createDepositInvoice(id);
+      return NextResponse.json(invoiceResult.data, {
+        status: invoiceResult.ok ? 200 : (invoiceResult.status || 400),
+      });
     }
 
     // Fetch reservation

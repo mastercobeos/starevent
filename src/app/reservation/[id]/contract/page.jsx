@@ -22,8 +22,35 @@ export default function ContractPage() {
   const [signing, setSigning] = useState(false);
   const [signed, setSigned] = useState(false);
   const [invoiceUrl, setInvoiceUrl] = useState('');
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+  const [invoiceError, setInvoiceError] = useState('');
   const [depositAmount, setDepositAmount] = useState(0);
   const [agreed, setAgreed] = useState(false);
+
+  const requestDepositInvoice = async () => {
+    setInvoiceLoading(true);
+    setInvoiceError('');
+    try {
+      const token = searchParams.get('token') || '';
+      const payRes = await fetch(`/api/reservations/${params.id}/pay-deposit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-access-token': token },
+      });
+      const payData = await payRes.json();
+      if (!payRes.ok) {
+        throw new Error(payData?.error || `Server error (${payRes.status})`);
+      }
+      if (payData.invoice_url) {
+        setInvoiceUrl(payData.invoice_url);
+      } else {
+        throw new Error(payData?.error || 'No invoice URL returned by server');
+      }
+    } catch (err) {
+      setInvoiceError(err.message);
+    } finally {
+      setInvoiceLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -41,6 +68,15 @@ export default function ContractPage() {
         // Check if already signed
         if (data.contracts?.[0]?.status === 'signed') {
           setSigned(true);
+
+          // Recover/create the deposit invoice URL on reload so the user
+          // never lands on a "stuck" view without a payment link.
+          const existingDeposit = (data.payments || []).find((p) => p.type === 'deposit');
+          if (existingDeposit?.square_invoice_url) {
+            setInvoiceUrl(existingDeposit.square_invoice_url);
+          } else if (existingDeposit?.status !== 'completed') {
+            requestDepositInvoice();
+          }
         }
       } catch (err) {
         setError(err.message);
@@ -49,6 +85,7 @@ export default function ContractPage() {
       }
     };
     fetchReservation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, searchParams]);
 
   const handleSign = async () => {
@@ -78,14 +115,7 @@ export default function ContractPage() {
       if (!res.ok || data.error) throw new Error(data.error || 'Signing failed');
 
       setSigned(true);
-
-      // Create deposit invoice
-      const payRes = await fetch(`/api/reservations/${params.id}/pay-deposit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-access-token': token },
-      });
-      const payData = await payRes.json();
-      if (payData.invoice_url) setInvoiceUrl(payData.invoice_url);
+      await requestDepositInvoice();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -182,6 +212,35 @@ export default function ContractPage() {
               {tr.payDeposit} — ${depositAmount.toFixed(2)}
               <ExternalLink className="w-4 h-4" />
             </a>
+          ) : invoiceLoading ? (
+            <div className="inline-flex items-center gap-2 text-white/70 text-sm">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {tr.invoicePreparing}
+            </div>
+          ) : invoiceError ? (
+            <div className="max-w-sm mx-auto rounded-lg bg-red-500/10 border border-red-500/30 p-4 text-left">
+              <div className="flex items-start gap-2 mb-2">
+                <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-red-300 text-sm font-semibold">
+                    {tr.invoiceFailedTitle}
+                  </p>
+                  <p className="text-red-200/70 text-xs mt-1">
+                    {tr.invoiceFailedHelp}
+                  </p>
+                  <p className="text-red-200/40 text-[10px] mt-2 font-mono break-all">
+                    {invoiceError}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={requestDepositInvoice}
+                className="mt-3 w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-4 rounded-lg text-sm"
+              >
+                <Loader2 className={`w-4 h-4 ${invoiceLoading ? 'animate-spin' : 'hidden'}`} />
+                {tr.retryInvoice}
+              </button>
+            </div>
           ) : (
             <p className="text-white/50 text-sm">
               {tr.invoiceWillBeSent}
@@ -190,7 +249,10 @@ export default function ContractPage() {
 
           <div className="mt-6">
             <button
-              onClick={() => router.push(`/reservation/${params.id}?lang=${lang}`)}
+              onClick={() => {
+                const token = searchParams.get('token') || '';
+                router.push(`/reservation/${params.id}?token=${token}&lang=${lang}`);
+              }}
               className="text-primary/70 hover:text-primary text-sm underline"
             >
               {tr.viewReservationStatus}
